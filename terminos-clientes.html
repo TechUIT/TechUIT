@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="manifest" href="manifest.json">
+<script src="service-worker.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos y Condiciones - Clientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #000;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .back-button {
+            display: block;
+            text-align: left;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        h1, h2 {
+            color: #007bff;
+        }
+        .button {
+            display: block;
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 15px auto;
+            width: 80%;
+            max-width: 300px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .paypal-button {
+            background-color: #003087; /* Azul de PayPal */
+        }
+        .paypal-button:hover {
+            background-color: #00225e;
+        }
+        .whatsapp-button {
+            background-color: #25D366; /* Verde de WhatsApp */
+            color: white;
+            font-size: 16px;
+        }
+        .whatsapp-button:hover {
+            background-color: #128C7E;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .terms-link {
+            font-size: 12px;
+            text-align: center;
+            color: #aaa;
+            margin-top: 20px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button" style="text-decoration: none;">
+    <div style="display: flex; align-items: center; padding: 10px; border-radius: 50px; background-color: #333; color: white; width: 150px;">
+        <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
+        <span style="font-size: 16px; font-weight: bold;">Inicio</span>
+    </div>
+</a>
+        <h1>Términos y Condiciones del Servicio</h1>
+        <p>Al continuar, aceptas los siguientes términos de servicio con TechUIT.</p>
+        
+        <h2>Proceso de Servicio</h2>
+        <p>1. **Solicitud de Servicio:** Describe tu problema en nuestro formulario. En base a esa información, asignaremos a un técnico verificado.</p>
+        <p>2. **Pago del Diagnóstico:** Antes de que el técnico se desplace, se debe realizar un pago no reembolsable de <strong>[CANTIDAD DEL DIAGNÓSTICO EN DÓLARES]</strong>. Este pago cubre el tiempo y el desplazamiento del experto.</p>
+        <p>3. **Diagnóstico y Cotización:** El técnico te visitará para diagnosticar el problema y te proporcionará un presupuesto para la reparación.</p>
+        <p>4. **Reparación y Pago:** Una vez aceptada la cotización, el técnico procederá con la reparación. El pago final se hará directamente al técnico.</p>
+
+        <h2>Seguridad y Confianza</h2>
+        <p>Todos nuestros técnicos han pasado por un proceso de verificación exhaustivo para garantizar tu seguridad y la calidad del servicio.</p>
+
+        <span class="terms-link">
+            Al hacer clic, también confirmas que has leído y aceptado nuestros 
+            <a href="terminos-legales.html" style="color: #007bff; text-decoration: underline;">Términos de Servicio completos</a> y nuestra Política de Privacidad.
+        </span>
+
+        <a href="URL_DEL_BOTON_DE_PAGO_TIGO_MONEY" class="button">Pagar Diagnóstico con Tigo Money</a>
+        <a href="URL_DEL_BOTON_DE_PAGO_PAYPAL" class="button paypal-button">Pagar Diagnóstico con PayPal</a>
+
+        <p style="margin-top: 20px;">¿Tienes alguna pregunta?</p>
+        <a href="https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20he%20leído%20los%20términos%20y%20tengo%20una%20pregunta%20sobre%20el%20diagnóstico." class="button whatsapp-button">Contáctanos </a>
+    </div>
+</body>
+</html>
