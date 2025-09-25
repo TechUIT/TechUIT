@@ -5,7 +5,7 @@
     <script src="service-worker.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Solicitud</title>
+    <title>Pasos para Usar el Servicio - Clientes</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,10 +14,6 @@
             background-color: #000;
             color: #fff;
             line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
         }
         .container {
             max-width: 800px;
@@ -38,26 +34,7 @@
         h1, h2 {
             color: #007bff;
         }
-        .form-section {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-        }
-        .form-input, .form-textarea, .form-select {
-            width: 80%;
-            max-width: 400px;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background-color: #2a2a2a;
-            color: #fff;
-        }
-        .form-textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        .button {
+        .button, .whatsapp-button {
             display: block;
             background-color: #007bff;
             color: #fff;
@@ -77,74 +54,55 @@
             background-color: #0056b3;
             transform: translateY(-2px);
         }
+        .whatsapp-button {
+            background-color: #25D366;
+            color: white;
+            font-size: 16px;
+        }
+        .whatsapp-button:hover {
+            background-color: #128C7E;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .terms-link {
+            font-size: 12px;
+            text-align: center;
+            color: #aaa;
+            margin-top: 20px;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="terminos-clientes.html" class="back-button" style="text-decoration: none;">
+        <a href="index.html" class="back-button" style="text-decoration: none;">
             <div style="display: flex; align-items: center; padding: 10px; border-radius: 50px; background-color: #333; color: white; width: 150px;">
                 <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-                <span style="font-size: 16px; font-weight: bold;">Atrás</span>
+                <span style="font-size: 16px; font-weight: bold;">Inicio</span>
             </div>
         </a>
+        <h1>Pasos para Usar el Servicio</h1>
+        <p>Al continuar, aceptas los siguientes términos de servicio con TechUIT.</p>
         
-        <h2>Solicitud de Servicio</h2>
-        <p>Por favor, llena el siguiente formulario para que un técnico se ponga en contacto contigo.</p>
-        <div id="form-section" class="form-section">
-            <form id="client-form">
-                <input type="text" name="Nombre completo" placeholder="Tu nombre completo" class="form-input" required>
-                <input type="tel" name="Numero de telefono" placeholder="Tu número de teléfono" class="form-input" required>
-                <input type="email" name="Correo electronico" placeholder="Tu correo electrónico" class="form-input" required>
-                <textarea name="Descripcion del problema" placeholder="Describe tu problema aquí" class="form-textarea" required></textarea>
-                <input type="text" name="Tipo de servicio" placeholder="Tipo de servicio (Ej. Reparación, Mantenimiento, etc.)" class="form-input" required>
-                <textarea name="Direccion de Servicio" placeholder="Dirección exacta para el servicio" class="form-textarea" required></textarea>
-                
-                <button type="submit" class="button">Enviar Solicitud</button>
-            </form>
-        </div>
+        <h2>Cómo Funciona</h2>
+        <p>1. **Solicitud de Servicio:** Describe tu problema en nuestra plataforma y te asignaremos a un técnico verificado y disponible en tu zona.</p>
+        <p>2. **Pago del Diagnóstico:** Para asegurar la visita del técnico, se realiza un pago único por el diagnóstico. El pago se realiza de forma segura a través de nuestra plataforma con Ko-fi.</p>
+        <p>3. **Diagnóstico y Presupuesto:** El técnico te visitará para diagnosticar el problema y te proporcionará un presupuesto para la reparación.</p>
+        <p>4. **Reparación y Pago:** Si aceptas el presupuesto, el técnico realizará el trabajo. El pago por la reparación se acuerda y se realiza directamente al técnico.</p>
+        <h2>Seguridad y Confianza</h2>
+        <p>Todos nuestros técnicos han pasado por un proceso de verificación exhaustivo para garantizar tu seguridad y la calidad del servicio.</p>
+
+        <span class="terms-link">
+            Al hacer clic, también confirmas que has leído y aceptado nuestros 
+            <a href="terminos-legales.html" style="color: #007bff; text-decoration: underline;">Términos de Servicio</a> y nuestra Política de Privacidad.
+        </span>
+
+        <a href="formulario-clientes.html" class="button">Acepto los términos y quiero un experto</a>
+        
+        <p style="margin-top: 20px;">¿Tienes alguna pregunta?</p>
+        <a href="https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20he%20leído%20los%20términos%20y%20tengo%20una%20pregunta%20sobre%20el%20diagnóstico." class="button whatsapp-button">Contáctanos </a>
     </div>
-
-    <script>
-        const form = document.getElementById('client-form');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const submitButton = form.querySelector('button');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Enviando...';
-
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-            // URL del Google Apps Script para el formulario de clientes. 
-            // DEBES CAMBIAR ESTO POR TU URL DEL SCRIPT DE GOOGLE.
-            const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
-
-            try {
-                const response = await fetch(scriptURL, {
-                    method: 'POST',
-                    body: JSON.stringify(data),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    console.log('Formulario de cliente enviado con éxito.');
-                    window.location.href = 'confirmacion-pago.html';
-                } else {
-                    console.error('Error al enviar el formulario del cliente.');
-                    alert("Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo más tarde.");
-                }
-            } catch (error) {
-                console.error('Error de red:', error);
-                alert("Hubo un error de conexión. Por favor, verifica tu conexión a internet.");
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Enviar Solicitud';
-            }
-        });
-    </script>
 </body>
 </html>
