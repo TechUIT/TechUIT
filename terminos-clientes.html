@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<link rel="manifest" href="manifest.json">
-<script src="service-worker.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <script src="service-worker.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pasos para Usar el Servicio - Clientes</title>
@@ -34,7 +34,7 @@
         h1, h2 {
             color: #007bff;
         }
-        .button {
+        .button, .whatsapp-button {
             display: block;
             background-color: #007bff;
             color: #fff;
@@ -47,19 +47,15 @@
             font-size: 18px;
             font-weight: bold;
             transition: background-color 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            border: none;
         }
         .button:hover {
             background-color: #0056b3;
             transform: translateY(-2px);
         }
-        .paypal-button {
-            background-color: #003087; /* Azul de PayPal */
-        }
-        .paypal-button:hover {
-            background-color: #00225e;
-        }
         .whatsapp-button {
-            background-color: #25D366; /* Verde de WhatsApp */
+            background-color: #25D366;
             color: white;
             font-size: 16px;
         }
@@ -82,19 +78,19 @@
 <body>
     <div class="container">
         <a href="index.html" class="back-button" style="text-decoration: none;">
-    <div style="display: flex; align-items: center; padding: 10px; border-radius: 50px; background-color: #333; color: white; width: 150px;">
-        <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-        <span style="font-size: 16px; font-weight: bold;">Inicio</span>
-    </div>
-</a>
+            <div style="display: flex; align-items: center; padding: 10px; border-radius: 50px; background-color: #333; color: white; width: 150px;">
+                <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
+                <span style="font-size: 16px; font-weight: bold;">Inicio</span>
+            </div>
+        </a>
         <h1>Pasos para Usar el Servicio</h1>
         <p>Al continuar, aceptas los siguientes términos de servicio con TechUIT.</p>
         
         <h2>Cómo Funciona</h2>
-<p>1. **Solicitud de Servicio:** Describe tu problema en nuestra plataforma y te asignaremos a un técnico verificado y disponible en tu zona.</p>
-<p>2. **Pago del Diagnóstico:** Para asegurar la visita del técnico, se realiza un pago único por el diagnóstico. El pago se realiza de forma segura a través de nuestra plataforma con Ko-fi.</p>
-<p>3. **Diagnóstico y Presupuesto:** El técnico te visitará para diagnosticar el problema y te proporcionará un presupuesto para la reparación.</p>
-<p>4. **Reparación y Pago:** Si aceptas el presupuesto, el técnico realizará el trabajo. El pago por la reparación se acuerda y se realiza directamente al técnico.</p>
+        <p>1. **Solicitud de Servicio:** Describe tu problema en nuestra plataforma y te asignaremos a un técnico verificado y disponible en tu zona.</p>
+        <p>2. **Pago del Diagnóstico:** Para asegurar la visita del técnico, se realiza un pago único por el diagnóstico. El pago se realiza de forma segura a través de nuestra plataforma con Ko-fi.</p>
+        <p>3. **Diagnóstico y Presupuesto:** El técnico te visitará para diagnosticar el problema y te proporcionará un presupuesto para la reparación.</p>
+        <p>4. **Reparación y Pago:** Si aceptas el presupuesto, el técnico realizará el trabajo. El pago por la reparación se acuerda y se realiza directamente al técnico.</p>
         <h2>Seguridad y Confianza</h2>
         <p>Todos nuestros técnicos han pasado por un proceso de verificación exhaustivo para garantizar tu seguridad y la calidad del servicio.</p>
 
@@ -103,8 +99,8 @@
             <a href="terminos-legales.html" style="color: #007bff; text-decoration: underline;">Términos de Servicio</a> y nuestra Política de Privacidad.
         </span>
 
-        <a href="https://ko-fi.com/c/8d720c6c86" class="button">Pagar Diagnóstico</a>
-
+        <a href="formulario-clientes.html" class="button">Acepto los términos y quiero un experto</a>
+        
         <p style="margin-top: 20px;">¿Tienes alguna pregunta?</p>
         <a href="https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20he%20leído%20los%20términos%20y%20tengo%20una%20pregunta%20sobre%20el%20diagnóstico." class="button whatsapp-button">Contáctanos </a>
     </div>
