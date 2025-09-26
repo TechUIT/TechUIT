@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <script src="service-worker.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Solicitud</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #000;
+            color: #fff;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .back-button {
+            display: block;
+            text-align: left;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        h1, h2 {
+            color: #007bff;
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .form-input, .form-textarea, .form-select {
+            width: 80%;
+            max-width: 400px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
+            color: #fff;
+        }
+        .form-textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .button {
+            display: block;
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 15px auto;
+            width: 80%;
+            max-width: 300px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="terminos-clientes.html" class="back-button" style="text-decoration: none;">
+            <div style="display: flex; align-items: center; padding: 10px; border-radius: 50px; background-color: #333; color: white; width: 150px;">
+                <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
+                <span style="font-size: 16px; font-weight: bold;">Atrás</span>
+            </div>
+        </a>
+        
+        <h2>Solicitud de Servicio</h2>
+        <p>Por favor, llena el siguiente formulario para que un técnico se ponga en contacto contigo.</p>
+        <div id="form-section" class="form-section">
+            <form id="client-form">
+                <input type="text" name="Nombre completo" placeholder="Tu nombre completo" class="form-input" required>
+                <input type="tel" name="Numero de telefono" placeholder="Tu número de teléfono" class="form-input" required>
+                <input type="email" name="Correo electronico" placeholder="Tu correo electrónico" class="form-input" required>
+                <textarea name="Descripcion del problema" placeholder="Describe tu problema aquí" class="form-textarea" required></textarea>
+                <input type="text" name="Tipo de servicio" placeholder="Tipo de servicio (Ej. Reparación, Mantenimiento, etc.)" class="form-input" required>
+                <textarea name="Direccion de Servicio" placeholder="Dirección exacta para el servicio" class="form-textarea" required></textarea>
+                
+                <button type="submit" class="button">Enviar Solicitud</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('client-form');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitButton = form.querySelector('button');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enviando...';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // URL del Google Apps Script para el formulario de clientes. 
+            // DEBES CAMBIAR ESTO POR TU URL DEL SCRIPT DE GOOGLE.
+            const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    console.log('Formulario de cliente enviado con éxito.');
+                    window.location.href = 'confirmacion-pago.html';
+                } else {
+                    console.error('Error al enviar el formulario del cliente.');
+                    alert("Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo más tarde.");
+                }
+            } catch (error) {
+                console.error('Error de red:', error);
+                alert("Hubo un error de conexión. Por favor, verifica tu conexión a internet.");
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Enviar Solicitud';
+            }
+        });
+    </script>
+</body>
+</html>
