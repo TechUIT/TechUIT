@@ -10,24 +10,19 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #000;
+            padding: 0;
+            background-color: #000; /* Fondo negro elegante */
             color: #fff;
             line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
             min-height: 100vh;
         }
         .container {
-            width: 100%;
             max-width: 600px;
-            margin: 40px auto;
+            margin: 20px auto;
             background-color: #1a1a1a;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
         }
         .back-button {
             display: block;
@@ -48,174 +43,216 @@
         .back-button-content:hover {
             background-color: #555;
         }
-        h2 {
+        h1 {
             color: #007bff;
-            margin-bottom: 10px;
+            text-align: center;
+            margin-bottom: 5px;
             font-size: 24px;
         }
         p.subtitle {
+            text-align: center;
+            color: #ccc;
             margin-bottom: 25px;
-        }
-        .form-section {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            align-items: center;
-        }
-        .form-input, .form-textarea, .form-select {
-            width: 90%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #007bff; 
-            background-color: #2a2a2a;
-            color: #fff;
             font-size: 16px;
         }
-        .form-select {
-            appearance: none; 
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23007bff'%3e%3cpath d='M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 10px top 50%;
-            background-size: 12px;
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: #2a2a2a;
+            color: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .form-select option {
+            background-color: #2a2a2a;
+            color: #fff;
         }
         .form-textarea {
-            height: 80px;
             resize: vertical;
         }
-        .button {
-            background-color: #25D366; /* Verde de WhatsApp para la llamada a la acción final */
-            color: #fff;
-            padding: 15px 30px;
-            text-decoration: none;
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #25D366; /* WhatsApp Green para la acción final */
+            color: #000;
+            border: none;
             border-radius: 50px;
-            margin-top: 20px;
-            width: 90%;
-            max-width: 300px;
             font-size: 18px;
             font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.3s ease;
             cursor: pointer;
-            border: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
             box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
         }
-        .button:hover:not(:disabled) {
+        .submit-button:hover:not(:disabled) {
             background-color: #1FAF59;
             transform: translateY(-2px);
         }
-        .button:disabled {
-            background-color: #1FAF59;
+        .submit-button:disabled {
+            background-color: #3d3d3d;
             cursor: not-allowed;
-            opacity: 0.7;
+            box-shadow: none;
         }
-        .info-note {
-            font-size: 14px;
-            color: #aaa;
-            margin-top: -10px;
-            margin-bottom: 15px;
-            width: 90%;
-            text-align: left;
+        #response-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #1a3a2a;
+            color: #25D366;
+            border: 1px solid #25D366;
+        }
+        .error {
+            background-color: #4a1a1a;
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="back-button">
-            <a href="terminos-tecnicos.html" class="back-button-content">
-                <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-                <span style="font-size: 16px;">Atrás</span>
-            </a>
-        </div>
-        
-        <h2>Registro de Experto Técnico</h2>
-        <p class="subtitle">Únete a nuestra red de profesionales verificados. Todos los campos son obligatorios.</p>
-        <div class="form-section">
-            <form id="tech-form">
-                <input type="text" name="Nombre completo" placeholder="Nombre completo" class="form-input" required>
-                <input type="text" name="Numero de Identidad (DPI/Cédula)" placeholder="Número de Identidad (DPI/Cédula)" class="form-input" pattern="[0-9A-Za-z\s-]+" title="Solo números y letras para la identidad" required>
-                <input type="tel" name="Numero de telefono" placeholder="Número de teléfono (WhatsApp)" class="form-input" required>
-                <input type="email" name="Correo electronico" placeholder="Correo electrónico" class="form-input" required>
-
-                <!-- Menú Desplegable de Especialidades (igual al de Clientes para consistencia) -->
-                <select name="Especialidad principal" class="form-select" required>
-                    <option value="" disabled selected>Selecciona tu especialidad principal*</option>
-                    <option value="Informático/Redes">Informático / Redes</option>
-                    <option value="Eléctrico/Electrónico">Eléctrico / Electrónico</option>
-                    <option value="Fontanería/Plomería">Fontanería / Plomería</option>
-                    <option value="Mecánica Doméstica">Mecánica Doméstica (Línea Blanca)</option>
-                    <option value="Aires Acondicionados">Aires Acondicionados</option>
-                    <option value="Construcción/Remodelación">Construcción / Remodelación</option>
-                    <option value="Automotriz">Automotriz</option>
-                    <option value="Médico-General">Médico General</option>
-                    <option value="Odontología">Odontología</option>
-                    <option value="Veterinaria">Veterinaria</option>
-                    <option value="Otro Servicio Técnico">Otro Servicio Técnico</option>
-                </select>
-                <!-- /Menú Desplegable -->
-
-                <input type="number" name="Años de experiencia" placeholder="Años de experiencia en tu especialidad" class="form-input" required>
-
-                <textarea name="Herramientas y Equipo" placeholder="Enumera las principales herramientas o equipos que posees (Esto ayuda a asignarte mejor)" class="form-textarea" required></textarea>
-                
-                <p class="info-note">
-                    ⚠️ Importante: Una vez enviado el formulario, serás redirigido a WhatsApp para enviar fotos de tus credenciales y una foto de tu rostro con tu credencial. ¡Este paso es obligatorio para la verificación!
-                </p>
-
-                <button type="submit" class="button">Registrarme y Continuar a Verificación</button>
-            </form>
-        </div>
+<div class="container">
+    <div class="back-button">
+        <a href="terminos-tecnicos.html" class="back-button-content">
+            <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
+            <span style="font-size: 16px;">Términos</span>
+        </a>
     </div>
 
-    <script>
-        const formTech = document.getElementById('tech-form');
+    <h1>Registro de Experto</h1>
+    <p class="subtitle">Ingresa tus datos para empezar el proceso de verificación.</p>
 
-        formTech.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    <form id="tech-form">
+        <div class="form-group">
+            <label for="nombre" class="form-label">Nombre Completo (Obligatorio)</label>
+            <input type="text" id="nombre" name="Nombre completo" placeholder="Juan Pérez" class="form-input" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="telefono" class="form-label">Número de Teléfono (Obligatorio)</label>
+            <input type="tel" id="telefono" name="Número de teléfono" placeholder="Ej: 9999-8888" class="form-input" required>
+        </div>
 
-            const submitButton = formTech.querySelector('button');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Enviando...';
+        <div class="form-group">
+            <label for="email" class="form-label">Correo Electrónico (Obligatorio)</label>
+            <input type="email" id="email" name="Correo electrónico" placeholder="ejemplo@correo.com" class="form-input" required>
+        </div>
 
-            const formData = new FormData(formTech);
-            const data = Object.fromEntries(formData.entries());
+        <div class="form-group">
+            <label for="especialidad" class="form-label">Especialidad Principal (Obligatorio)</label>
+            <select id="especialidad" name="Especialidad principal" class="form-select" required>
+                <option value="" disabled selected>Selecciona tu área de experiencia</option>
+                <option value="Electricidad Residencial">Electricidad Residencial</option>
+                <option value="Plomeria y Tuberias">Plomería y Tuberías</option>
+                <option value="Aires Acondicionados">Aires Acondicionados / Refrigeración</option>
+                <option value="Construcción/Remodelación">Construcción / Remodelación</option>
+                <option value="Automotriz">Automotriz</option>
+                <option value="Médico-General">Médico General</option>
+                <option value="Odontología">Odontología</option>
+                <option value="Veterinaria">Veterinaria</option>
+                <option value="Otro Servicio Técnico">Otro Servicio Técnico</option>
+            </select>
+        </div>
 
-            // URL del Google Apps Script para el formulario de TÉCNICOS. 
-            // DEBES CAMBIAR ESTO POR TU SEGUNDA URL DEL SCRIPT DE GOOGLE.
-            const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_TECHNICIANS'; 
+        <div class="form-group">
+            <label for="experiencia" class="form-label">Años de Experiencia en tu especialidad (Obligatorio)</label>
+            <input type="number" id="experiencia" name="Años de experiencia en tu especialidad" placeholder="Mínimo 1 año" class="form-input" min="1" required>
+        </div>
 
-            try {
-                const response = await fetch(scriptURL, {
-                    method: 'POST',
-                    body: JSON.stringify(data),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+        <div class="form-group">
+            <label for="documentos" class="form-label">Documentos para Verificación (Opcional, se envía por WhatsApp)</label>
+            <textarea id="documentos" name="Comentarios sobre documentos" placeholder="DNI, Licencia, Títulos, etc. (Opcional, nos contactaremos para fotos)" class="form-textarea" rows="3"></textarea>
+        </div>
+        
+        <button type="submit" class="submit-button">Registrarme y Continuar a Verificación</button>
+        <div id="response-message"></div>
+    </form>
+</div>
 
-                if (response.ok) {
-                    console.log('Formulario de técnico enviado con éxito. Redirigiendo a WhatsApp.');
-                    // Éxito: Redirige a WhatsApp para el envío de fotos de verificación
-                    // Reemplaza TU_NUMERO_DE_TELEFONO_AQUÍ con tu número de WhatsApp
-                    const whatsappUrl = `https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20acabo%20de%20registrarme%20en%20TechUIT%20con%20el%20nombre%20de%20${encodeURIComponent(data['Nombre completo'])}.%20Aquí%20están%20mis%20documentos%20de%20verificación.`;
+<script>
+    const formTech = document.getElementById('tech-form');
+    const responseMessage = document.getElementById('response-message');
+    
+    // URL del Google Apps Script (¡LA MISMA QUE USA EL CLIENTE!)
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyQlwxkrpdEwo3r_pdNU2PS826gG_GgqdNGTdiAMggoas33K63Xra-b6btWm36-oCPJBA/exec'; 
+
+    formTech.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const submitButton = formTech.querySelector('button');
+        submitButton.disabled = true;
+        responseMessage.style.display = 'block';
+        responseMessage.className = 'error';
+        responseMessage.textContent = 'Enviando solicitud, por favor espera...';
+        
+        const formData = new FormData(formTech);
+        
+        // 1. Obtener los datos del formulario
+        const data = Object.fromEntries(formData.entries());
+        
+        // 2. AÑADIMOS ESTA LÍNEA CLAVE: Especifica que use la hoja "Tecnicos"
+        data.sheet = 'Tecnicos'; 
+
+        try {
+            const response = await fetch(scriptURL, {
+                method: 'POST',
+                // Enviamos los datos, incluyendo el 'data.sheet'
+                body: JSON.stringify(data), 
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                // Notificación de éxito
+                responseMessage.className = 'success';
+                responseMessage.textContent = 'Registro exitoso. Redirigiendo a WhatsApp para verificación...';
+                
+                // Éxito: Redirige a WhatsApp para el envío de fotos de verificación
+                // IMPORTANTE: REEMPLAZA "TU_NUMERO_DE_TELEFONO_AQUÍ" CON TU NÚMERO
+                const whatsappUrl = `https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20acabo%20de%20registrarme%20en%20TechUIT%20con%20el%20nombre%20de%20${encodeURIComponent(data['Nombre completo'])}.%20Estoy%20listo%20para%20enviar%20mis%20documentos%20de%20verificación.`;
+                
+                // Esperar 2 segundos antes de la redirección para que el usuario lea el mensaje
+                setTimeout(() => {
                     window.location.href = whatsappUrl;
-                } else {
-                    console.error('Error al enviar el formulario del técnico. Respuesta no ok.');
-                    submitButton.textContent = 'Error al enviar. Intenta de nuevo.';
-                }
-            } catch (error) {
-                console.error('Error de red:', error);
-                submitButton.textContent = 'Error de conexión. Intenta de nuevo.';
-            } finally {
-                 // Habilitamos el botón después de unos segundos si hubo un error
-                if (submitButton.disabled) {
-                    setTimeout(() => {
-                        submitButton.disabled = false;
-                        if (submitButton.textContent !== 'Enviando...') {
-                            submitButton.textContent = 'Registrarme y Continuar a Verificación';
-                        }
-                    }, 3000);
-                }
+                }, 2000);
+
+            } else {
+                console.error('Error al enviar el formulario del técnico. Respuesta no ok.');
+                responseMessage.className = 'error';
+                responseMessage.textContent = 'Error al enviar el formulario. Verifica tu conexión e intenta de nuevo.';
             }
-        });
-    </script>
+        } catch (error) {
+            console.error('Error de red:', error);
+            responseMessage.className = 'error';
+            responseMessage.textContent = 'Error de conexión. Intenta de nuevo.';
+        } finally {
+            // Habilitamos el botón después de la acción o error (excepto si redirige)
+            if (responseMessage.className === 'error') {
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    responseMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+    });
+</script>
 </body>
 </html>
