@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <script src="service-worker.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Técnico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #000;
+            color: #fff;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #1a1a1a;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.2);
+        }
+        .back-button {
+            display: block;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .back-button-content {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 50px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .back-button-content:hover {
+            background-color: #555;
+        }
+        h2 {
+            color: #007bff;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        p.subtitle {
+            margin-bottom: 25px;
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            align-items: center;
+        }
+        .form-input, .form-textarea, .form-select {
+            width: 90%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #007bff; 
+            background-color: #2a2a2a;
+            color: #fff;
+            font-size: 16px;
+        }
+        .form-select {
+            appearance: none; 
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23007bff'%3e%3cpath d='M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 12px;
+        }
+        .form-textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        .button {
+            background-color: #25D366; /* Verde de WhatsApp para la llamada a la acción final */
+            color: #fff;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            margin-top: 20px;
+            width: 90%;
+            max-width: 300px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+        .button:hover:not(:disabled) {
+            background-color: #1FAF59;
+            transform: translateY(-2px);
+        }
+        .button:disabled {
+            background-color: #1FAF59;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .info-note {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            width: 90%;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-button">
+            <a href="terminos-tecnicos.html" class="back-button-content">
+                <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
+                <span style="font-size: 16px;">Atrás</span>
+            </a>
+        </div>
+        
+        <h2>Registro de Experto Técnico</h2>
+        <p class="subtitle">Únete a nuestra red de profesionales verificados. Todos los campos son obligatorios.</p>
+        <div class="form-section">
+            <form id="tech-form">
+                <input type="text" name="Nombre completo" placeholder="Nombre completo" class="form-input" required>
+                <input type="text" name="Numero de Identidad (DPI/Cédula)" placeholder="Número de Identidad (DPI/Cédula)" class="form-input" pattern="[0-9A-Za-z\s-]+" title="Solo números y letras para la identidad" required>
+                <input type="tel" name="Numero de telefono" placeholder="Número de teléfono (WhatsApp)" class="form-input" required>
+                <input type="email" name="Correo electronico" placeholder="Correo electrónico" class="form-input" required>
+
+                <!-- Menú Desplegable de Especialidades (igual al de Clientes para consistencia) -->
+                <select name="Especialidad principal" class="form-select" required>
+                    <option value="" disabled selected>Selecciona tu especialidad principal*</option>
+                    <option value="Informático/Redes">Informático / Redes</option>
+                    <option value="Eléctrico/Electrónico">Eléctrico / Electrónico</option>
+                    <option value="Fontanería/Plomería">Fontanería / Plomería</option>
+                    <option value="Mecánica Doméstica">Mecánica Doméstica (Línea Blanca)</option>
+                    <option value="Aires Acondicionados">Aires Acondicionados</option>
+                    <option value="Construcción/Remodelación">Construcción / Remodelación</option>
+                    <option value="Automotriz">Automotriz</option>
+                    <option value="Médico-General">Médico General</option>
+                    <option value="Odontología">Odontología</option>
+                    <option value="Veterinaria">Veterinaria</option>
+                    <option value="Otro Servicio Técnico">Otro Servicio Técnico</option>
+                </select>
+                <!-- /Menú Desplegable -->
+
+                <input type="number" name="Años de experiencia" placeholder="Años de experiencia en tu especialidad" class="form-input" required>
+
+                <textarea name="Herramientas y Equipo" placeholder="Enumera las principales herramientas o equipos que posees (Esto ayuda a asignarte mejor)" class="form-textarea" required></textarea>
+                
+                <p class="info-note">
+                    ⚠️ Importante: Una vez enviado el formulario, serás redirigido a WhatsApp para enviar fotos de tus credenciales y una foto de tu rostro con tu credencial. ¡Este paso es obligatorio para la verificación!
+                </p>
+
+                <button type="submit" class="button">Registrarme y Continuar a Verificación</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const formTech = document.getElementById('tech-form');
+
+        formTech.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitButton = formTech.querySelector('button');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enviando...';
+
+            const formData = new FormData(formTech);
+            const data = Object.fromEntries(formData.entries());
+
+            // URL del Google Apps Script para el formulario de TÉCNICOS. 
+            // DEBES CAMBIAR ESTO POR TU SEGUNDA URL DEL SCRIPT DE GOOGLE.
+            const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_TECHNICIANS'; 
+
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    console.log('Formulario de técnico enviado con éxito. Redirigiendo a WhatsApp.');
+                    // Éxito: Redirige a WhatsApp para el envío de fotos de verificación
+                    // Reemplaza TU_NUMERO_DE_TELEFONO_AQUÍ con tu número de WhatsApp
+                    const whatsappUrl = `https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20acabo%20de%20registrarme%20en%20TechUIT%20con%20el%20nombre%20de%20${encodeURIComponent(data['Nombre completo'])}.%20Aquí%20están%20mis%20documentos%20de%20verificación.`;
+                    window.location.href = whatsappUrl;
+                } else {
+                    console.error('Error al enviar el formulario del técnico. Respuesta no ok.');
+                    submitButton.textContent = 'Error al enviar. Intenta de nuevo.';
+                }
+            } catch (error) {
+                console.error('Error de red:', error);
+                submitButton.textContent = 'Error de conexión. Intenta de nuevo.';
+            } finally {
+                 // Habilitamos el botón después de unos segundos si hubo un error
+                if (submitButton.disabled) {
+                    setTimeout(() => {
+                        submitButton.disabled = false;
+                        if (submitButton.textContent !== 'Enviando...') {
+                            submitButton.textContent = 'Registrarme y Continuar a Verificación';
+                        }
+                    }, 3000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
