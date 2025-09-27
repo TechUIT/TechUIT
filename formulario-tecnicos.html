@@ -1,258 +1,256 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="manifest" href="manifest.json">
-    <script src="service-worker.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Técnico</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #000; /* Fondo negro elegante */
-            color: #fff;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #1a1a1a;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
-        }
-        .back-button {
-            display: block;
-            text-align: left;
-            margin-bottom: 20px;
-        }
-        .back-button-content {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 15px;
-            border-radius: 50px;
-            background-color: #333;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .back-button-content:hover {
-            background-color: #555;
-        }
-        h1 {
-            color: #007bff;
-            text-align: center;
-            margin-bottom: 5px;
-            font-size: 24px;
-        }
-        p.subtitle {
-            text-align: center;
-            color: #ccc;
-            margin-bottom: 25px;
-            font-size: 16px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #ccc;
-        }
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #444;
-            border-radius: 8px;
-            background-color: #2a2a2a;
-            color: #fff;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        .form-select option {
-            background-color: #2a2a2a;
-            color: #fff;
-        }
-        .form-textarea {
-            resize: vertical;
-        }
-        .submit-button {
-            width: 100%;
-            padding: 15px;
-            background-color: #25D366; /* WhatsApp Green para la acción final */
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-        }
-        .submit-button:hover:not(:disabled) {
-            background-color: #1FAF59;
-            transform: translateY(-2px);
-        }
-        .submit-button:disabled {
-            background-color: #3d3d3d;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        #response-message {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            display: none;
-            font-weight: bold;
-        }
-        .success {
-            background-color: #1a3a2a;
-            color: #25D366;
-            border: 1px solid #25D366;
-        }
-        .error {
-            background-color: #4a1a1a;
-            color: #ff4d4d;
-            border: 1px solid #ff4d4d;
-        }
-    </style>
+    <link rel="manifest" href="manifest.json">
+    <script src="service-worker.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Técnico</title>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif; /* Usando Inter para consistencia */
+            margin: 0;
+            padding: 0;
+            background-color: #000; /* Fondo negro elegante */
+            color: #fff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #1a1a1a;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
+        }
+        .back-button {
+            display: block;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .back-button-content {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 50px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .back-button-content:hover {
+            background-color: #555;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: #2a2a2a;
+            color: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .form-select option {
+            background-color: #2a2a2a;
+            color: #fff;
+        }
+        .form-textarea {
+            resize: vertical;
+        }
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff; /* Azul primario, ya que es el color de la App */
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+        }
+        .submit-button:hover:not(:disabled) {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .submit-button:disabled {
+            background-color: #3d3d3d;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        #response-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #1a2a3a;
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+        .error {
+            background-color: #4a1a1a;
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <div class="back-button">
-        <a href="terminos-tecnicos.html" class="back-button-content">
-            <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-            <span style="font-size: 16px;">Términos</span>
-        </a>
-    </div>
+    <div class="back-button">
+        <a href="terminos-tecnicos.html" class="back-button-content">
+            <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
+            <span style="font-size: 16px;">Términos</span>
+        </a>
+    </div>
 
-    <h1>Registro de Experto</h1>
-    <p class="subtitle">Ingresa tus datos para empezar el proceso de verificación.</p>
+    <h1>Registro de Experto</h1>
+    <p class="subtitle">Ingresa tus datos para empezar el proceso de verificación.</p>
+    <!-- NOTA para el usuario sobre los campos obligatorios -->
+    <p style="text-align: center; color: #ffc107; font-size: 14px; margin-top: -15px; margin-bottom: 20px;">
+        Los campos marcados con * son obligatorios.
+    </p>
 
-    <form id="tech-form">
-        <div class="form-group">
-            <label for="nombre" class="form-label">Nombre Completo (Obligatorio)</label>
-            <input type="text" id="nombre" name="Nombre completo" placeholder="Juan Pérez" class="form-input" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="telefono" class="form-label">Número de Teléfono (Obligatorio)</label>
-            <input type="tel" id="telefono" name="Número de teléfono" placeholder="Ej: 9999-8888" class="form-input" required>
-        </div>
+    <form id="tech-form">
+        <div class="form-group">
+            <label for="nombre" class="form-label">Nombre Completo *</label>
+            <input type="text" id="nombre" name="Nombre completo" placeholder="Juan Pérez" class="form-input" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="telefono" class="form-label">Número de Teléfono *</label>
+            <input type="tel" id="telefono" name="Número de teléfono" placeholder="Ej: 9999-8888" class="form-input" required>
+        </div>
 
-        <div class="form-group">
-            <label for="email" class="form-label">Correo Electrónico (Obligatorio)</label>
-            <input type="email" id="email" name="Correo electrónico" placeholder="ejemplo@correo.com" class="form-input" required>
-        </div>
+        <div class="form-group">
+            <label for="email" class="form-label">Correo Electrónico *</label>
+            <input type="email" id="email" name="Correo electrónico" placeholder="ejemplo@correo.com" class="form-input" required>
+        </div>
 
-        <div class="form-group">
-            <label for="especialidad" class="form-label">Especialidad Principal (Obligatorio)</label>
-            <select id="especialidad" name="Especialidad principal" class="form-select" required>
-                <option value="" disabled selected>Selecciona tu área de experiencia</option>
-                <option value="Electricidad Residencial">Electricidad Residencial</option>
-                <option value="Plomeria y Tuberias">Plomería y Tuberías</option>
-                <option value="Aires Acondicionados">Aires Acondicionados / Refrigeración</option>
-                <option value="Construcción/Remodelación">Construcción / Remodelación</option>
-                <option value="Automotriz">Automotriz</option>
-                <option value="Médico-General">Médico General</option>
-                <option value="Odontología">Odontología</option>
-                <option value="Veterinaria">Veterinaria</option>
-                <option value="Otro Servicio Técnico">Otro Servicio Técnico</option>
-            </select>
-        </div>
+        <div class="form-group">
+            <label for="especialidad" class="form-label">Especialidad Principal *</label>
+            <select id="especialidad" name="Especialidad principal" class="form-select" required>
+                <option value="" disabled selected>Selecciona tu área de experiencia</option>
+                <option value="Electricidad Residencial">Electricidad Residencial</option>
+                <option value="Plomeria y Tuberias">Plomería y Tuberías</option>
+                <option value="Aires Acondicionados">Aires Acondicionados / Refrigeración</option>
+                <option value="Construcción/Remodelación">Construcción / Remodelación</option>
+                <option value="Mecanica Automotriz">Mecánica Automotriz</option>
+                <option value="Reparacion de Electrodomesticos">Reparación de Electrodomésticos</option>
+                <option value="Informatica y Reparacion PC">Informática y Reparación de PC</option>
+                <option value="Contaduria y Finanzas">Contaduría y Finanzas</option>
+                <option value="Carpinteria y Muebles">Carpintería y Muebles</option>
+                <option value="Jardineria y Paisajismo">Jardinería y Paisajismo</option>
+                <option value="Medico General">Médico General</option>
+                <option value="Otro Servicio Tecnico">Otro Servicio Técnico</option>
+            </select>
+        </div>
 
-        <div class="form-group">
-            <label for="experiencia" class="form-label">Años de Experiencia en tu especialidad (Obligatorio)</label>
-            <input type="number" id="experiencia" name="Años de experiencia en tu especialidad" placeholder="Mínimo 1 año" class="form-input" min="1" required>
-        </div>
+        <div class="form-group">
+            <label for="experiencia" class="form-label">Años de Experiencia en tu especialidad *</label>
+            <input type="number" id="experiencia" name="Años de experiencia en tu especialidad" placeholder="Mínimo 1 año" class="form-input" min="1" required>
+        </div>
 
-        <div class="form-group">
-            <label for="documentos" class="form-label">Comentarios sobre Documentos para Verificación (Opcional)</label>
-            <textarea id="documentos" name="Comentarios sobre documentos" placeholder="DNI, Licencia, Títulos, etc. (Opcional, nos contactaremos para fotos)" class="form-textarea" rows="3"></textarea>
-        </div>
-        
-        <button type="submit" class="submit-button">Registrarme y Continuar a Verificación</button>
-        <div id="response-message"></div>
-    </form>
+        <div class="form-group">
+            <label for="documentos" class="form-label">Comentarios sobre Documentos para Verificación (Opcional)</label>
+            <textarea id="documentos" name="Comentarios sobre documentos" placeholder="DNI, Licencia, Títulos, etc. (Opcional, nos contactaremos para fotos)" class="form-textarea" rows="3"></textarea>
+        </div>
+        
+        <button type="submit" class="submit-button">Registrarme y Continuar a Verificación</button>
+        <div id="response-message"></div>
+    </form>
 </div>
 
 <script>
-    const formTech = document.getElementById('tech-form');
-    const responseMessage = document.getElementById('response-message');
-    
-    // URL del Google Apps Script para el formulario de técnicos.
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyQlwxkrpdEwo3r_pdNU2PS826gG_GgqdNGTdiAMggoas33K63Xra-b6btWm36-oCPJBA/exec'; 
+    const formTech = document.getElementById('tech-form');
+    const responseMessage = document.getElementById('response-message');
+    
+    // **NUEVA URL DEL GOOGLE APPS SCRIPT**
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbySHqKDhDcslaeiuNXYfQX6qH_ezblPs1Q_G1etlyHXdR70QjUKSi0STtsymCVZ7j07mQ/exec'; 
 
-    formTech.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    formTech.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-        const submitButton = formTech.querySelector('button');
-        submitButton.disabled = true;
-        responseMessage.style.display = 'block';
-        responseMessage.className = 'error';
-        responseMessage.textContent = 'Enviando solicitud, por favor espera...';
-        
-        const formData = new FormData(formTech);
-        
-        // 1. Obtener los datos del formulario
-        const data = Object.fromEntries(formData.entries());
-        
-        // 2. LÍNEA CLAVE: Especifica que use la hoja "Tecnicos"
-        data.sheet = 'Tecnicos'; 
+        const submitButton = formTech.querySelector('button');
+        submitButton.disabled = true;
+        responseMessage.style.display = 'block';
+        responseMessage.className = 'error';
+        responseMessage.textContent = 'Enviando solicitud, por favor espera...';
+        
+        const formData = new FormData(formTech);
+        const data = Object.fromEntries(formData.entries());
+        data.sheet = 'Tecnicos'; // Hoja de destino
 
-        try {
-            const response = await fetch(scriptURL, {
-                method: 'POST',
-                // Enviamos los datos, incluyendo el 'data.sheet'
-                body: JSON.stringify(data), 
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+        try {
+            const response = await fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(data), 
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            if (response.ok) {
-                // Notificación de éxito
-                responseMessage.className = 'success';
-                responseMessage.textContent = 'Registro exitoso. Redirigiendo a WhatsApp para verificación...';
-                
-                // Éxito: Redirige a WhatsApp para el envío de fotos de verificación
-                // NOTA IMPORTANTE: REEMPLAZA "TU_NUMERO_DE_TELEFONO_AQUÍ" CON EL NÚMERO DE SOPORTE
-                const whatsappUrl = `https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20acabo%20de%20registrarme%20en%20TechUIT%20con%20el%20nombre%20de%20${encodeURIComponent(data['Nombre completo'])}.%20Estoy%20listo%20para%20enviar%20mis%20documentos%20de%20verificación.`;
-                
-                // Esperar 2 segundos antes de la redirección para que el usuario lea el mensaje
-                setTimeout(() => {
-                    window.location.href = whatsappUrl;
-                }, 2000);
+            if (response.ok) {
+                responseMessage.className = 'success';
+                responseMessage.textContent = 'Registro exitoso. Redirigiendo a WhatsApp para verificación...';
+                
+                // Éxito: Redirige a WhatsApp. Reemplaza "TU_NUMERO_DE_TELEFONO_AQUÍ"
+                const whatsappUrl = `https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20acabo%20de%20registrarme%20en%20TechUIT%20con%20el%20nombre%20de%20${encodeURIComponent(data['Nombre completo'])}.%20Estoy%20listo%20para%20enviar%20mis%20documentos%20de%20verificación.`;
+                
+                setTimeout(() => {
+                    window.location.href = whatsappUrl;
+                }, 2000);
 
-            } else {
-                console.error('Error al enviar el formulario del técnico. Respuesta no ok.');
-                responseMessage.className = 'error';
-                responseMessage.textContent = 'Error al enviar el formulario. Verifica tu conexión e intenta de nuevo.';
-            }
-        } catch (error) {
-            console.error('Error de red:', error);
-            responseMessage.className = 'error';
-            responseMessage.textContent = 'Error de conexión. Intenta de nuevo.';
-        } finally {
-            // Habilitamos el botón después de la acción o error (excepto si redirige)
-            if (responseMessage.className === 'error') {
-                setTimeout(() => {
-                    submitButton.disabled = false;
-                    responseMessage.style.display = 'none';
-                }, 3000);
-            }
-        }
-    });
+            } else {
+                console.error('Error al enviar el formulario del técnico. Respuesta no ok:', response.status);
+                responseMessage.className = 'error';
+                responseMessage.textContent = 'Error al enviar. Verifica tu Google Script (' + response.status + ')';
+            }
+        } catch (error) {
+            console.error('Error de red:', error);
+            responseMessage.className = 'error';
+            responseMessage.textContent = 'Error de conexión. Intenta de nuevo.';
+        } finally {
+            if (responseMessage.className === 'error') {
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    responseMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+    });
 </script>
 </body>
 </html>

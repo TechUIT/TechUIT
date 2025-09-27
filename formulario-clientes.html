@@ -138,45 +138,54 @@
 
     <h1>Solicitud de Experto</h1>
     <p class="subtitle">Cuéntanos sobre tu problema para asignarte un técnico verificado.</p>
+    <!-- NOTA para el usuario sobre los campos obligatorios -->
+    <p style="text-align: center; color: #ffc107; font-size: 14px; margin-top: -15px; margin-bottom: 20px;">
+        Los campos marcados con * son obligatorios.
+    </p>
 
     <form id="client-form">
         <div class="form-group">
-            <label for="nombre" class="form-label">Nombre Completo (Obligatorio)</label>
+            <label for="nombre" class="form-label">Nombre Completo *</label>
             <input type="text" id="nombre" name="Nombre completo" placeholder="Juan Pérez" class="form-input" required>
         </div>
         
         <div class="form-group">
-            <label for="telefono" class="form-label">Número de Teléfono (Obligatorio)</label>
+            <label for="telefono" class="form-label">Número de Teléfono *</label>
             <!-- Este campo es de tipo 'tel' para mejor usabilidad móvil -->
             <input type="tel" id="telefono" name="Número de teléfono" placeholder="Ej: 9999-8888" class="form-input" required>
         </div>
 
         <div class="form-group">
-            <label for="email" class="form-label">Correo Electrónico (Obligatorio)</label>
+            <label for="email" class="form-label">Correo Electrónico *</label>
             <input type="email" id="email" name="Correo electrónico" placeholder="ejemplo@correo.com" class="form-input" required>
         </div>
         
         <div class="form-group">
-            <label for="direccion" class="form-label">Dirección / Ubicación (Obligatorio)</label>
+            <label for="direccion" class="form-label">Dirección / Ubicación *</label>
             <input type="text" id="direccion" name="Dirección / Ubicación" placeholder="Colonia, Calle y número de casa" class="form-input" required>
         </div>
 
         <div class="form-group">
-            <label for="servicio" class="form-label">Tipo de Servicio Requerido (Obligatorio)</label>
+            <label for="servicio" class="form-label">Tipo de Servicio Requerido *</label>
             <select id="servicio" name="Tipo de servicio" class="form-select" required>
                 <option value="" disabled selected>Selecciona el área de tu problema</option>
                 <option value="Electricidad Residencial">Electricidad Residencial</option>
                 <option value="Plomeria y Tuberias">Plomería y Tuberías</option>
                 <option value="Aires Acondicionados">Aires Acondicionados / Refrigeración</option>
                 <option value="Construcción/Remodelación">Construcción / Remodelación</option>
-                <option value="Automotriz">Mecánica Automotriz</option>
-                <option value="Médico-General">Consulta Médica General</option>
+                <option value="Mecanica Automotriz">Mecánica Automotriz</option>
+                <option value="Reparacion de Electrodomesticos">Reparación de Electrodomésticos</option>
+                <option value="Informática y Reparacion PC">Informática y Reparación de PC</option>
+                <option value="Contaduria y Finanzas">Contaduría y Finanzas</option>
+                <option value="Carpinteria y Muebles">Carpintería y Muebles</option>
+                <option value="Jardineria y Paisajismo">Jardinería y Paisajismo</option>
+                <option value="Medico General">Consulta Médica General</option>
                 <option value="Otro">Otro (Especificar en descripción)</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="descripcion" class="form-label">Describe tu Problema (Obligatorio)</label>
+            <label for="descripcion" class="form-label">Describe tu Problema *</label>
             <textarea id="descripcion" name="Descripción del problema" placeholder="Sé lo más detallado posible sobre lo que está fallando o necesitas." class="form-textarea" rows="4" required></textarea>
         </div>
         
@@ -189,8 +198,8 @@
     const formClient = document.getElementById('client-form');
     const responseMessage = document.getElementById('response-message');
     
-    // URL del Google Apps Script para el formulario (Misma URL para técnicos y clientes)
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyQlwxkrpdEwo3r_pdNU2PS826gG_GgqdNGTdiAMggoas33K63Xra-b6btWm36-oCPJBA/exec'; 
+    // **NUEVA URL DEL GOOGLE APPS SCRIPT**
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbySHqKDhDcslaeiuNXYfQX6qH_ezblPs1Q_G1etlyHXdR70QjUKSi0STtsymCVZ7j07mQ/exec'; 
 
     formClient.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -202,14 +211,9 @@
         responseMessage.textContent = 'Enviando solicitud, por favor espera...';
         
         const formData = new FormData(formClient);
-        
-        // 1. Obtener los datos del formulario
         const data = Object.fromEntries(formData.entries());
-        
-        // 2. LÍNEA CLAVE: Especifica que use la hoja "Clientes"
-        data.sheet = 'Clientes'; 
+        data.sheet = 'Clientes'; // Hoja de destino
 
-        // 3. Obtener el tipo de servicio y la descripción para el mensaje de WhatsApp
         const nombre = data['Nombre completo'];
         const servicio = data['Tipo de servicio'];
         const descripcion = data['Descripción del problema'];
@@ -217,7 +221,6 @@
         try {
             const response = await fetch(scriptURL, {
                 method: 'POST',
-                // Enviamos los datos, incluyendo el 'data.sheet'
                 body: JSON.stringify(data), 
                 headers: {
                     'Content-Type': 'application/json'
@@ -225,32 +228,27 @@
             });
 
             if (response.ok) {
-                // Notificación de éxito
                 responseMessage.className = 'success';
                 responseMessage.textContent = 'Solicitud enviada. Redirigiendo a WhatsApp para pago de diagnóstico y asignación...';
                 
-                // Éxito: Redirige a WhatsApp para el siguiente paso (pago de diagnóstico, etc.)
-                // NOTA IMPORTANTE: REEMPLAZA "TU_NUMERO_DE_TELEFONO_AQUÍ" CON EL NÚMERO DE SOPORTE
+                // Éxito: Redirige a WhatsApp. Reemplaza "TU_NUMERO_DE_TELEFONO_AQUÍ"
                 const whatsappMessage = `Hola, acabo de enviar una solicitud en TechUIT con el nombre de ${encodeURIComponent(nombre)}. Necesito un servicio de ${encodeURIComponent(servicio)}. Mi problema es: ${encodeURIComponent(descripcion)}. Estoy listo/a para continuar con el pago del diagnóstico.`;
-
                 const whatsappUrl = `https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=${whatsappMessage}`;
                 
-                // Esperar 2 segundos antes de la redirección para que el usuario lea el mensaje
                 setTimeout(() => {
                     window.location.href = whatsappUrl;
                 }, 2000);
 
             } else {
-                console.error('Error al enviar el formulario del cliente. Respuesta no ok.');
+                console.error('Error al enviar el formulario del cliente. Respuesta no ok:', response.status);
                 responseMessage.className = 'error';
-                responseMessage.textContent = 'Error al enviar el formulario. Verifica tu conexión e intenta de nuevo.';
+                responseMessage.textContent = 'Error al enviar. Verifica tu Google Script (' + response.status + ')';
             }
         } catch (error) {
             console.error('Error de red:', error);
             responseMessage.className = 'error';
             responseMessage.textContent = 'Error de conexión. Intenta de nuevo.';
         } finally {
-            // Habilitamos el botón después de la acción o error (excepto si redirige)
             if (responseMessage.className === 'error') {
                 setTimeout(() => {
                     submitButton.disabled = false;
