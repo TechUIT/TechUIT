@@ -5,29 +5,24 @@
     <script src="service-worker.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Solicitud</title>
+    <title>Registro de Cliente</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #000;
+            padding: 0;
+            background-color: #000; /* Fondo negro elegante */
             color: #fff;
             line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Alineado al inicio para evitar que se desborde */
             min-height: 100vh;
         }
         .container {
-            width: 100%;
             max-width: 600px;
-            margin: 40px auto;
+            margin: 20px auto;
             background-color: #1a1a1a;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
         }
         .back-button {
             display: block;
@@ -48,61 +43,69 @@
         .back-button-content:hover {
             background-color: #555;
         }
-        h2 {
+        h1 {
             color: #007bff;
-            margin-bottom: 25px;
+            text-align: center;
+            margin-bottom: 5px;
             font-size: 24px;
         }
-        .form-section {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            align-items: center;
-        }
-        .form-input, .form-textarea, .form-select {
-            width: 90%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #007bff; /* Borde de color de la app */
-            background-color: #2a2a2a;
-            color: #fff;
+        p.subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 25px;
             font-size: 16px;
         }
-        .form-select {
-            appearance: none; /* Quitar el estilo nativo */
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23007bff'%3e%3cpath d='M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 10px top 50%;
-            background-size: 12px;
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: #2a2a2a;
+            color: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .form-select option {
+            background-color: #2a2a2a;
+            color: #fff;
         }
         .form-textarea {
-            height: 120px;
             resize: vertical;
         }
-        .button {
-            background-color: #007bff;
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff; /* Azul primario */
             color: #fff;
-            padding: 15px 30px;
-            text-decoration: none;
+            border: none;
             border-radius: 50px;
-            margin-top: 20px;
-            width: 90%;
-            max-width: 300px;
             font-size: 18px;
             font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.3s ease;
             cursor: pointer;
-            border: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
         }
-        .button:hover:not(:disabled) {
+        .submit-button:hover:not(:disabled) {
             background-color: #0056b3;
             transform: translateY(-2px);
         }
-        .button:disabled {
-            background-color: #004d99;
+        .submit-button:disabled {
+            background-color: #3d3d3d;
             cursor: not-allowed;
-            opacity: 0.7;
+            box-shadow: none;
         }
         #response-message {
             margin-top: 20px;
@@ -113,9 +116,9 @@
             font-weight: bold;
         }
         .success {
-            background-color: #1a3a2a;
-            color: #25D366;
-            border: 1px solid #25D366;
+            background-color: #1a2a3a;
+            color: #007bff;
+            border: 1px solid #007bff;
         }
         .error {
             background-color: #4a1a1a;
@@ -125,115 +128,137 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="back-button">
-            <a href="terminos-clientes.html" class="back-button-content">
-                <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-                <span style="font-size: 16px;">Atrás</span>
-            </a>
-        </div>
-        
-        <h2>Solicitud de Servicio</h2>
-        <p>Completa tus datos para que podamos asignarte un experto verificado. Todos los campos son obligatorios.</p>
-        <div id="form-section" class="form-section">
-            <form id="client-form">
-                <!-- Requisito de Identidad -->
-                <input type="text" name="Nombre completo" placeholder="Nombre completo" class="form-input" required>
-                <input type="text" name="Numero de Identidad (DPI/Cédula)" placeholder="Número de Identidad (DPI/Cédula)" class="form-input" pattern="[0-9A-Za-z\s-]+" title="Solo números y letras para la identidad" required>
-                <!-- /Requisito de Identidad -->
-
-                <input type="tel" name="Numero de telefono" placeholder="Número de teléfono" class="form-input" required>
-                <input type="email" name="Correo electronico" placeholder="Correo electrónico" class="form-input" required>
-
-                <!-- Menú Desplegable de Servicio -->
-                <select name="Tipo de servicio" class="form-select" required>
-                    <option value="" disabled selected>Selecciona el tipo de servicio*</option>
-                    <!-- Servicios Técnicos Generales -->
-                    <option value="Informático/Redes">Informático / Redes</option>
-                    <option value="Eléctrico/Electrónico">Eléctrico / Electrónico</option>
-                    <option value="Fontanería/Plomería">Fontanería / Plomería</option>
-                    <option value="Mecánica Doméstica">Mecánica Doméstica (Línea Blanca)</option>
-                    <option value="Aires Acondicionados">Aires Acondicionados</option>
-                    <!-- TUS NUEVAS ÁREAS TÉCNICAS AQUÍ -->
-                    <option value="Construcción/Remodelación">Construcción / Remodelación</option>
-                    <option value="Automotriz">Automotriz</option>
-                    <option value="Médico-General">Médico General</option>
-                    <option value="Odontología">Odontología</option>
-                    <option value="Veterinaria">Veterinaria</option>
-                    <option value="Otro Servicio Técnico">Otro Servicio Técnico</option>
-                </select>
-                <!-- /Menú Desplegable -->
-
-                <textarea name="Descripcion del problema" placeholder="Describe el problema en detalle" class="form-textarea" required></textarea>
-                <textarea name="Direccion de Servicio" placeholder="Dirección exacta para el servicio" class="form-textarea" required></textarea>
-                
-                <button type="submit" class="button">Enviar Solicitud</button>
-                <div id="response-message"></div>
-            </form>
-        </div>
+<div class="container">
+    <div class="back-button">
+        <a href="terminos-clientes.html" class="back-button-content">
+            <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
+            <span style="font-size: 16px;">Términos</span>
+        </a>
     </div>
 
-    <script>
-        const form = document.getElementById('client-form');
-        const responseMessage = document.getElementById('response-message');
+    <h1>Solicitud de Experto</h1>
+    <p class="subtitle">Cuéntanos sobre tu problema para asignarte un técnico verificado.</p>
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    <form id="client-form">
+        <div class="form-group">
+            <label for="nombre" class="form-label">Nombre Completo (Obligatorio)</label>
+            <input type="text" id="nombre" name="Nombre completo" placeholder="Juan Pérez" class="form-input" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="telefono" class="form-label">Número de Teléfono (Obligatorio)</label>
+            <!-- Este campo es de tipo 'tel' para mejor usabilidad móvil -->
+            <input type="tel" id="telefono" name="Número de teléfono" placeholder="Ej: 9999-8888" class="form-input" required>
+        </div>
 
-            const submitButton = form.querySelector('button');
-            submitButton.disabled = true;
-            
-            responseMessage.style.display = 'block';
-            responseMessage.className = 'error';
-            responseMessage.textContent = 'Enviando solicitud, por favor espera...';
+        <div class="form-group">
+            <label for="email" class="form-label">Correo Electrónico (Obligatorio)</label>
+            <input type="email" id="email" name="Correo electrónico" placeholder="ejemplo@correo.com" class="form-input" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="direccion" class="form-label">Dirección / Ubicación (Obligatorio)</label>
+            <input type="text" id="direccion" name="Dirección / Ubicación" placeholder="Colonia, Calle y número de casa" class="form-input" required>
+        </div>
 
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            // AÑADIMOS ESTA LÍNEA CLAVE: Especifica que use la hoja "Clientes"
-            data.sheet = 'Clientes';
+        <div class="form-group">
+            <label for="servicio" class="form-label">Tipo de Servicio Requerido (Obligatorio)</label>
+            <select id="servicio" name="Tipo de servicio" class="form-select" required>
+                <option value="" disabled selected>Selecciona el área de tu problema</option>
+                <option value="Electricidad Residencial">Electricidad Residencial</option>
+                <option value="Plomeria y Tuberias">Plomería y Tuberías</option>
+                <option value="Aires Acondicionados">Aires Acondicionados / Refrigeración</option>
+                <option value="Construcción/Remodelación">Construcción / Remodelación</option>
+                <option value="Automotriz">Mecánica Automotriz</option>
+                <option value="Médico-General">Consulta Médica General</option>
+                <option value="Otro">Otro (Especificar en descripción)</option>
+            </select>
+        </div>
 
-            // URL del Google Apps Script para el formulario de clientes. 
-            // DEBES CAMBIAR ESTO POR TU URL DEL SCRIPT DE GOOGLE.
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbyQlwxkrpdEwo3r_pdNU2PS826gG_GgqdNGTdiAMggoas33K63Xra-b6btWm36-oCPJBA/exec'; 
+        <div class="form-group">
+            <label for="descripcion" class="form-label">Describe tu Problema (Obligatorio)</label>
+            <textarea id="descripcion" name="Descripción del problema" placeholder="Sé lo más detallado posible sobre lo que está fallando o necesitas." class="form-textarea" rows="4" required></textarea>
+        </div>
+        
+        <button type="submit" class="submit-button">Enviar Solicitud y Continuar</button>
+        <div id="response-message"></div>
+    </form>
+</div>
 
-            try {
-                const response = await fetch(scriptURL, {
-                    method: 'POST',
-                    body: JSON.stringify(data),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+<script>
+    const formClient = document.getElementById('client-form');
+    const responseMessage = document.getElementById('response-message');
+    
+    // URL del Google Apps Script para el formulario (Misma URL para técnicos y clientes)
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyQlwxkrpdEwo3r_pdNU2PS826gG_GgqdNGTdiAMggoas33K63Xra-b6btWm36-oCPJBA/exec'; 
 
-                if (response.ok) {
-                    responseMessage.className = 'success';
-                    responseMessage.textContent = 'Solicitud enviada con éxito. Redirigiendo a confirmación de pago...';
-                    
-                    // Éxito: Redirige a la página de pago
-                    setTimeout(() => {
-                        window.location.href = 'confirmacion-pago.html';
-                    }, 2000);
-                    
-                } else {
-                    console.error('Error al enviar el formulario del cliente. Respuesta no ok.');
-                    responseMessage.className = 'error';
-                    responseMessage.textContent = 'Error al enviar el formulario. Verifica tu conexión e intenta de nuevo.';
+    formClient.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const submitButton = formClient.querySelector('button');
+        submitButton.disabled = true;
+        responseMessage.style.display = 'block';
+        responseMessage.className = 'error';
+        responseMessage.textContent = 'Enviando solicitud, por favor espera...';
+        
+        const formData = new FormData(formClient);
+        
+        // 1. Obtener los datos del formulario
+        const data = Object.fromEntries(formData.entries());
+        
+        // 2. LÍNEA CLAVE: Especifica que use la hoja "Clientes"
+        data.sheet = 'Clientes'; 
+
+        // 3. Obtener el tipo de servicio y la descripción para el mensaje de WhatsApp
+        const nombre = data['Nombre completo'];
+        const servicio = data['Tipo de servicio'];
+        const descripcion = data['Descripción del problema'];
+
+        try {
+            const response = await fetch(scriptURL, {
+                method: 'POST',
+                // Enviamos los datos, incluyendo el 'data.sheet'
+                body: JSON.stringify(data), 
+                headers: {
+                    'Content-Type': 'application/json'
                 }
-            } catch (error) {
-                console.error('Error de red:', error);
+            });
+
+            if (response.ok) {
+                // Notificación de éxito
+                responseMessage.className = 'success';
+                responseMessage.textContent = 'Solicitud enviada. Redirigiendo a WhatsApp para pago de diagnóstico y asignación...';
+                
+                // Éxito: Redirige a WhatsApp para el siguiente paso (pago de diagnóstico, etc.)
+                // NOTA IMPORTANTE: REEMPLAZA "TU_NUMERO_DE_TELEFONO_AQUÍ" CON EL NÚMERO DE SOPORTE
+                const whatsappMessage = `Hola, acabo de enviar una solicitud en TechUIT con el nombre de ${encodeURIComponent(nombre)}. Necesito un servicio de ${encodeURIComponent(servicio)}. Mi problema es: ${encodeURIComponent(descripcion)}. Estoy listo/a para continuar con el pago del diagnóstico.`;
+
+                const whatsappUrl = `https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=${whatsappMessage}`;
+                
+                // Esperar 2 segundos antes de la redirección para que el usuario lea el mensaje
+                setTimeout(() => {
+                    window.location.href = whatsappUrl;
+                }, 2000);
+
+            } else {
+                console.error('Error al enviar el formulario del cliente. Respuesta no ok.');
                 responseMessage.className = 'error';
-                responseMessage.textContent = 'Error de conexión. Intenta de nuevo.';
-            } finally {
-                // Habilitamos el botón solo si hubo un error de conexión o respuesta no exitosa
-                if (responseMessage.className === 'error') {
-                    setTimeout(() => {
-                        submitButton.disabled = false;
-                        responseMessage.style.display = 'none';
-                    }, 3000);
-                }
+                responseMessage.textContent = 'Error al enviar el formulario. Verifica tu conexión e intenta de nuevo.';
             }
-        });
-    </script>
+        } catch (error) {
+            console.error('Error de red:', error);
+            responseMessage.className = 'error';
+            responseMessage.textContent = 'Error de conexión. Intenta de nuevo.';
+        } finally {
+            // Habilitamos el botón después de la acción o error (excepto si redirige)
+            if (responseMessage.className === 'error') {
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    responseMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+    });
+</script>
 </body>
 </html>
