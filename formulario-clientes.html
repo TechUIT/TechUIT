@@ -136,27 +136,25 @@
         </a>
     </div>
 
-    <h1>Solicitud de Experto</h1>
-    <p class="subtitle">Cuéntanos sobre tu problema para asignarte un técnico verificado.</p>
-    <!-- NOTA para el usuario sobre los campos obligatorios -->
+    <h1>Solicitud de Experto Informático</h1>
+    <p class="subtitle">Cuéntanos sobre tu problema de PC, red o software para asignarte un técnico verificado.</p>
     <p style="text-align: center; color: #ffc107; font-size: 14px; margin-top: -15px; margin-bottom: 20px;">
         Los campos marcados con * son obligatorios.
     </p>
 
     <form id="client-form">
         <div class="form-group">
-            <label for="nombre" class="form-label">Nombre Completo *</label>
+            <label for="nombre" class="form-label">Nombre completo *</label>
             <input type="text" id="nombre" name="Nombre completo" placeholder="Juan Pérez" class="form-input" required>
         </div>
         
         <div class="form-group">
-            <label for="telefono" class="form-label">Número de Teléfono *</label>
-            <!-- Este campo es de tipo 'tel' para mejor usabilidad móvil -->
+            <label for="telefono" class="form-label">Número de teléfono *</label>
             <input type="tel" id="telefono" name="Número de teléfono" placeholder="Ej: 9999-8888" class="form-input" required>
         </div>
 
         <div class="form-group">
-            <label for="email" class="form-label">Correo Electrónico *</label>
+            <label for="email" class="form-label">Correo electrónico *</label>
             <input type="email" id="email" name="Correo electrónico" placeholder="ejemplo@correo.com" class="form-input" required>
         </div>
         
@@ -166,26 +164,20 @@
         </div>
 
         <div class="form-group">
-            <label for="servicio" class="form-label">Tipo de Servicio Requerido *</label>
+            <label for="servicio" class="form-label">Tipo de servicio informático requerido *</label>
             <select id="servicio" name="Tipo de servicio" class="form-select" required>
-                <option value="" disabled selected>Selecciona el área de tu problema</option>
-                <option value="Electricidad Residencial">Electricidad Residencial</option>
-                <option value="Plomeria y Tuberias">Plomería y Tuberías</option>
-                <option value="Aires Acondicionados">Aires Acondicionados / Refrigeración</option>
-                <option value="Construcción/Remodelación">Construcción / Remodelación</option>
-                <option value="Mecanica Automotriz">Mecánica Automotriz</option>
-                <option value="Reparacion de Electrodomesticos">Reparación de Electrodomésticos</option>
-                <option value="Informática y Reparacion PC">Informática y Reparación de PC</option>
-                <option value="Contaduria y Finanzas">Contaduría y Finanzas</option>
-                <option value="Carpinteria y Muebles">Carpintería y Muebles</option>
-                <option value="Jardineria y Paisajismo">Jardinería y Paisajismo</option>
-                <option value="Medico General">Consulta Médica General</option>
-                <option value="Otro">Otro (Especificar en descripción)</option>
+                <option value="" disabled selected>Selecciona tu problema de tecnología</option>
+                <option value="Reparacion de Hardware PC/Laptop">Reparación de Hardware PC/Laptop</option>
+                <option value="Instalacion de Software y SO">Instalación de Software y Sistemas Operativos</option>
+                <option value="Eliminacion de Virus y Malware">Eliminación de Virus y Malware</option>
+                <option value="Configuracion de Redes y WiFi">Configuración de Redes y WiFi</option>
+                <option value="Soporte Remoto">Soporte Remoto (Diagnóstico Rápido)</option>
+                <option value="Otro Servicio Tecnico">Otro (Si tu necesidad no es informática)</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="descripcion" class="form-label">Describe tu Problema *</label>
+            <label for="descripcion" class="form-label">Describe tu problema *</label>
             <textarea id="descripcion" name="Descripción del problema" placeholder="Sé lo más detallado posible sobre lo que está fallando o necesitas." class="form-textarea" rows="4" required></textarea>
         </div>
         
@@ -198,8 +190,9 @@
     const formClient = document.getElementById('client-form');
     const responseMessage = document.getElementById('response-message');
     
-    // **NUEVA URL DEL GOOGLE APPS SCRIPT**
+    // URL de tu Google Apps Script que ya has implementado
     const scriptURL = 'https://script.google.com/macros/s/AKfycbySHqKDhDcslaeiuNXYfQX6qH_ezblPs1Q_G1etlyHXdR70QjUKSi0STtsymCVZ7j07mQ/exec'; 
+    const TU_NUMERO_DE_TELEFONO_AQUÍ = '504XXXXXXXX'; // Asegúrate de cambiar esto a tu número de WhatsApp real
 
     formClient.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -227,33 +220,41 @@
                 }
             });
 
-            if (response.ok) {
+            const responseText = await response.text();
+            let result = {};
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                // Manejar respuesta no JSON (ej. errores internos del GS)
+                result = { result: 'error', message: 'Respuesta del servidor no válida. Revisa el registro de ejecución de GS.' };
+            }
+
+            if (response.ok && result.result === 'success') {
                 responseMessage.className = 'success';
-                responseMessage.textContent = 'Solicitud enviada. Redirigiendo a WhatsApp para pago de diagnóstico y asignación...';
+                responseMessage.textContent = '¡Solicitud enviada! Redirigiendo a WhatsApp para asignación...';
                 
-                // Éxito: Redirige a WhatsApp. Reemplaza "TU_NUMERO_DE_TELEFONO_AQUÍ"
-                const whatsappMessage = `Hola, acabo de enviar una solicitud en TechUIT con el nombre de ${encodeURIComponent(nombre)}. Necesito un servicio de ${encodeURIComponent(servicio)}. Mi problema es: ${encodeURIComponent(descripcion)}. Estoy listo/a para continuar con el pago del diagnóstico.`;
-                const whatsappUrl = `https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=${whatsappMessage}`;
+                // Redirección a WhatsApp para iniciar la conversación
+                const whatsappMessage = `Hola, acabo de enviar una solicitud en TechUIT con el nombre de ${encodeURIComponent(nombre)}. Necesito un servicio de ${encodeURIComponent(servicio)}. Mi problema es: ${encodeURIComponent(descripcion)}. Estoy listo/a para continuar con la asignación del técnico.`;
+                const whatsappUrl = `https://wa.me/${TU_NUMERO_DE_TELEFONO_AQUÍ}?text=${whatsappMessage}`;
                 
                 setTimeout(() => {
                     window.location.href = whatsappUrl;
                 }, 2000);
 
             } else {
-                console.error('Error al enviar el formulario del cliente. Respuesta no ok:', response.status);
+                console.error('Error al enviar el formulario del cliente. Mensaje de GS:', result.message);
                 responseMessage.className = 'error';
-                responseMessage.textContent = 'Error al enviar. Verifica tu Google Script (' + response.status + ')';
+                responseMessage.textContent = 'Error al guardar datos. Revisa el GS y los encabezados: ' + (result.message || 'Error de servidor.');
             }
         } catch (error) {
-            console.error('Error de red:', error);
+            console.error('Error de red o parsing de respuesta:', error);
             responseMessage.className = 'error';
             responseMessage.textContent = 'Error de conexión. Intenta de nuevo.';
         } finally {
             if (responseMessage.className === 'error') {
                 setTimeout(() => {
                     submitButton.disabled = false;
-                    responseMessage.style.display = 'none';
-                }, 3000);
+                }, 5000);
             }
         }
     });
