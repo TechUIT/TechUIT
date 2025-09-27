@@ -190,8 +190,8 @@
     const formClient = document.getElementById('client-form');
     const responseMessage = document.getElementById('response-message');
     
-    // URL de tu Google Apps Script que ya has implementado
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbySHqKDhDcslaeiuNXYfQX6qH_ezblPs1Q_G1etlyHXdR70QjUKSi0STtsymCVZ7j07mQ/exec'; 
+    // URL de tu Google Apps Script - ACTUALIZADA CON EL NUEVO ENLACE
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxGeneQiipkFmP11nOBw47fGqMmqZOKwhpS8mWU17SYw5w_kNrFoHEFuZGRR7gC02yDNw/exec'; 
     const TU_NUMERO_DE_TELEFONO_AQUÍ = '504XXXXXXXX'; // Asegúrate de cambiar esto a tu número de WhatsApp real
 
     formClient.addEventListener('submit', async (e) => {
@@ -216,12 +216,19 @@
                 method: 'POST',
                 body: JSON.stringify(data), 
                 headers: {
-                    'Content-Type': 'application/json'
+                    // Es CRÍTICO enviar este encabezado para que Apps Script lo reciba como JSON.
+                    'Content-Type': 'application/json' 
                 }
             });
 
             const responseText = await response.text();
             let result = {};
+            
+            // Si la respuesta no fue OK (ej. 403 Forbidden por permisos), esto nos dirá el error.
+            if (!response.ok) {
+                throw new Error(`Error HTTP ${response.status}. Revisa los permisos de despliegue.`);
+            }
+
             try {
                 result = JSON.parse(responseText);
             } catch (e) {
@@ -229,7 +236,7 @@
                 result = { result: 'error', message: 'Respuesta del servidor no válida. Revisa el registro de ejecución de GS.' };
             }
 
-            if (response.ok && result.result === 'success') {
+            if (result.result === 'success') {
                 responseMessage.className = 'success';
                 responseMessage.textContent = '¡Solicitud enviada! Redirigiendo a WhatsApp para asignación...';
                 
@@ -244,12 +251,12 @@
             } else {
                 console.error('Error al enviar el formulario del cliente. Mensaje de GS:', result.message);
                 responseMessage.className = 'error';
-                responseMessage.textContent = 'Error al guardar datos. Revisa el GS y los encabezados: ' + (result.message || 'Error de servidor.');
+                responseMessage.textContent = 'Error al guardar datos. Mensaje: ' + (result.message || 'Error desconocido.');
             }
         } catch (error) {
-            console.error('Error de red o parsing de respuesta:', error);
+            console.error('Error de conexión o permisos:', error);
             responseMessage.className = 'error';
-            responseMessage.textContent = 'Error de conexión. Intenta de nuevo.';
+            responseMessage.textContent = 'Error de conexión. Es probable que sea un error de PERMISOS de tu Apps Script. Intenta de nuevo.';
         } finally {
             if (responseMessage.className === 'error') {
                 setTimeout(() => {
