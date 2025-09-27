@@ -21,48 +21,95 @@
             background-color: #1a1a1a;
             padding: 20px;
             border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.2);
+        }
+        .back-button {
+            display: block;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .back-button-content {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 50px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .back-button-content:hover {
+            background-color: #555;
         }
         h1, h2 {
             color: #007bff;
+            margin-top: 20px;
+        }
+        p {
+            text-align: justify;
         }
         .button {
             display: inline-block;
-            background-color: #007bff;
+            background-color: #25D366; /* WhatsApp Green */
             color: #fff;
             padding: 15px 30px;
             text-decoration: none;
             border-radius: 50px;
             margin-top: 20px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+        .button:hover {
+            background-color: #1FAF59;
+            transform: translateY(-2px);
+        }
+        .terms-link {
+            display: block;
+            font-size: 14px;
+            margin-top: 15px;
+            color: #aaa;
         }
     </style>
 </head>
 <body>
-<div style="text-align: left; padding: 10px;">
-   <a href="index.html" class="back-button" style="text-decoration: none;">
-    <div style="display: flex; align-items: center; padding: 10px; border-radius: 50px; background-color: #333; color: white; width: 150px;">
-        <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-        <span style="font-size: 16px; font-weight: bold;">Inicio</span>
+<div class="container">
+    <div class="back-button">
+        <a href="index.html" class="back-button-content">
+            <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
+            <span style="font-size: 16px;">Inicio</span>
+        </a>
     </div>
-</a>
+
+    <h1>Términos para Técnicos</h1>
+    <p style="font-size: 18px; color: #ccc;">Proceso y Recompensas al ser parte de TechUIT.</p>
+
+    <h2>Verificación de Calidad (Obligatoria)</h2>
+    <p>Todos nuestros técnicos deben pasar por un proceso de verificación que incluye: validación de identidad (DPI/Cédula), verificación de credenciales y envío de una foto de rostro con documento. Este paso es fundamental para la confianza de nuestros clientes.</p>
+
+    <h2>Proceso y Ganancias</h2>
+    <p>1. **Ingreso por Diagnóstico:** Por cada servicio, recibirás una parte del pago de diagnóstico, que es tu compensación por el tiempo y desplazamiento. Este pago es procesado por la plataforma.</p>
+    <p>2. **Manejo de Pagos:** Todos los pagos de diagnóstico se realizan a través de la plataforma. Una vez confirmado el pago del cliente y el servicio, te enviaremos tu parte directamente. Esto garantiza tu pago y te protege de clientes que no se presentan.</p>
+    <p>3. **Evitar Pagos Externos:** No se aceptarán pagos en efectivo para el diagnóstico. Cualquier intento de confabular con un cliente para saltarse la plataforma resultará en la eliminación inmediata y permanente de nuestra red.</p>
+    <p>4. **Pago por Reparación:** La ganancia por la reparación se acuerda directamente entre tú y el cliente. La plataforma no participa en este proceso.</p>
+    <p>5. **Transparencia:** Te pedimos que mantengas los precios de reparación justos y transparentes con el cliente. La confianza es la base de nuestra red.</p>
+    
+    <span class="terms-link">
+        Al hacer clic, también confirmas que has leído y aceptado nuestros
+        <a href="terminos-legales.html" style="color: #007bff; text-decoration: underline;">Términos de Servicio completos</a> y nuestra Política de Privacidad.
+    </span>
+
+    <!-- Aquí cambiamos el enlace al nuevo formulario HTML -->
+    <a href="formulario-tecnicos.html" class="button">Acepto los términos y quiero registrarme</a>
+    
+    <p style="margin-top: 30px;">¿Necesitas ayuda con el registro?</p>
+    <!-- Asegúrate de reemplazar TU_NUMERO_DE_TELEFONO_AQUÍ con tu número -->
+    <a href="https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20el%20registro%20de%20técnicos." class="button" style="background-color: #333; box-shadow: none;">Contáctanos por WhatsApp</a>
+
 </div>
-
-    <div class="container">
-        <h1>Términos para unirte a TechUIT</h1>
-        <p>Al unirte a nuestra red, aceptas los siguientes términos para asegurar un servicio de alta calidad.</p>
-        
-        <h2>Modelo de Ganancias</h2>
-<p>1. **Ingreso por Diagnóstico:** Por cada servicio, recibirás una parte del pago de diagnóstico, que es tu compensación por el tiempo y desplazamiento. Este pago es procesado por la plataforma.</p>
-<p>2. **Manejo de Pagos:** Todos los pagos de diagnóstico se realizan a través de la plataforma. Una vez confirmado el pago del cliente y el servicio, te enviaremos tu parte directamente. Esto garantiza tu pago y te protege de clientes que no se presentan.</p>
-<p>3. **Evitar Pagos Externos:** No se aceptarán pagos en efectivo para el diagnóstico. Cualquier intento de confabular con un cliente para saltarse la plataforma resultará en la eliminación inmediata y permanente de nuestra red.</p>
-<p>4. **Pago por Reparación:** La ganancia por la reparación se acuerda directamente entre tú y el cliente. La plataforma no participa en este proceso.</p>
-<p>5. **Transparencia:** Te pedimos que mantengas los precios de reparación justos y transparentes con el cliente. La confianza es la base de nuestra red.</p>
-<p style="font-size: 12px; text-align: center; color: #aaa;">
-            Al hacer clic, también confirmas que has leído y aceptado nuestros
-            <a href="terminos-legales.html" style="color: #007bff; text-decoration: underline;">Términos de Servicio completos</a> y nuestra Política de Privacidad.
-        </p>
-
-        
-        <a href="https://forms.gle/a1pMK1XsushmZdBf8" class="button">Acepto los términos y quiero unirme</a>
-    </div>
 </body>
 </html>
