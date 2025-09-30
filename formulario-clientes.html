@@ -1,270 +1,224 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="manifest" href="manifest.json">
-    <script src="service-worker.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Cliente</title>
+    <title>Solicitud de Servicio (Supabase)</title>
+    
+    <!-- Incluir la librería de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
+        /* Estilos basados en el diseño oscuro que manejamos */
         body {
-            font-family: 'Inter', AriaAl, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #000; /* Fondo negro elegante */
+            padding: 20px;
+            background-color: #000;
             color: #fff;
             line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
         .container {
-            max-width: 600px;
-            margin: 20px auto;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
             background-color: #1a1a1a;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
         }
         .back-button {
             display: block;
             text-align: left;
             margin-bottom: 20px;
-        }
-        .back-button-content {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 15px;
-            border-radius: 50px;
-            background-color: #333;
-            color: white;
+            color: #007bff;
             text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .back-button-content:hover {
-            background-color: #555;
+            font-size: 16px;
         }
         h1 {
             color: #007bff;
             text-align: center;
-            margin-bottom: 5px;
-            font-size: 24px;
-        }
-        p.subtitle {
-            text-align: center;
-            color: #ccc;
             margin-bottom: 25px;
-            font-size: 16px;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-label {
+        label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
             color: #ccc;
         }
-        .form-input, .form-select, .form-textarea {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
-            border: 1px solid #444;
-            border-radius: 8px;
-            background-color: #2a2a2a;
-            color: #fff;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            border-radius: 5px;
             box-sizing: border-box;
+            background-color: #333;
+            color: #fff;
             transition: border-color 0.3s;
         }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: #007bff;
             outline: none;
         }
-        .form-select option {
-            background-color: #2a2a2a;
-            color: #fff;
-        }
-        .form-textarea {
-            resize: vertical;
-        }
-        .submit-button {
+        .button {
             width: 100%;
-            padding: 15px;
-            background-color: #007bff; /* Azul primario */
+            background-color: #007bff;
             color: #fff;
+            padding: 15px;
             border: none;
             border-radius: 50px;
+            cursor: pointer;
             font-size: 18px;
             font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+            transition: background-color 0.3s;
         }
-        .submit-button:hover:not(:disabled) {
+        .button:hover {
             background-color: #0056b3;
-            transform: translateY(-2px);
         }
-        .submit-button:disabled {
-            background-color: #3d3d3d;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        #response-message {
+        #responseMessage {
             margin-top: 20px;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 5px;
             text-align: center;
-            display: none;
             font-weight: bold;
+            display: none; 
         }
         .success {
-            background-color: #1a2a3a;
-            color: #007bff;
-            border: 1px solid #007bff;
+            background-color: #4CAF50; 
+            color: white;
         }
         .error {
-            background-color: #4a1a1a;
-            color: #ff4d4d;
-            border: 1px solid #ff4d4d;
+            background-color: #f44336; 
+            color: white;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="back-button">
-        <a href="terminos-clientes.html" class="back-button-content">
-            <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-            <span style="font-size: 16px;">Términos</span>
-        </a>
+    <div class="container">
+        <a href="terminos-clientes.html" class="back-button">&larr; Volver a Términos</a>
+        <h1>Solicita tu Servicio Técnico</h1>
+        
+        <form id="clientForm">
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" required>
+
+            <label for="telefono">Número de teléfono (WhatsApp)</label>
+            <input type="tel" id="telefono" name="telefono" required 
+                   placeholder="Ej: +504 9876-5432">
+
+            <label for="direccion">Dirección/Zona de Servicio</label>
+            <input type="text" id="direccion" name="direccion" required 
+                   placeholder="Ej: Colonia Tara, cerca de Banco Atlántida">
+            
+            <label for="tipo_servicio">Tipo de Servicio Requerido</label>
+            <select id="tipo_servicio" name="tipo_servicio" required>
+                <option value="">Selecciona el área de tu problema</option>
+                <option value="Laptop/PC_Falla">Laptop/PC - Falla de Hardware/Software</option>
+                <option value="Redes/Internet">Redes, Wi-Fi o Problemas de Internet</option>
+                <option value="Software_Instalacion">Instalación de Programas o Sistemas</option>
+                <option value="Recuperacion_Datos">Recuperación de Archivos/Datos</option>
+                <option value="Otro">Otro Problema Informático</option>
+            </select>
+            
+            <label for="problema">Describe tu problema (Sé específico)</label>
+            <textarea id="problema" name="problema" rows="4" required 
+                      placeholder="Ej: Mi laptop se apaga a los 5 minutos de encenderla, o: No puedo conectar la impresora en red."></textarea>
+            
+            <p style="font-size: 14px; color: #aaa; margin-bottom: 25px;">
+                Al enviar, aceptas el cargo por diagnóstico (ver <a href="terminos-clientes.html" style="color: #007bff;">Términos</a>).
+            </p>
+            
+            <button type="submit" class="button" id="submitButton">
+                Solicitar Experto y Pagar Diagnóstico
+            </button>
+        </form>
+
+        <div id="responseMessage"></div>
     </div>
 
-    <h1>Solicitud de Experto Informático</h1>
-    <p class="subtitle">Cuéntanos sobre tu problema de PC, red o software para asignarte un técnico verificado.</p>
-    <p style="text-align: center; color: #ffc107; font-size: 14px; margin-top: -15px; margin-bottom: 20px;">
-        Los campos marcados con * son obligatorios.
-    </p>
-
-    <form id="client-form">
-        <div class="form-group">
-            <label for="nombre" class="form-label">Nombre completo *</label>
-            <input type="text" id="nombre" name="Nombre completo" placeholder="Juan Pérez" class="form-input" required>
-        </div>
+    <script>
+        // *** CONFIGURACIÓN DE SUPABASE (CLAVES INSERTADAS) ***
+        // Estas claves conectan directamente a tu proyecto 'hsdhsgyzxalhjdihpuvo'.
+        const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
         
-        <div class="form-group">
-            <label for="telefono" class="form-label">Número de teléfono *</label>
-            <input type="tel" id="telefono" name="Número de teléfono" placeholder="Ej: 9999-8888" class="form-input" required>
-        </div>
-
-        <div class="form-group">
-            <label for="email" class="form-label">Correo electrónico *</label>
-            <input type="email" id="email" name="Correo electrónico" placeholder="ejemplo@correo.com" class="form-input" required>
-        </div>
+        let supabaseClient; 
         
-        <div class="form-group">
-            <label for="direccion" class="form-label">Dirección / Ubicación *</label>
-            <input type="text" id="direccion" name="Dirección / Ubicación" placeholder="Colonia, Calle y número de casa" class="form-input" required>
-        </div>
-
-        <div class="form-group">
-            <label for="servicio" class="form-label">Tipo de servicio informático requerido *</label>
-            <select id="servicio" name="Tipo de servicio" class="form-select" required>
-                <option value="" disabled selected>Selecciona tu problema de tecnología</option>
-                <option value="Reparacion de Hardware PC/Laptop">Reparación de Hardware PC/Laptop</option>
-                <option value="Instalacion de Software y SO">Instalación de Software y Sistemas Operativos</option>
-                <option value="Eliminacion de Virus y Malware">Eliminación de Virus y Malware</option>
-                <option value="Configuracion de Redes y WiFi">Configuración de Redes y WiFi</option>
-                <option value="Soporte Remoto">Soporte Remoto (Diagnóstico Rápido)</option>
-                <option value="Otro Servicio Tecnico">Otro (Si tu necesidad no es informática)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="descripcion" class="form-label">Describe tu problema *</label>
-            <textarea id="descripcion" name="Descripción del problema" placeholder="Sé lo más detallado posible sobre lo que está fallando o necesitas." class="form-textarea" rows="4" required></textarea>
-        </div>
-        
-        <button type="submit" class="submit-button">Enviar Solicitud y Continuar</button>
-        <div id="response-message"></div>
-    </form>
-</div>
-
-<script>
-    const formClient = document.getElementById('client-form');
-    const responseMessage = document.getElementById('response-message');
-    
-    // URL de tu Google Apps Script - ¡YA ESTÁ ACTUALIZADA!
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwFVowm625p4rujwvTEGz29IxVLUaocwcMX087maMgvN6ela46PpT7f1KGip0F7yGTgTw/exec'; 
-    const TU_NUMERO_DE_TELEFONO_AQUÍ = '504XXXXXXXX'; // Asegúrate de cambiar esto a tu número de WhatsApp real
-
-    formClient.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const submitButton = formClient.querySelector('button');
-        submitButton.disabled = true;
-        responseMessage.style.display = 'block';
-        responseMessage.className = 'error';
-        responseMessage.textContent = 'Enviando solicitud, por favor espera...';
-        
-        const formData = new FormData(formClient);
-        const data = Object.fromEntries(formData.entries());
-        data.sheet = 'Clientes'; // Hoja de destino
-
-        const nombre = data['Nombre completo'];
-        const servicio = data['Tipo de servicio'];
-        const descripcion = data['Descripción del problema'];
-
         try {
-            const response = await fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify(data), 
-                headers: {
-                    // Es CRÍTICO enviar este encabezado para que Apps Script lo reciba como JSON.
-                    'Content-Type': 'application/json' 
-                }
-            });
-
-            const responseText = await response.text();
-            let result = {};
-            
-            // Si la respuesta no fue OK (ej. 403 Forbidden por permisos), esto nos dirá el error.
-            if (!response.ok) {
-                throw new Error(`Error HTTP ${response.status}. Revisa los permisos de despliegue.`);
-            }
-
-            try {
-                result = JSON.parse(responseText);
-            } catch (e) {
-                // Manejar respuesta no JSON (ej. errores internos del GS)
-                result = { result: 'error', message: 'Respuesta del servidor no válida. Revisa el registro de ejecución de GS.' };
-            }
-
-            if (result.result === 'success') {
-                responseMessage.className = 'success';
-                responseMessage.textContent = '¡Solicitud enviada! Redirigiendo a WhatsApp para asignación...';
-                
-                // Redirección a WhatsApp para iniciar la conversación
-                const whatsappMessage = `Hola, acabo de enviar una solicitud en TechUIT con el nombre de ${encodeURIComponent(nombre)}. Necesito un servicio de ${encodeURIComponent(servicio)}. Mi problema es: ${encodeURIComponent(descripcion)}. Estoy listo/a para continuar con la asignación del técnico.`;
-                const whatsappUrl = `https://wa.me/${TU_NUMERO_DE_TELEFONO_AQUÍ}?text=${whatsappMessage}`;
-                
-                setTimeout(() => {
-                    window.location.href = whatsappUrl;
-                }, 2000);
-
-            } else {
-                console.error('Error al enviar el formulario del cliente. Mensaje de GS:', result.message);
-                responseMessage.className = 'error';
-                responseMessage.textContent = 'Error al guardar datos. Mensaje: ' + (result.message || 'Error desconocido.');
-            }
-        } catch (error) {
-            console.error('Error de conexión o permisos:', error);
-            responseMessage.className = 'error';
-            responseMessage.textContent = 'Error de conexión. Es probable que sea un error de PERMISOS de tu Apps Script. Intenta de nuevo.';
-        } finally {
-            if (responseMessage.className === 'error') {
-                setTimeout(() => {
-                    submitButton.disabled = false;
-                }, 5000);
-            }
+             // Inicialización del cliente Supabase
+             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.error("Error al inicializar el cliente Supabase.", e);
         }
-    });
-</script>
+
+
+        const form = document.getElementById('clientForm');
+        const responseMessage = document.getElementById('responseMessage');
+        const submitButton = document.getElementById('submitButton');
+
+        function showMessage(message, type) {
+            responseMessage.textContent = message;
+            responseMessage.className = type;
+            responseMessage.style.display = 'block';
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!supabaseClient) { 
+                showMessage('Error: Supabase no está configurado. Revisa la consola para más detalles.', 'error');
+                return;
+            }
+
+            responseMessage.style.display = 'none';
+            responseMessage.className = '';
+            submitButton.disabled = true;
+            submitButton.textContent = 'Procesando Solicitud...';
+
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+
+            // Datos que se enviarán a la tabla 'clientes' de Supabase
+            const clientData = {
+                fecha_solicitud: new Date().toISOString(),
+                nombre: data.nombre,
+                telefono: data.telefono,
+                direccion: data.direccion,
+                tipo_servicio: data.tipo_servicio,
+                problema: data.problema,
+                status: 'Pendiente - Pago Diagnóstico', // Estado inicial
+            };
+
+            // Intentar insertar los datos en la tabla 'clientes'
+            const { data: dbData, error } = await supabaseClient 
+                .from('clientes') // Usamos la tabla 'clientes'
+                .insert([clientData]);
+
+            if (error) {
+                console.error('Error de Supabase al insertar:', error);
+                // Si el error es 401/403, es un error de RLS (seguridad) en Supabase.
+                showMessage(`Error al guardar: ${error.message}. ¡Asegúrate que la Política RLS de INSERT esté activa para el rol 'anon'!`, 'error');
+            } else {
+                // Éxito al guardar
+                showMessage('¡Solicitud enviada! Redirigiendo para completar el pago de diagnóstico...', 'success');
+                form.reset(); 
+                
+                // REDIRECCIÓN PARA EL PAGO DE DIAGNÓSTICO (Pasarela Ko-fi)
+                // Enlace Ko-fi predefinido, listo para usar.
+                window.location.href = 'https://ko-fi.com/techuit/diagnostico-pago';
+                return; 
+            }
+            
+            submitButton.disabled = false;
+            submitButton.textContent = 'Solicitar Experto y Pagar Diagnóstico';
+        });
+
+    </script>
 </body>
 </html>
