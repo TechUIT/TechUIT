@@ -202,8 +202,12 @@
 
             if (error) {
                 console.error('Error de Supabase al insertar:', error);
-                // Si el error es 401/403, es un error de RLS (seguridad) en Supabase.
-                showMessage(`Error al guardar: ${error.message}. ¡Asegúrate que la Política RLS de INSERT esté activa para el rol 'anon'!`, 'error');
+                
+                // MEJORA: Mensaje más específico para el usuario sobre qué revisar en Supabase.
+                const columnMatch = error.message.match(/'([^']*)'/);
+                const offendingColumn = columnMatch ? columnMatch[1] : 'una columna';
+
+                showMessage(`🚨 Error de Esquema o Caché: Supabase no encuentra la columna '${offendingColumn}'. Debes ir al 'Table Editor' en Supabase y verificar que la columna se llame EXACTAMENTE '${offendingColumn}' (todo en minúsculas). Luego, desactiva y vuelve a activar la Política RLS.`, 'error');
             } else {
                 // Éxito al guardar
                 showMessage('¡Solicitud enviada! Redirigiendo para completar el pago de diagnóstico...', 'success');
