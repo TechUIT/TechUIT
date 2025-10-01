@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Servicio (Supabase)</title>
-    
-    <!-- Incluir la librería de Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <title>Confirmación de Pago</title>
     <style>
-        /* Estilos basados en el diseño oscuro que manejamos */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -19,210 +14,74 @@
             line-height: 1.6;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             min-height: 100vh;
         }
         .container {
-            width: 100%;
-            max-width: 500px;
-            margin-top: 20px;
+            max-width: 800px;
+            margin: auto;
             background-color: #1a1a1a;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.4);
         }
-        .back-button {
-            display: block;
-            text-align: left;
-            margin-bottom: 20px;
-            color: #007bff;
-            text-decoration: none;
-            font-size: 16px;
+        h2 {
+            color: #25D366; /* Un color de éxito o verde vibrante */
+            margin-bottom: 10px;
+            font-size: 28px;
         }
         h1 {
             color: #007bff;
-            text-align: center;
+            font-size: 22px;
             margin-bottom: 25px;
         }
-        label {
+        p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .button, .home-button {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #ccc;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-            border-radius: 5px;
-            box-sizing: border-box;
-            background-color: #333;
             color: #fff;
-            transition: border-color 0.3s;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        .button {
-            width: 100%;
-            background-color: #007bff;
-            color: #fff;
-            padding: 15px;
-            border: none;
+            padding: 15px 30px;
+            text-decoration: none;
             border-radius: 50px;
-            cursor: pointer;
+            margin: 15px auto;
+            width: 80%;
+            max-width: 300px;
             font-size: 18px;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .button {
+            background-color: #007bff; /* Botón de acción principal (Pago) */
         }
         .button:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
         }
-        #responseMessage {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-            display: none; 
+        .home-button {
+            background-color: #333; /* Botón secundario (Volver a inicio) */
+            font-size: 16px;
         }
-        .success {
-            background-color: #4CAF50; 
-            color: white;
-        }
-        .error {
-            background-color: #f44336; 
-            color: white;
+        .home-button:hover {
+            background-color: #555;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="terminos-clientes.html" class="back-button">&larr; Volver a Términos</a>
-        <h1>Solicita tu Servicio Técnico</h1>
+        <h2>✅ ¡Solicitud Recibida!</h2>
+        <h1>Paso Final: Pago del Diagnóstico</h1>
+        <p>Tu información se ha guardado exitosamente. Ahora, por favor, procede al pago del diagnóstico (tarifa única) para que podamos enviarte al técnico.</p>
         
-        <form id="clientForm">
-            <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" name="nombre" required>
+        <!-- ENLACE KO-FI CORREGIDO: Lleva al pago directo del diagnóstico. -->
+        <a href="https://ko-fi.com/techuit/diagnostico-pago" class="button">Proceder al Pago del Diagnóstico</a>
 
-            <label for="telefono">Número de teléfono (WhatsApp)</label>
-            <input type="tel" id="telefono" name="telefono" required 
-                   placeholder="Ej: +504 9876-5432">
-
-            <label for="direccion">Dirección/Zona de Servicio</label>
-            <input type="text" id="direccion" name="direccion" required 
-                   placeholder="Ej: Colonia Tara, cerca de Banco Atlántida">
-            
-            <label for="tipo_servicio">Tipo de Servicio Requerido</label>
-            <select id="tipo_servicio" name="tipo_servicio" required>
-                <option value="">Selecciona el área de tu problema</option>
-                <option value="Laptop/PC_Falla">Laptop/PC - Falla de Hardware/Software</option>
-                <option value="Redes/Internet">Redes, Wi-Fi o Problemas de Internet</option>
-                <option value="Software_Instalacion">Instalación de Programas o Sistemas</option>
-                <option value="Recuperacion_Datos">Recuperación de Archivos/Datos</option>
-                <option value="Otro">Otro Problema Informático</option>
-            </select>
-            
-            <label for="problema">Describe tu problema (Sé específico)</label>
-            <textarea id="problema" name="problema" rows="4" required 
-                      placeholder="Ej: Mi laptop se apaga a los 5 minutos de encenderla, o: No puedo conectar la impresora en red."></textarea>
-            
-            <p style="font-size: 14px; color: #aaa; margin-bottom: 25px;">
-                Al enviar, aceptas el cargo por diagnóstico (ver <a href="terminos-clientes.html" style="color: #007bff;">Términos</a>).
-            </p>
-            
-            <button type="submit" class="button" id="submitButton">
-                Solicitar Experto y Pagar Diagnóstico
-            </button>
-        </form>
-
-        <div id="responseMessage"></div>
+        <p style="margin-top: 40px; font-size: 16px;">Una vez completado el pago, te contactaremos.</p>
+        <a href="index.html" class="home-button">Volver al Inicio</a>
     </div>
-
-    <script>
-        // *** CONFIGURACIÓN DE SUPABASE (CLAVES INSERTADAS) ***
-        // Estas claves conectan directamente a tu proyecto 'hsdhsgyzxalhjdihpuvo'.
-        const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
-        
-        let supabaseClient; 
-        
-        try {
-             // Inicialización del cliente Supabase
-             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.error("Error al inicializar el cliente Supabase.", e);
-        }
-
-
-        const form = document.getElementById('clientForm');
-        const responseMessage = document.getElementById('responseMessage');
-        const submitButton = document.getElementById('submitButton');
-
-        function showMessage(message, type) {
-            responseMessage.textContent = message;
-            responseMessage.className = type;
-            responseMessage.style.display = 'block';
-        }
-
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (!supabaseClient) { 
-                showMessage('Error: Supabase no está configurado. Revisa la consola para más detalles.', 'error');
-                return;
-            }
-
-            responseMessage.style.display = 'none';
-            responseMessage.className = '';
-            submitButton.disabled = true;
-            submitButton.textContent = 'Procesando Solicitud...';
-
-            const formData = new FormData(form);
-            const data = {};
-            formData.forEach((value, key) => data[key] = value);
-
-            // Datos que se enviarán a la tabla 'clientes' de Supabase
-            const clientData = {
-                fecha_solicitud: new Date().toISOString(),
-                nombre: data.nombre,
-                telefono: data.telefono,
-                direccion: data.direccion,
-                tipo_servicio: data.tipo_servicio,
-                problema: data.problema,
-                status: 'Pendiente - Pago Diagnóstico', // Estado inicial
-            };
-
-            // Intentar insertar los datos en la tabla 'clientes'
-            const { data: dbData, error } = await supabaseClient 
-                .from('clientes') // Usamos la tabla 'clientes'
-                .insert([clientData]);
-
-            if (error) {
-                console.error('Error de Supabase al insertar:', error);
-                
-                // MEJORA: Mensaje más específico para el usuario sobre qué revisar en Supabase.
-                const columnMatch = error.message.match(/'([^']*)'/);
-                const offendingColumn = columnMatch ? columnMatch[1] : 'una columna';
-
-                showMessage(`🚨 Error de Esquema o Caché: Supabase no encuentra la columna '${offendingColumn}'. Debes ir al 'Table Editor' en Supabase y verificar que la columna se llame EXACTAMENTE '${offendingColumn}' (todo en minúsculas). Luego, desactiva y vuelve a activar la Política RLS.`, 'error');
-            } else {
-                // Éxito al guardar
-                showMessage('¡Solicitud enviada! Redirigiendo para completar el pago de diagnóstico...', 'success');
-                form.reset(); 
-                
-                // REDIRECCIÓN PARA EL PAGO DE DIAGNÓSTICO (Pasarela Ko-fi)
-                // Enlace Ko-fi predefinido, listo para usar.
-                window.location.href = 'https://ko-fi.com/techuit/diagnostico-pago';
-                return; 
-            }
-            
-            submitButton.disabled = false;
-            submitButton.textContent = 'Solicitar Experto y Pagar Diagnóstico';
-        });
-
-    </script>
 </body>
 </html>
