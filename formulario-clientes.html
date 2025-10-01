@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmación de Pago</title>
+    <title>Solicitud de Servicio de Cliente</title>
+    
     <style>
+        /* Estilos basados en el diseño oscuro que ya tienes */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -14,74 +16,198 @@
             line-height: 1.6;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
         .container {
-            max-width: 800px;
-            margin: auto;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
             background-color: #1a1a1a;
             padding: 30px;
             border-radius: 12px;
-            text-align: center;
             box-shadow: 0 5px 20px rgba(0, 123, 255, 0.4);
         }
-        h2 {
-            color: #25D366; /* Un color de éxito o verde vibrante */
-            margin-bottom: 10px;
-            font-size: 28px;
+        .back-button {
+            display: block;
+            text-align: left;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 16px;
         }
         h1 {
             color: #007bff;
-            font-size: 22px;
-            margin-bottom: 25px;
-        }
-        p {
-            font-size: 18px;
+            text-align: center;
             margin-bottom: 30px;
+            font-size: 24px;
         }
-        .button, .home-button {
+        label {
             display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #333;
             color: #fff;
-            padding: 15px 30px;
-            text-decoration: none;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-button {
+            width: 100%;
+            background-color: #25D366; /* Verde de WhatsApp/Éxito para el envío */
+            color: #fff;
+            padding: 15px;
+            border: none;
             border-radius: 50px;
-            margin: 15px auto;
-            width: 80%;
-            max-width: 300px;
+            cursor: pointer;
             font-size: 18px;
             font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            cursor: pointer;
-            border: none;
+            transition: background-color 0.3s, transform 0.3s;
         }
-        .button {
-            background-color: #007bff; /* Botón de acción principal (Pago) */
-        }
-        .button:hover {
-            background-color: #0056b3;
+        .submit-button:hover {
+            background-color: #1FAF59;
             transform: translateY(-2px);
         }
-        .home-button {
-            background-color: #333; /* Botón secundario (Volver a inicio) */
-            font-size: 16px;
+        #responseMessage {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none; 
         }
-        .home-button:hover {
-            background-color: #555;
+        .success {
+            background-color: #4CAF50; 
+            color: white;
+        }
+        .error {
+            background-color: #f44336; 
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>✅ ¡Solicitud Recibida!</h2>
-        <h1>Paso Final: Pago del Diagnóstico</h1>
-        <p>Tu información se ha guardado exitosamente. Ahora, por favor, procede al pago del diagnóstico (tarifa única) para que podamos enviarte al técnico.</p>
+        <a href="terminos-clientes.html" class="back-button">&larr; Volver a Términos</a>
+        <h1>Detalles de tu Solicitud</h1>
         
-        <!-- ENLACE KO-FI CORREGIDO: Lleva al pago directo del diagnóstico. -->
-        <a href="https://ko-fi.com/techuit/diagnostico-pago" class="button">Proceder al Pago del Diagnóstico</a>
+        <form id="clientForm">
+            
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" required> 
 
-        <p style="margin-top: 40px; font-size: 16px;">Una vez completado el pago, te contactaremos.</p>
-        <a href="index.html" class="home-button">Volver al Inicio</a>
+            <label for="telefono">Número de teléfono</label>
+            <input type="tel" id="telefono" name="telefono" required 
+                   placeholder="Ej: +504 9876-5432">
+
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="ubicacion">Ubicación / Ciudad</label>
+            <select id="ubicacion" name="ubicacion" required>
+                <option value="">Selecciona tu ubicación</option>
+                <option value="Tegucigalpa">Tegucigalpa</option>
+                <option value="San Pedro Sula">San Pedro Sula</option>
+                <option value="La Ceiba">La Ceiba</option>
+                <option value="Otra">Otra (Especificar en descripción)</option>
+            </select>
+            
+            <label for="problema">Describe tu problema (Sé lo más detallado posible)</label>
+            <textarea id="problema" name="problema" required></textarea>
+
+            <button type="submit" class="submit-button" id="submitButton">
+                Enviar Solicitud
+            </button>
+        </form>
+
+        <div id="responseMessage"></div>
     </div>
+    
+    <script>
+        const form = document.getElementById('clientForm');
+        const responseMessage = document.getElementById('responseMessage');
+        const submitButton = document.getElementById('submitButton');
+        
+        // --- ¡CRÍTICO! REEMPLAZA CON TU URL DE DESPLIEGUE DE GOOGLE APPS SCRIPT ---
+        const APPS_SCRIPT_URL = 'URL_DE_TU_APPS_SCRIPT_AQUÍ'; 
+        // --------------------------------------------------------------------------
+
+        function showMessage(message, type) {
+            responseMessage.textContent = message;
+            responseMessage.className = type;
+            responseMessage.style.display = 'block';
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (APPS_SCRIPT_URL === 'URL_DE_TU_APPS_SCRIPT_AQUÍ') {
+                showMessage('ERROR: Por favor, actualiza APPS_SCRIPT_URL con tu enlace de despliegue.', 'error');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enviando...';
+            responseMessage.style.display = 'none';
+
+            // 1. Recopilar datos del formulario
+            const formData = new FormData(form);
+            const data = { 
+                sheet: "Clientes" // Indicamos al Apps Script que use la pestaña 'Clientes'
+            };
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            try {
+                // 2. Enviar datos a Google Apps Script
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Necesario para evitar errores CORS en Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // Como usamos 'no-cors', la respuesta no puede ser leída. 
+                // Asumimos éxito si la solicitud no falló a nivel de red.
+                
+                // En un entorno real con Apps Script, se asume el éxito si no hay error de red
+                // y se redirige.
+
+                showMessage('Solicitud enviada correctamente. Redirigiendo...', 'success');
+                
+                // 3. Redirigir a la página de confirmación de pago
+                setTimeout(() => {
+                    window.location.href = 'confirmacion-pago.html';
+                }, 1500); // Dar 1.5 segundos para que el mensaje sea visible
+
+            } catch (error) {
+                // Si hay un error de red (por ejemplo, URL incorrecta)
+                console.error('Error al enviar la solicitud:', error);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Enviar Solicitud';
+                showMessage('Error al enviar la solicitud. Revisa la URL del Apps Script y tu conexión.', 'error');
+            }
+        });
+
+    </script>
 </body>
 </html>

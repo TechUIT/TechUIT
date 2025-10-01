@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Técnicos</title>
+    <title>Solicitud de Servicio de Cliente</title>
+    
     <style>
-        /* Estilos basados en el diseño oscuro y simple que te gusta */
+        /* Estilos basados en el diseño oscuro que ya tienes */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -20,12 +21,12 @@
         }
         .container {
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             margin-top: 20px;
             background-color: #1a1a1a;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.4);
         }
         .back-button {
             display: block;
@@ -38,7 +39,8 @@
         h1 {
             color: #007bff;
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            font-size: 24px;
         }
         label {
             display: block;
@@ -51,7 +53,7 @@
             padding: 12px;
             margin-bottom: 20px;
             border: 1px solid #333;
-            border-radius: 5px;
+            border-radius: 8px;
             box-sizing: border-box;
             background-color: #333;
             color: #fff;
@@ -61,9 +63,13 @@
             border-color: #007bff;
             outline: none;
         }
-        .button {
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-button {
             width: 100%;
-            background-color: #007bff;
+            background-color: #25D366; /* Verde de Éxito/WhatsApp */
             color: #fff;
             padding: 15px;
             border: none;
@@ -71,40 +77,44 @@
             cursor: pointer;
             font-size: 18px;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.3s;
         }
-        .button:hover {
-            background-color: #0056b3;
+        .submit-button:hover {
+            background-color: #1FAF59;
+            transform: translateY(-2px);
         }
         #responseMessage {
             margin-top: 20px;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 8px;
             text-align: center;
             font-weight: bold;
-            display: none; /* Oculto por defecto */
+            display: none; 
         }
         .success {
-            background-color: #4CAF50; /* Verde */
+            background-color: #4CAF50; 
             color: white;
         }
         .error {
-            background-color: #f44336; /* Rojo */
+            background-color: #f44336; 
+            color: white;
+        }
+        .loading {
+            background-color: #007bff;
             color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="terminos-tecnicos.html" class="back-button">&larr; Volver a Términos</a>
-        <h1>Formulario de Aplicación</h1>
+        <a href="terminos-clientes.html" class="back-button">&larr; Volver a Términos</a>
+        <h1>Detalles de tu Solicitud</h1>
         
-        <!-- El ID del formulario es crucial para el JavaScript -->
-        <form id="technicianForm">
+        <form id="clientForm">
+            
             <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" name="nombre" required>
+            <input type="text" id="nombre" name="nombre" required> 
 
-            <!-- NOTA: El campo 'telefono' es crucial para el Apps Script. -->
             <label for="telefono">Número de teléfono</label>
             <input type="tel" id="telefono" name="telefono" required 
                    placeholder="Ej: +504 9876-5432">
@@ -112,95 +122,110 @@
             <label for="email">Correo electrónico</label>
             <input type="email" id="email" name="email" required>
             
-            <label for="especialidad">Especialidad principal</label>
-            <select id="especialidad" name="especialidad" required>
-                <option value="">Selecciona una especialidad</option>
-                <option value="Mantenimiento_PC_Laptop">Mantenimiento de PC/Laptop</option>
-                <option value="Redes_Cableado">Redes y Cableado Estructurado</option>
-                <option value="Software_Sistemas">Instalación/Soporte de Software</option>
-                <option value="Recuperacion_Datos">Recuperación de Datos</option>
-                <option value="Otros_Informatica">Otros (Área Informática)</option>
+            <label for="ubicacion">Ubicación / Ciudad</label>
+            <select id="ubicacion" name="ubicacion" required>
+                <option value="">Selecciona tu ubicación</option>
+                <option value="Tegucigalpa">Tegucigalpa</option>
+                <option value="San Pedro Sula">San Pedro Sula</option>
+                <option value="La Ceiba">La Ceiba</option>
+                <option value="Otra">Otra (Especificar en descripción)</option>
             </select>
             
-            <label for="experiencia">Años de experiencia</label>
-            <input type="number" id="experiencia" name="experiencia" min="1" required>
+            <label for="problema">Describe tu problema (Sé lo más detallado posible)</label>
+            <textarea id="problema" name="problema" required></textarea>
 
-            <!-- No incluimos la subida de archivos aquí, ya que Apps Script requiere un manejo diferente y complejo para archivos grandes. El Google Form original lo manejaría mejor. -->
-            <p style="font-size: 14px; color: #aaa; margin-bottom: 25px;">
-                NOTA: Después de enviar este formulario, te contactaremos para solicitar fotos de tus credenciales y una foto tuya con tu credencial.
-            </p>
-            
-            <button type="submit" class="button" id="submitButton">
-                Enviar Aplicación
+            <button type="submit" class="submit-button" id="submitButton">
+                Enviar Solicitud
             </button>
         </form>
 
         <div id="responseMessage"></div>
     </div>
+    
+    <!-- Carga la librería de Supabase desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // *** 🟢 URL FIJA Y ACTIVA CONFIRMADA POR EL USUARIO 🟢 ***
-        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFVowm625p4rujwvTEGz29IxVLUaocwcMX087maMgvN6ela46PpT7f1KGip0F7yGTgTw/exec';
-
-        const form = document.getElementById('technicianForm');
+        const form = document.getElementById('clientForm');
         const responseMessage = document.getElementById('responseMessage');
         const submitButton = document.getElementById('submitButton');
+        
+        // --- ¡CRÍTICO! REEMPLAZA CON TUS VALORES DE SUPABASE ---
+        const SUPABASE_URL = 'TU_URL_DE_PROYECTO_SUPABASE'; 
+        const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_DE_SUPABASE'; 
+        // --------------------------------------------------------
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // Detiene el envío normal del formulario
-
-            responseMessage.style.display = 'none';
-            responseMessage.className = '';
-            submitButton.disabled = true;
-            submitButton.textContent = 'Enviando...';
-
-            const formData = new FormData(form);
-            const data = {};
-            // Convierte FormData a un objeto plano para el fetch
-            formData.forEach((value, key) => data[key] = value);
-
-            // Usa 'fetch' para enviar los datos al Apps Script
-            fetch(GOOGLE_APPS_SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify(data), // Enviamos los datos como JSON
-                headers: {
-                    'Content-Type': 'application/json' // Indicamos que enviamos JSON
-                }
-            })
-            // El Apps Script devuelve una respuesta JSON (éxito o error)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error de red: Respuesta del servidor no OK.');
-                }
-                return response.json();
-            })
-            .then(result => {
-                if (result.result === 'success') {
-                    // Éxito: El script guardó los datos
-                    showMessage('¡Éxito! Tu aplicación ha sido enviada. Nos pondremos en contacto pronto.', 'success');
-                    form.reset(); // Limpia el formulario
-                } else {
-                    // Error: El script no guardó los datos (revisar Logs de Apps Script)
-                    showMessage('Error al enviar los datos: ' + result.message + '. Revisa los logs de Apps Script.', 'error');
-                }
-            })
-            .catch(error => {
-                // Error de conexión, permisos o JSON.
-                console.error('Error al enviar:', error);
-                // Mensaje detallado para el usuario:
-                showMessage('Error fatal de conexión: ' + error.message + '. Esto casi siempre es un problema de PERMISOS (debe ser Acceso: Cualquier persona) en tu implementación de Google Apps Script.', 'error');
-            })
-            .finally(() => {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Enviar Aplicación';
-            });
-        });
+        // Inicializa el cliente de Supabase
+        let supabase = null;
+        try {
+            if (SUPABASE_URL === 'TU_URL_DE_PROYECTO_SUPABASE' || SUPABASE_ANON_KEY === 'TU_CLAVE_ANON_DE_SUPABASE') {
+                showMessage('ERROR: Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY.', 'error');
+            } else {
+                supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error("Error al inicializar Supabase:", e);
+            showMessage('Error al inicializar la conexión con Supabase. Revisa la consola.', 'error');
+        }
 
         function showMessage(message, type) {
             responseMessage.textContent = message;
             responseMessage.className = type;
             responseMessage.style.display = 'block';
         }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!supabase) {
+                showMessage('Conexión a Supabase no válida. Por favor, revisa tus claves.', 'error');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Guardando Solicitud...';
+            responseMessage.style.display = 'none';
+
+            // 1. Recopilar datos del formulario
+            const formData = new FormData(form);
+            const clientRequest = {
+                nombre: formData.get('nombre'),
+                telefono: formData.get('telefono'),
+                email: formData.get('email'),
+                ubicacion: formData.get('ubicacion'),
+                problema: formData.get('problema'),
+                
+                // Nuevos campos para la base de datos SQL
+                fecha_solicitud: new Date().toISOString(),
+                estado: 'Pendiente', // 'Pendiente', 'Asignado', 'Completado'
+            };
+
+            try {
+                // 2. Insertar datos en la tabla 'client_requests' de Supabase
+                // Debes asegurarte de que esta tabla exista en tu esquema de Supabase
+                const { data, error } = await supabase
+                    .from('client_requests')
+                    .insert([clientRequest]);
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                showMessage('Solicitud guardada correctamente. Redirigiendo al pago...', 'success');
+                
+                // 3. Redirigir a la página de confirmación de pago
+                setTimeout(() => {
+                    window.location.href = 'confirmacion-pago.html';
+                }, 1500); 
+
+            } catch (error) {
+                console.error('Error al guardar la solicitud en Supabase:', error);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Enviar Solicitud';
+                showMessage(`ERROR: No se pudo guardar. ${error.message || 'Error desconocido.'}`, 'error');
+            }
+        });
+
     </script>
 </body>
 </html>
