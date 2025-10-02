@@ -227,14 +227,14 @@
             };
 
             try {
-                // 3. Insertar datos en la tabla 'client_requests'
+                // 3. Insertar datos en la tabla 'clientes' (¡Nombre corregido!)
                 const { error } = await supabaseClient
-                    .from('client_requests') 
+                    .from('clientes') 
                     .insert([data]);
 
                 if (error) {
                     // Mensaje para el error RLS
-                    showMessage('ERROR DE ENVÍO: Permiso denegado. **Deshabilita el RLS** en tu tabla "client_requests".', 'error');
+                    showMessage('ERROR DE ENVÍO: Permiso denegado. **Deshabilita el RLS** en tu tabla "clientes".', 'error');
                     console.error("Supabase Error:", error);
                     return;
                 }
