@@ -154,103 +154,96 @@
         <button type="submit" class="submit-button">Enviar Solicitud</button>
     </form>
     
+    <!-- ¡ELEMENTO PARA CARGADOR Y MENSAJES! -->
     <div id="message-box"></div>
 </div>
 
 <script>
     // **********************************************
-    // ¡CRÍTICO! REEMPLAZA ESTOS VALORES
+    // 1. ¡CRÍTICO! REEMPLAZA ESTOS VALORES
     // **********************************************
-    // Línea 140 (TU_URL_DE_PROYECTO_SUPABASE)
+    // Pega tu URL de Supabase real
     const SUPABASE_URL = 'TU_URL_DE_PROYECTO_SUPABASE'; 
-    // Línea 141 (TU_CLAVE_ANON_DE_SUPABASE)
+    // Pega tu Clave ANÓNIMA de Supabase real
     const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_DE_SUPABASE'; 
     // **********************************************
 
-    // 1. Inicializar el cliente Supabase
-    // Usamos 'supabaseClient' para evitar conflictos con el objeto global.
+    // Variables globales
     let supabaseClient = null;
+    const form = document.getElementById('clientForm');
+    const messageBox = document.getElementById('message-box'); 
+
+    // Función para mostrar el cargador o los errores
+    function showMessage(message, type) {
+        if (messageBox) {
+            messageBox.textContent = message;
+            messageBox.className = type; 
+            messageBox.style.display = 'block';
+        } else {
+            // Este console.error es la razón por la que viste el error anterior.
+            // Si lo ves, es que faltó el <div id="message-box"> en tu HTML.
+            console.error("Error de renderizado: El elemento #message-box no se encuentra en el DOM.");
+        }
+    }
+
+    // Inicialización de Supabase
     try {
-        if (SUPABASE_URL === 'TU_URL_DE_PROYECTO_SUPABASE' || SUPABASE_ANON_KEY === 'TU_CLAVE_ANON_DE_SUPABASE') {
+        if (SUPABASE_URL.includes('TU_URL') || SUPABASE_ANON_KEY.includes('TU_CLAVE')) {
             throw new Error("Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY.");
         }
-        // Inicialización correcta del cliente
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (error) {
         showMessage('Error al inicializar Supabase: ' + error.message, 'error');
-        // Prevenir el envío si la inicialización falla
-        document.getElementById('clientForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-        });
-    }
-
-    const form = document.getElementById('clientForm');
-    const messageBox = document.getElementById('message-box');
-
-    function showMessage(message, type) {
-        messageBox.textContent = message;
-        messageBox.className = type;
-        messageBox.style.display = 'block';
-    }
-
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        if (!supabaseClient) {
-            showMessage("Error: La conexión a la base de datos no está activa.", 'error');
-            return;
+        if (form) {
+             document.getElementById('clientForm').addEventListener('submit', function(e) { e.preventDefault(); });
         }
+    }
 
-        showMessage("Enviando solicitud...", 'loading');
-
-        // 2. Recolectar datos del formulario
-        const formData = new FormData(form);
-        const data = {
-            // Mapeo EXACTO a las columnas de Supabase
-            nombre: formData.get('nombre'),
-            telefono: formData.get('telefono'),
-            direccion: formData.get('direccion'),
-            tipo_servicio: formData.get('tipo_servicio'),
-            problema: formData.get('problema'),
-            // Añadir campos de control de la base de datos
-            estado: 'Pendiente', 
-            fecha_solicitud: new Date().toISOString()
-        };
-
-        try {
-            // 3. Insertar datos en la tabla 'client_requests'
-            const { data: insertedData, error } = await supabaseClient
-                .from('client_requests') 
-                .insert([data])
-                .select(); // Usamos select() para obtener los datos insertados
-
-            if (error) {
-                // El error 400/401 casi siempre es RLS
-                if (error.code === '40001' || error.message.includes('permission denied')) {
-                     showMessage('ERROR DE INSERCIÓN: Permiso denegado por RLS. **Deshabilita el RLS** en la tabla "client_requests" en Supabase.', 'error');
-                } else {
-                     showMessage(`ERROR DE INSERCIÓN: ${error.message}`, 'error');
-                }
-                console.error("Supabase Error:", error);
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!supabaseClient) {
+                showMessage("Error: Conexión inactiva.", 'error');
                 return;
             }
 
-            // 4. Éxito: Redirigir a la confirmación
-            console.log("Datos insertados con éxito:", insertedData);
-            window.location.href = "confirmacion-pago.html";
+            // Muestra el cargador o mensaje de envío
+            showMessage("Enviando solicitud...", 'loading'); 
 
-        } catch (error) {
-            // Error de red (Failed to fetch) o error de promesa general
-            console.error("Error al enviar la solicitud:", error);
-            showMessage('ERROR DE CONEXIÓN: ' + error.message + '. Revisa tu conexión de red o las URL de Supabase.', 'error');
-        } finally {
-            // Restaurar el botón si hubo un error para que puedan volver a intentarlo
-            setTimeout(() => {
-                if (messageBox.className === 'loading') {
-                    messageBox.style.display = 'none';
+            // 2. Recolectar datos del formulario
+            const formData = new FormData(form);
+            const data = {
+                nombre: formData.get('nombre'),
+                telefono: formData.get('telefono'),
+                direccion: formData.get('direccion'), 
+                tipo_servicio: formData.get('tipo_servicio'),
+                problema: formData.get('problema'),
+                estado: 'Pendiente', 
+                fecha_solicitud: new Date().toISOString()
+            };
+
+            try {
+                // 3. Insertar datos en la tabla 'client_requests'
+                const { error } = await supabaseClient
+                    .from('client_requests') 
+                    .insert([data]);
+
+                if (error) {
+                    // ¡Esto es lo que estabiliza el cargador! Si el cargador se pega, es por esto:
+                    showMessage('ERROR DE ENVÍO: Permiso denegado. **Deshabilita el RLS** en tu tabla "client_requests".', 'error');
+                    console.error("Supabase Error:", error);
+                    return;
                 }
-            }, 3000);
-        }
-    });
+
+                // 4. Éxito: Redirigir
+                window.location.href = "confirmacion-pago.html";
+
+            } catch (error) {
+                console.error("Error al enviar la solicitud:", error);
+                showMessage('ERROR DE CONEXIÓN DE RED: No se pudo contactar a Supabase. Revisa tus claves.', 'error');
+            } 
+        });
+    }
 </script>
 </body>
 </html>
