@@ -222,19 +222,20 @@
                 direccion: formData.get('direccion'), 
                 tipo_servicio: formData.get('tipo_servicio'),
                 problema: formData.get('problema'),
-                estado: 'Pendiente', 
+                // ¡CORRECCIÓN CLAVE! Cambiamos 'estado' a 'status' para coincidir con la tabla SQL
+                status: 'Pendiente', 
                 fecha_solicitud: new Date().toISOString()
             };
 
             try {
-                // 3. Insertar datos en la tabla 'clientes' (¡Nombre corregido!)
+                // 3. Insertar datos en la tabla 'clientes' 
                 const { error } = await supabaseClient
                     .from('clientes') 
                     .insert([data]);
 
                 if (error) {
-                    // Mensaje para el error RLS
-                    showMessage('ERROR DE ENVÍO: Permiso denegado. **Deshabilita el RLS** en tu tabla "clientes".', 'error');
+                    // Si el error sigue siendo "Permiso denegado", el problema es un dato inválido o RLS mal desactivado.
+                    showMessage('ERROR DE ENVÍO: Permiso denegado (Aún después de corregir el nombre). Revisa si existe la columna **status**.', 'error');
                     console.error("Supabase Error:", error);
                     return;
                 }
