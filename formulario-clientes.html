@@ -10,161 +10,86 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #000;
+            background-color: #0d1117; /* Fondo oscuro y profesional */
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background-color: #1a1a1a;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
-            margin-top: 30px;
-        }
-        h1 {
-            color: #007bff;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 700;
-        }
-        label {
-            color: #ccc;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 8px;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            background-color: #2a2a2a;
-            color: #fff;
-            transition: border-color 0.3s;
-            box-sizing: border-box;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        .submit-button {
-            width: 100%;
-            background-color: #25D366; /* WhatsApp Green */
-            color: #fff;
-            padding: 15px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            margin-top: 20px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-        }
-        .submit-button:hover {
-            background-color: #1FAF59;
-            transform: translateY(-2px);
-        }
-        .back-button {
-            display: block;
-            text-align: left;
-            margin-bottom: 20px;
-        }
-        .back-button-content {
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 12px;
-            border-radius: 50px;
-            background-color: #333;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-        .back-button-content:hover {
-            background-color: #555;
-        }
-        #message-box {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            display: none;
-        }
-        .error {
-            background-color: #ff3b30;
-            color: #fff;
-        }
-        .loading {
-            background-color: #007bff;
-            color: #fff;
+            padding: 1rem;
         }
     </style>
 </head>
-<body>
+<body class="p-4 sm:p-6">
 
-<div class="container">
-    <div class="back-button">
-        <!-- Volver a la página anterior -->
-        <a href="terminos-clientes.html" class="back-button-content">
-            <span style="font-size: 18px; margin-right: 5px;">&#x2190;</span>
-            Volver
+<div class="w-full max-w-lg bg-[#161b22] p-6 sm:p-8 rounded-xl shadow-2xl mt-4 border border-[#30363d]">
+    
+    <div class="mb-6">
+        <!-- Botón de regreso con mejor estilo -->
+        <a href="terminos-clientes.html" class="inline-flex items-center text-gray-400 hover:text-[#007bff] transition duration-200">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span class="font-semibold text-sm">Volver</span>
         </a>
     </div>
 
-    <h1>Solicitud de Servicio Técnico</h1>
+    <h1 class="text-3xl font-bold text-[#007bff] mb-6 text-center border-b border-[#30363d] pb-3">Solicitud de Servicio</h1>
 
-    <form id="clientForm">
-        <!-- Alineado con la columna 'nombre' -->
-        <label for="nombre">Nombre Completo</label>
-        <input type="text" id="nombre" name="nombre" required placeholder="Ej: Juan Pérez">
-
-        <!-- Alineado con la columna 'telefono' -->
-        <label for="telefono">Número de Teléfono</label>
-        <input type="tel" id="telefono" name="telefono" required placeholder="Ej: +502 5555 5555">
+    <form id="clientForm" class="space-y-4">
         
-        <!-- Alineado con la columna 'direccion' -->
-        <label for="direccion">Dirección / Ubicación (Ciudad, Zona)</label>
-        <input type="text" id="direccion" name="direccion" required placeholder="Ej: Ciudad de Guatemala, Zona 10">
+        <div>
+            <label for="nombre" class="block text-sm font-medium text-gray-300 mb-1">Nombre Completo</label>
+            <input type="text" id="nombre" name="nombre" required placeholder="Ej: Juan Pérez" 
+                   class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-white focus:border-[#007bff] focus:ring focus:ring-[#007bff]/50 transition shadow-inner">
+        </div>
 
-        <!-- Alineado con la columna 'tipo_servicio' -->
-        <label for="tipo_servicio">Tipo de Servicio de Informática</label>
-        <select id="tipo_servicio" name="tipo_servicio" required>
-            <option value="">Selecciona el tipo de servicio</option>
-            <option value="Laptop/PC - Reparación">Laptop/PC - Reparación de Hardware</option>
-            <option value="Laptop/PC - Software">Laptop/PC - Formateo/Software/Virus</option>
-            <option value="Redes/Internet">Redes, WiFi e Internet</option>
-            <option value="Servidores/Cloud">Servidores y Servicios en la Nube</option>
-            <option value="Otros">Otro problema técnico</option>
-        </select>
-
-        <!-- Alineado con la columna 'problema' -->
-        <label for="problema">Describe tu Problema (Sé específico)</label>
-        <textarea id="problema" name="problema" rows="4" required placeholder="Ej: Mi laptop enciende pero la pantalla se queda negra."></textarea>
+        <div>
+            <label for="telefono" class="block text-sm font-medium text-gray-300 mb-1">Número de Teléfono</label>
+            <!-- CORRECCIÓN: Placeholder genérico y serio -->
+            <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 555 123 4567" 
+                   class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-white focus:border-[#007bff] focus:ring focus:ring-[#007bff]/50 transition shadow-inner">
+        </div>
         
-        <button type="submit" class="submit-button">Enviar Solicitud</button>
+        <div>
+            <label for="direccion" class="block text-sm font-medium text-gray-300 mb-1">Dirección / Ubicación</label>
+            <input type="text" id="direccion" name="direccion" required placeholder="Ej: Ciudad, Colonia, Casa #5" 
+                   class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-white focus:border-[#007bff] focus:ring focus:ring-[#007bff]/50 transition shadow-inner">
+        </div>
+
+        <div>
+            <label for="tipo_servicio" class="block text-sm font-medium text-gray-300 mb-1">Tipo de Servicio de Informática</label>
+            <select id="tipo_servicio" name="tipo_servicio" required
+                    class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-white focus:border-[#007bff] focus:ring focus:ring-[#007bff]/50 transition shadow-inner">
+                <option value="">Selecciona el tipo de servicio</option>
+                <option value="Laptop/PC - Reparación">Laptop/PC - Reparación de Hardware</option>
+                <option value="Laptop/PC - Software">Laptop/PC - Formateo/Software/Virus</option>
+                <option value="Redes/Internet">Redes, WiFi e Internet</option>
+                <option value="Servidores/Cloud">Servidores y Servicios en la Nube</option>
+                <option value="Otros">Otro problema técnico</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="problema" class="block text-sm font-medium text-gray-300 mb-1">Describe tu Problema (Sé específico)</label>
+            <textarea id="problema" name="problema" rows="4" required placeholder="Ej: Mi laptop enciende pero la pantalla se queda negra. Le dio SIDA." 
+                      class="w-full p-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-white focus:border-[#007bff] focus:ring focus:ring-[#007bff]/50 transition shadow-inner resize-y"></textarea>
+        </div>
+        
+        <button type="submit" 
+                class="w-full bg-[#25D366] text-white font-extrabold py-3 rounded-full hover:bg-[#1FAF59] transition duration-200 ease-in-out transform hover:scale-[1.01] shadow-lg shadow-[#25D366]/40">
+            Enviar Solicitud
+        </button>
     </form>
     
     <!-- ¡ELEMENTO PARA CARGADOR Y MENSAJES! -->
-    <div id="message-box"></div>
+    <div id="message-box" class="mt-4 p-3 rounded-lg text-center font-semibold" style="display: none;"></div>
 </div>
 
 <script>
     // **********************************************
     // 1. ¡CRÍTICO! ESTOS SON TUS VALORES REALES DE SUPABASE
     // **********************************************
-    // URL de Supabase
+    // URL de Supabase (TU URL REAL)
     const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
-    // Clave ANÓNIMA de Supabase
+    // Clave ANÓNIMA de Supabase (TU CLAVE REAL)
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
     // **********************************************
 
@@ -177,8 +102,17 @@
     function showMessage(message, type) {
         if (messageBox) {
             messageBox.textContent = message;
-            messageBox.className = type; 
             messageBox.style.display = 'block';
+            
+            // Definir estilos basados en el tipo
+            messageBox.classList.remove('bg-red-500', 'bg-blue-500', 'text-white');
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-600', 'text-white');
+            } else if (type === 'loading') {
+                messageBox.classList.add('bg-blue-600', 'text-white');
+            } else {
+                messageBox.style.display = 'none';
+            }
         } else {
             console.error("Error de renderizado: El elemento #message-box no se encuentra en el DOM.");
         }
@@ -195,7 +129,6 @@
         console.log("DEBUG: Cliente Supabase inicializado con éxito.");
     } catch (error) {
         console.error("DEBUG: Fallo al inicializar el cliente:", error.message);
-        // Mostrar error si la conexión no se pudo establecer
         showMessage('Error al inicializar Supabase: ' + error.message, 'error');
         if (form) {
              document.getElementById('clientForm').addEventListener('submit', function(e) { e.preventDefault(); });
@@ -206,12 +139,10 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             if (!supabaseClient) {
-                // Aquí se dispara el error "Conexión inactiva" si la inicialización falló
                 showMessage("Error: Conexión inactiva. Verifica tus claves o la consola.", 'error');
                 return;
             }
 
-            // Muestra el cargador o mensaje de envío
             showMessage("Enviando solicitud...", 'loading'); 
 
             // 2. Recolectar datos del formulario
@@ -222,25 +153,25 @@
                 direccion: formData.get('direccion'), 
                 tipo_servicio: formData.get('tipo_servicio'),
                 problema: formData.get('problema'),
-                // ¡CORRECCIÓN CLAVE! Cambiamos 'estado' a 'status' para coincidir con la tabla SQL
+                // Columna 'status' verificada para Supabase
                 status: 'Pendiente', 
                 fecha_solicitud: new Date().toISOString()
             };
 
             try {
-                // 3. Insertar datos en la tabla 'clientes' 
+                // 3. Insertar datos en la tabla 'clientes'
                 const { error } = await supabaseClient
                     .from('clientes') 
                     .insert([data]);
 
                 if (error) {
-                    // Si el error sigue siendo "Permiso denegado", el problema es un dato inválido o RLS mal desactivado.
-                    showMessage('ERROR DE ENVÍO: Permiso denegado (Aún después de corregir el nombre). Revisa si existe la columna **status**.', 'error');
+                    // El error de RLS ya no debería salir si lo desactivaste. 
+                    showMessage('ERROR DE ENVÍO: ' + (error.message || 'Error desconocido. Revisa el RLS.'), 'error');
                     console.error("Supabase Error:", error);
                     return;
                 }
 
-                // 4. Éxito: Redirigir
+                // 4. Éxito: Redirigir a la nueva página de confirmación simplificada
                 window.location.href = "confirmacion-pago.html";
 
             } catch (error) {
