@@ -3,229 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Servicio de Cliente</title>
-    
+    <title>Registro de Técnico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Estilos basados en el diseño oscuro que ya tienes */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
             background-color: #000;
-            color: #fff;
-            line-height: 1.6;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
+            padding: 20px;
         }
         .container {
             width: 100%;
             max-width: 500px;
-            margin-top: 20px;
             background-color: #1a1a1a;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.4);
-        }
-        .back-button {
-            display: block;
-            text-align: left;
-            margin-bottom: 20px;
-            color: #007bff;
-            text-decoration: none;
-            font-size: 16px;
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
+            margin-top: 30px;
         }
         h1 {
-            color: #007bff;
+            color: #25D366; /* Verde para destacar el registro */
+            border-bottom: 2px solid #25D366;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 24px;
+            font-weight: 700;
         }
         label {
+            color: #ccc;
+            font-weight: 600;
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
-            color: #ccc;
         }
         input, select, textarea {
             width: 100%;
             padding: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border: 1px solid #333;
             border-radius: 8px;
-            box-sizing: border-box;
-            background-color: #333;
+            background-color: #2a2a2a;
             color: #fff;
             transition: border-color 0.3s;
+            box-sizing: border-box;
         }
         input:focus, select:focus, textarea:focus {
-            border-color: #007bff;
+            border-color: #25D366;
             outline: none;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 100px;
         }
         .submit-button {
             width: 100%;
-            background-color: #25D366; /* Verde de Éxito/WhatsApp */
+            background-color: #007bff; /* Azul para destacar el envío */
             color: #fff;
             padding: 15px;
-            border: none;
             border-radius: 50px;
-            cursor: pointer;
-            font-size: 18px;
             font-weight: bold;
-            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-top: 20px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
         }
         .submit-button:hover {
-            background-color: #1FAF59;
+            background-color: #0056b3;
             transform: translateY(-2px);
         }
-        #responseMessage {
+        #message-box {
             margin-top: 20px;
             padding: 15px;
             border-radius: 8px;
             text-align: center;
             font-weight: bold;
-            display: none; 
-        }
-        .success {
-            background-color: #4CAF50; 
-            color: white;
+            display: none;
         }
         .error {
-            background-color: #f44336; 
-            color: white;
+            background-color: #ff3b30;
+            color: #fff;
         }
         .loading {
             background-color: #007bff;
-            color: white;
+            color: #fff;
+        }
+        .success {
+            background-color: #25D366;
+            color: #fff;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="terminos-clientes.html" class="back-button">&larr; Volver a Términos</a>
-        <h1>Detalles de tu Solicitud</h1>
+
+<div class="container">
+    <h1>Registro de Técnico</h1>
+    <p class="text-gray-400 mb-6 text-center">Únete a nuestra red de soporte informático.</p>
+
+    <form id="techForm">
+        <label for="nombre_tecnico">Nombre Completo</label>
+        <input type="text" id="nombre_tecnico" name="nombre_tecnico" required placeholder="Tu nombre legal">
+
+        <label for="cedula">Cédula o Identificación</label>
+        <input type="text" id="cedula" name="cedula" required placeholder="Número de identificación oficial">
+
+        <label for="telefono_tecnico">Número de Teléfono</label>
+        <input type="tel" id="telefono_tecnico" name="telefono_tecnico" required placeholder="Ej: +502 5555 5555">
         
-        <form id="clientForm">
-            
-            <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" name="nombre" required> 
+        <label for="email_tecnico">Correo Electrónico</label>
+        <input type="email" id="email_tecnico" name="email_tecnico" required placeholder="Correo para notificaciones">
 
-            <label for="telefono">Número de teléfono</label>
-            <input type="tel" id="telefono" name="telefono" required 
-                   placeholder="Ej: +504 9876-5432">
-
-            <label for="email">Correo electrónico</label>
-            <input type="email" id="email" name="email" required>
-            
-            <label for="ubicacion">Ubicación / Ciudad</label>
-            <select id="ubicacion" name="ubicacion" required>
-                <option value="">Selecciona tu ubicación</option>
-                <option value="Tegucigalpa">Tegucigalpa</option>
-                <option value="San Pedro Sula">San Pedro Sula</option>
-                <option value="La Ceiba">La Ceiba</option>
-                <option value="Otra">Otra (Especificar en descripción)</option>
-            </select>
-            
-            <label for="problema">Describe tu problema (Sé lo más detallado posible)</label>
-            <textarea id="problema" name="problema" required></textarea>
-
-            <button type="submit" class="submit-button" id="submitButton">
-                Enviar Solicitud
-            </button>
-        </form>
-
-        <div id="responseMessage"></div>
-    </div>
+        <label for="especialidad">Especialidad Principal</label>
+        <select id="especialidad" name="especialidad" required>
+            <option value="">Selecciona tu área</option>
+            <option value="Hardware - PC/Laptop">Hardware (Reparación de PC/Laptop)</option>
+            <option value="Software/Sistemas">Software, Sistemas Operativos y Virus</option>
+            <option value="Redes y Conectividad">Redes, Servidores, y Conectividad</option>
+            <option value="Desarrollo Web/Móvil">Desarrollo Web/Móvil</option>
+            <option value="Otros">General / Múltiples Áreas</option>
+        </select>
+        
+        <label for="experiencia">Años de Experiencia</label>
+        <input type="number" id="experiencia" name="experiencia" min="1" max="50" required placeholder="Mínimo 1 año">
+        
+        <label for="bio">Breve Biografía / Descripción de Servicios</label>
+        <textarea id="bio" name="bio" rows="3" required placeholder="Máximo 200 caracteres sobre tu experiencia y áreas de servicio."></textarea>
+        
+        <button type="submit" class="submit-button">Registrarme como Técnico</button>
+    </form>
     
-    <!-- Carga la librería de Supabase desde CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div id="message-box"></div>
+</div>
 
-    <script>
-        const form = document.getElementById('clientForm');
-        const responseMessage = document.getElementById('responseMessage');
-        const submitButton = document.getElementById('submitButton');
-        
-        // --- ¡CRÍTICO! REEMPLAZA CON TUS VALORES DE SUPABASE ---
-        const SUPABASE_URL = 'TU_URL_DE_PROYECTO_SUPABASE'; 
-        const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_DE_SUPABASE'; 
-        // --------------------------------------------------------
+<script>
+    // **********************************************
+    // ¡CRÍTICO! REEMPLAZA ESTOS VALORES CON TUS CLAVES REALES DE SUPABASE
+    // **********************************************
+    const SUPABASE_URL = 'TU_URL_DE_PROYECTO_SUPABASE'; 
+    const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_DE_SUPABASE'; 
+    // **********************************************
 
-        // Inicializa el cliente de Supabase
-        let supabase = null;
-        try {
-            if (SUPABASE_URL === 'TU_URL_DE_PROYECTO_SUPABASE' || SUPABASE_ANON_KEY === 'TU_CLAVE_ANON_DE_SUPABASE') {
-                showMessage('ERROR: Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY.', 'error');
-            } else {
-                supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
-        } catch (e) {
-            console.error("Error al inicializar Supabase:", e);
-            showMessage('Error al inicializar la conexión con Supabase. Revisa la consola.', 'error');
+    // 1. Inicializar el cliente Supabase
+    let supabaseClient = null;
+    try {
+        if (SUPABASE_URL === 'TU_URL_DE_PROYECTO_SUPABASE' || SUPABASE_ANON_KEY === 'TU_CLAVE_ANON_DE_SUPABASE') {
+            throw new Error("Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY.");
         }
-
-        function showMessage(message, type) {
-            responseMessage.textContent = message;
-            responseMessage.className = type;
-            responseMessage.style.display = 'block';
-        }
-
-        form.addEventListener('submit', async function(e) {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (error) {
+        showMessage('Error al inicializar Supabase: ' + error.message, 'error');
+        // Prevenir el envío si la inicialización falla
+        document.getElementById('techForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            if (!supabase) {
-                showMessage('Conexión a Supabase no válida. Por favor, revisa tus claves.', 'error');
+        });
+    }
+
+    const form = document.getElementById('techForm');
+    const messageBox = document.getElementById('message-box');
+
+    function showMessage(message, type) {
+        messageBox.textContent = message;
+        messageBox.className = type;
+        messageBox.style.display = 'block';
+    }
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (!supabaseClient) {
+            showMessage("Error: La conexión a la base de datos no está activa.", 'error');
+            return;
+        }
+
+        showMessage("Registrando técnico...", 'loading');
+
+        // 2. Recolectar datos del formulario
+        const formData = new FormData(form);
+        const data = {
+            // Mapeo a las columnas de Supabase (Asegúrate que estas columnas existan en tu tabla 'technicians' o 'tecnicos')
+            nombre_tecnico: formData.get('nombre_tecnico'),
+            cedula: formData.get('cedula'),
+            telefono_tecnico: formData.get('telefono_tecnico'),
+            email_tecnico: formData.get('email_tecnico'),
+            especialidad: formData.get('especialidad'),
+            experiencia: parseInt(formData.get('experiencia')),
+            bio: formData.get('bio'),
+            // Campo de control: Poner en 'pending' hasta que sea aprobado
+            status: 'Pending', 
+            registro_fecha: new Date().toISOString()
+        };
+
+        try {
+            // 3. Insertar datos en la tabla 'technicians'
+            const { error } = await supabaseClient
+                .from('technicians') // O usa 'tecnicos' si ese es el nombre de tu tabla
+                .insert([data]);
+
+            if (error) {
+                 showMessage('ERROR DE INSERCIÓN: Permiso denegado por RLS. Revisa la política de inserción en la tabla "technicians".', 'error');
+                console.error("Supabase Error:", error);
                 return;
             }
 
-            submitButton.disabled = true;
-            submitButton.textContent = 'Guardando Solicitud...';
-            responseMessage.style.display = 'none';
+            // 4. Éxito: Mostrar mensaje de confirmación
+            showMessage('Registro exitoso. Serás contactado para validación.', 'success');
+            form.reset(); // Limpiar el formulario
 
-            // 1. Recopilar datos del formulario
-            const formData = new FormData(form);
-            const clientRequest = {
-                nombre: formData.get('nombre'),
-                telefono: formData.get('telefono'),
-                email: formData.get('email'),
-                ubicacion: formData.get('ubicacion'),
-                problema: formData.get('problema'),
-                
-                // Nuevos campos para la base de datos SQL
-                fecha_solicitud: new Date().toISOString(),
-                estado: 'Pendiente', // 'Pendiente', 'Asignado', 'Completado'
-            };
-
-            try {
-                // 2. Insertar datos en la tabla 'client_requests' de Supabase
-                // Debes asegurarte de que esta tabla exista en tu esquema de Supabase
-                const { data, error } = await supabase
-                    .from('client_requests')
-                    .insert([clientRequest]);
-
-                if (error) {
-                    throw new Error(error.message);
+        } catch (error) {
+            // Error de red o error de promesa general
+            console.error("Error al enviar la solicitud:", error);
+            showMessage('ERROR DE CONEXIÓN: ' + error.message + '. Revisa tu conexión de red o las URL de Supabase.', 'error');
+        } finally {
+            // Quitar el mensaje de carga
+            setTimeout(() => {
+                if (messageBox.className === 'loading') {
+                    messageBox.style.display = 'none';
                 }
-
-                showMessage('Solicitud guardada correctamente. Redirigiendo al pago...', 'success');
-                
-                // 3. Redirigir a la página de confirmación de pago
-                setTimeout(() => {
-                    window.location.href = 'confirmacion-pago.html';
-                }, 1500); 
-
-            } catch (error) {
-                console.error('Error al guardar la solicitud en Supabase:', error);
-                submitButton.disabled = false;
-                submitButton.textContent = 'Enviar Solicitud';
-                showMessage(`ERROR: No se pudo guardar. ${error.message || 'Error desconocido.'}`, 'error');
-            }
-        });
-
-    </script>
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>
