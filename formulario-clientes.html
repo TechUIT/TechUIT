@@ -69,7 +69,7 @@
         }
         .submit-button {
             width: 100%;
-            background-color: #25D366; /* Verde de WhatsApp/Éxito para el envío */
+            background-color: #25D366; /* Verde de Éxito/WhatsApp */
             color: #fff;
             padding: 15px;
             border: none;
@@ -99,6 +99,10 @@
             background-color: #f44336; 
             color: white;
         }
+        .loading {
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -118,13 +122,13 @@
             <label for="email">Correo electrónico</label>
             <input type="email" id="email" name="email" required>
             
-            <label for="ubicacion">Ubicación / Ciudad</label>
+            <label for="ubicacion">Ubicación (Ciudad o Zona)</label>
             <select id="ubicacion" name="ubicacion" required>
                 <option value="">Selecciona tu ubicación</option>
                 <option value="Tegucigalpa">Tegucigalpa</option>
                 <option value="San Pedro Sula">San Pedro Sula</option>
                 <option value="La Ceiba">La Ceiba</option>
-                <option value="Otra">Otra (Especificar en descripción)</option>
+                <option value="Otra">Otra Ubicación</option>
             </select>
             
             <label for="problema">Describe tu problema (Sé lo más detallado posible)</label>
@@ -138,14 +142,32 @@
         <div id="responseMessage"></div>
     </div>
     
+    <!-- Carga la librería de Supabase desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
         const form = document.getElementById('clientForm');
         const responseMessage = document.getElementById('responseMessage');
         const submitButton = document.getElementById('submitButton');
         
-        // --- ¡CRÍTICO! REEMPLAZA CON TU URL DE DESPLIEGUE DE GOOGLE APPS SCRIPT ---
-        const APPS_SCRIPT_URL = 'URL_DE_TU_APPS_SCRIPT_AQUÍ'; 
-        // --------------------------------------------------------------------------
+        // --- ¡CRÍTICO! REEMPLAZA CON TUS VALORES DE SUPABASE ---
+        const SUPABASE_URL = 'TU_URL_DE_PROYECTO_SUPABASE'; 
+        const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_DE_SUPABASE'; 
+        // --------------------------------------------------------
+
+        // Inicializa el cliente de Supabase
+        let supabase = null;
+        try {
+            if (SUPABASE_URL === 'TU_URL_DE_PROYECTO_SUPABASE' || SUPABASE_ANON_KEY === 'TU_CLAVE_ANON_DE_SUPABASE') {
+                showMessage('ERROR: Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY.', 'error');
+            } else {
+                // Configura Supabase si las claves son válidas
+                supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error("Error al inicializar Supabase:", e);
+            showMessage('Error al inicializar la conexión con Supabase. Revisa la consola.', 'error');
+        }
 
         function showMessage(message, type) {
             responseMessage.textContent = message;
@@ -156,55 +178,52 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            if (APPS_SCRIPT_URL === 'URL_DE_TU_APPS_SCRIPT_AQUÍ') {
-                showMessage('ERROR: Por favor, actualiza APPS_SCRIPT_URL con tu enlace de despliegue.', 'error');
+            if (!supabase) {
+                showMessage('Conexión a Supabase no válida. Por favor, revisa tus claves.', 'error');
                 return;
             }
 
             submitButton.disabled = true;
-            submitButton.textContent = 'Enviando...';
+            submitButton.textContent = 'Guardando Solicitud...';
             responseMessage.style.display = 'none';
 
             // 1. Recopilar datos del formulario
             const formData = new FormData(form);
-            const data = { 
-                sheet: "Clientes" // Indicamos al Apps Script que use la pestaña 'Clientes'
+            const clientRequest = {
+                nombre: formData.get('nombre'),
+                telefono: formData.get('telefono'),
+                email: formData.get('email'),
+                ubicacion: formData.get('ubicacion'),
+                problema: formData.get('problema'),
+                
+                // Campos internos de la base de datos
+                fecha_solicitud: new Date().toISOString(),
+                estado: 'Pendiente', // 'Pendiente', 'Asignado', 'Completado'
             };
-            
-            for (let [key, value] of formData.entries()) {
-                data[key] = value;
-            }
 
             try {
-                // 2. Enviar datos a Google Apps Script
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Necesario para evitar errores CORS en Google Apps Script
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
+                // 2. Insertar datos en la tabla 'client_requests' de Supabase
+                const { data, error } = await supabase
+                    .from('client_requests')
+                    .insert([clientRequest]);
 
-                // Como usamos 'no-cors', la respuesta no puede ser leída. 
-                // Asumimos éxito si la solicitud no falló a nivel de red.
-                
-                // En un entorno real con Apps Script, se asume el éxito si no hay error de red
-                // y se redirige.
+                if (error) {
+                    throw new Error(error.message);
+                }
 
-                showMessage('Solicitud enviada correctamente. Redirigiendo...', 'success');
+                showMessage('Solicitud guardada correctamente. Redirigiendo al pago...', 'success');
                 
                 // 3. Redirigir a la página de confirmación de pago
                 setTimeout(() => {
+                    // Asegúrate de que 'confirmacion-pago.html' exista
                     window.location.href = 'confirmacion-pago.html';
-                }, 1500); // Dar 1.5 segundos para que el mensaje sea visible
+                }, 1500); 
 
             } catch (error) {
-                // Si hay un error de red (por ejemplo, URL incorrecta)
-                console.error('Error al enviar la solicitud:', error);
+                console.error('Error al guardar la solicitud en Supabase:', error);
                 submitButton.disabled = false;
                 submitButton.textContent = 'Enviar Solicitud';
-                showMessage('Error al enviar la solicitud. Revisa la URL del Apps Script y tu conexión.', 'error');
+                showMessage(`ERROR: No se pudo guardar. ${error.message || 'Error desconocido.'}`, 'error');
             }
         });
 
