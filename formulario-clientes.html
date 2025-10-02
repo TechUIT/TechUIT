@@ -6,7 +6,7 @@
     <title>Solicitud de Servicio de Cliente</title>
     
     <style>
-        /* Estilos basados en el diseño oscuro que ya tienes */
+        /* Estilos basados en el diseño oscuro */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -150,20 +150,16 @@
         const responseMessage = document.getElementById('responseMessage');
         const submitButton = document.getElementById('submitButton');
         
-        // --- ¡CRÍTICO! REEMPLAZA CON TUS VALORES DE SUPABASE ---
-        const SUPABASE_URL = 'TU_URL_DE_PROYECTO_SUPABASE'; 
-        const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_DE_SUPABASE'; 
-        // --------------------------------------------------------
+        // --- CREDENCIALES INTEGRADAS DIRECTAMENTE DE TU INFORMACIÓN ---
+        const SUPABASE_URL = 'https://hsdhsgzyxalhjdihpuvo.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
+        // ----------------------------------------------------------------------------------
 
         // Inicializa el cliente de Supabase
-        let supabase = null;
+        // Corregido: Renombrar la variable local para usar correctamente la función global createClient
+        let supabaseClient = null;
         try {
-            if (SUPABASE_URL === 'TU_URL_DE_PROYECTO_SUPABASE' || SUPABASE_ANON_KEY === 'TU_CLAVE_ANON_DE_SUPABASE') {
-                showMessage('ERROR: Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY.', 'error');
-            } else {
-                // Configura Supabase si las claves son válidas
-                supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } catch (e) {
             console.error("Error al inicializar Supabase:", e);
             showMessage('Error al inicializar la conexión con Supabase. Revisa la consola.', 'error');
@@ -178,8 +174,8 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            if (!supabase) {
-                showMessage('Conexión a Supabase no válida. Por favor, revisa tus claves.', 'error');
+            if (!supabaseClient) {
+                showMessage('Error: El cliente Supabase no se pudo inicializar.', 'error');
                 return;
             }
 
@@ -203,7 +199,7 @@
 
             try {
                 // 2. Insertar datos en la tabla 'client_requests' de Supabase
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('client_requests')
                     .insert([clientRequest]);
 
@@ -215,7 +211,6 @@
                 
                 // 3. Redirigir a la página de confirmación de pago
                 setTimeout(() => {
-                    // Asegúrate de que 'confirmacion-pago.html' exista
                     window.location.href = 'confirmacion-pago.html';
                 }, 1500); 
 
@@ -223,7 +218,7 @@
                 console.error('Error al guardar la solicitud en Supabase:', error);
                 submitButton.disabled = false;
                 submitButton.textContent = 'Enviar Solicitud';
-                showMessage(`ERROR: No se pudo guardar. ${error.message || 'Error desconocido.'}`, 'error');
+                showMessage(`ERROR DE INSERCIÓN: ${error.message || 'Error desconocido.'}. Revisa permisos de tabla.`, 'error');
             }
         });
 
