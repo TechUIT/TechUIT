@@ -1,71 +1,110 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="manifest" href="manifest.json">
-    <script src="service-worker.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pasos para Usar el Servicio - Clientes</title>
+    <!-- Incluir Tailwind CSS para facilitar la estética de app-móvil -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Estilos base consistentes con clientes.html y panel.html */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #000;
+            padding: 0;
+            background-color: #000; /* Fondo negro elegante */
             color: #fff;
             line-height: 1.6;
+            min-height: 100vh;
         }
-        .container {
+        /* Custom styles for consistency */
+        .app-container {
             max-width: 800px;
-            margin: auto;
-            background-color: #1a1a1a;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
+            margin: 20px auto;
+            background-color: #1a1a1a; /* Oscuro consistente */
+            padding: 30px 20px;
+            border-radius: 15px; /* Bordes redondeados consistentes */
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2); /* Sombra azul para acento */
         }
-        .back-button {
-            display: block;
-            text-align: left;
-            margin-bottom: 20px;
-            color: #007bff;
-            text-decoration: none;
-            font-size: 16px;
-        }
-        h1, h2 {
-            color: #007bff;
-        }
-        .button, .whatsapp-button {
-            display: block;
-            background-color: #007bff;
-            color: #fff;
-            padding: 15px 30px;
-            text-decoration: none;
+        
+        /* Estilo del botón de Volver (píldora, como en clientes.html) */
+        .back-button-content {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 15px;
             border-radius: 50px;
-            margin: 15px auto;
-            width: 80%;
-            max-width: 300px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .back-button-content:hover {
+            background-color: #555;
+        }
+        
+        h1, h2 {
+            color: #007bff; /* Azul primario */
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        /* Estilo para los pasos (listado) */
+        .step-list {
+            text-align: left;
+            margin: 25px 0;
+            padding: 0 10px;
+        }
+        .step-list p {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 15px;
+            border-left: 5px solid #007bff;
+        }
+        .step-list p strong {
+            color: #fff;
+        }
+
+        /* ESTILOS DE BOTÓN DINÁMICOS Y ATRACTIVOS */
+        .action-button {
+            width: 100%;
+            padding: 15px;
+            /* Aplicamos un gradiente sutil para el "pop" visual */
+            background: linear-gradient(145deg, #007bff, #0056b3);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
             font-size: 18px;
             font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.3s ease;
             cursor: pointer;
-            border: none;
+            transition: all 0.3s ease;
+            /* Sombra más profunda para el efecto 3D/App */
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+            max-width: 350px;
+            margin: 15px auto;
+            display: block; /* Asegura que se centre correctamente */
+            text-align: center;
         }
-        .button:hover {
-            background-color: #0056b3;
+        .action-button:hover {
+            /* Invertir gradiente para un efecto de "presión" visual */
+            background: linear-gradient(145deg, #0056b3, #007bff);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.7);
         }
+
+        /* CORRECCIÓN FINAL CLAVE: Estilo del botón de WhatsApp con color GRIS/PLATEADO serio */
         .whatsapp-button {
-            background-color: #25D366;
-            color: white;
-            font-size: 16px;
+            /* Gradiente GRIS/PLATA (Serio y complementario al azul) */
+            background: linear-gradient(145deg, #707070, #505050); 
+            box-shadow: 0 6px 20px rgba(100, 100, 100, 0.6);
         }
         .whatsapp-button:hover {
-            background-color: #128C7E;
+            background: linear-gradient(145deg, #505050, #707070);
+            box-shadow: 0 8px 25px rgba(100, 100, 100, 0.8);
         }
-        p {
-            font-size: 16px;
-            margin: 10px 0;
-        }
+        
         .terms-link {
             font-size: 12px;
             text-align: center;
@@ -76,33 +115,58 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container">
+        
+        <!-- Botón Volver Consistente -->
         <a href="index.html" class="back-button" style="text-decoration: none;">
-            <div style="display: flex; align-items: center; padding: 10px; border-radius: 50px; background-color: #333; color: white; width: 150px;">
+            <div class="back-button-content">
                 <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-                <span style="font-size: 16px; font-weight: bold;">Inicio</span>
+                <span style="font-size: 16px;">Inicio</span>
             </div>
         </a>
-        <h1>Pasos para Usar el Servicio</h1>
-        <p>Al continuar, aceptas los siguientes términos de servicio con TechUIT.</p>
         
-        <h2>Cómo Funciona</h2>
-        <p>1. **Solicitud de Servicio:** Describe tu problema en nuestra plataforma y te asignaremos a un técnico verificado y disponible en tu zona.</p>
-        <p>2. **Pago del Diagnóstico:** Para asegurar la visita del técnico, se realiza un pago único por el diagnóstico. El pago se realiza de forma segura a través de nuestra plataforma con Ko-fi.</p>
-        <p>3. **Diagnóstico y Presupuesto:** El técnico te visitará para diagnosticar el problema y te proporcionará un presupuesto para la reparación.</p>
-        <p>4. **Reparación y Pago:** Si aceptas el presupuesto, el técnico realizará el trabajo. El pago por la reparación se acuerda y se realiza directamente al técnico.</p>
-        <h2>Seguridad y Confianza</h2>
-        <p>Todos nuestros técnicos han pasado por un proceso de verificación exhaustivo para garantizar tu seguridad y la calidad del servicio.</p>
+        <h1>Pasos y Términos de Servicio</h1>
+        <p class="text-center text-gray-400 mb-6">
+            Al continuar, aceptas el flujo y los siguientes términos de servicio con TechUIT.
+        </p>
+
+        <h2>Cómo Funciona (4 Pasos)</h2>
+        <div class="step-list">
+            <p>
+                <strong>1. Solicitud de Servicio:</strong> Describe tu problema en el formulario y te asignaremos a un técnico verificado y disponible en tu zona.
+            </p>
+            <p>
+                <strong>2. Pago del Diagnóstico:</strong> Para asegurar la visita del técnico, se realiza un pago único por el diagnóstico. El pago se realiza de forma segura a través de nuestra plataforma con Ko-fi.
+            </p>
+            <p>
+                <strong>3. Diagnóstico y Presupuesto:</strong> El técnico te visitará en la dirección proporcionada para diagnosticar el problema y te entregará un presupuesto para la reparación total.
+            </p>
+            <p>
+                <strong>4. Reparación y Pago Final:</strong> Si aceptas el presupuesto, el técnico realizará el trabajo. El pago por la reparación se acuerda y se realiza directamente al técnico.
+            </p>
+        </div>
+
+        <h2 class="mt-8">Seguridad y Confianza</h2>
+        <p class="text-center text-gray-300">
+            Todos nuestros técnicos han pasado por un proceso de verificación exhaustivo para garantizar tu seguridad y la calidad del servicio.
+        </p>
 
         <span class="terms-link">
-            Al hacer clic, también confirmas que has leído y aceptado nuestros 
+            Al hacer clic en el botón de abajo, también confirmas que has leído y aceptado nuestros 
             <a href="terminos-legales.html" style="color: #007bff; text-decoration: underline;">Términos de Servicio</a> y nuestra Política de Privacidad.
         </span>
 
-        <a href="formulario-clientes.html" class="button">Acepto los términos y quiero un experto</a>
-        
-        <p style="margin-top: 20px;">¿Tienes alguna pregunta?</p>
-        <a href="https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20he%20leído%20los%20términos%20y%20tengo%20una%20pregunta%20sobre%20el%20diagnóstico." class="button whatsapp-button">Contáctanos </a>
+        <!-- Botones centrados y con estilo de app -->
+        <div class="flex flex-col items-center">
+            <a href="formulario-clientes.html" class="action-button">
+                Acepto los términos y quiero un experto
+            </a>
+            
+            <p style="margin-top: 20px;">¿Tienes alguna pregunta?</p>
+            <a href="https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20he%20leído%20los%20términos%20y%20tengo%20una%20pregunta%20sobre%20el%20diagnóstico." class="action-button whatsapp-button">
+                Contáctanos por WhatsApp
+            </a>
+        </div>
     </div>
 </body>
 </html>

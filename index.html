@@ -1,113 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta property="og:title" content="TechUIT | Servicios Técnicos a Domicilio">
-<meta property="og:description" content="Tu solución para problemas técnicos.">
-<meta property="og:image" content="https://techuit.github.io/TechUIT/Logo.png">
-<meta property="og:url" content="https://techuit.github.io/TechUIT/index.html">
-<meta property="og:type" content="website">
-
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="TechUIT | Servicios Técnicos a Domicilio">
-<meta name="twitter:description" content="Tu solución para problemas técnicos.">
-<meta name="twitter:image" content="https://techuit.github.io/TechUIT/Logo.png">
-<link rel="manifest" href="manifest.json">
-<script src="service-worker.js"></script>
+    <!-- Metadatos y scripts -->
+    <link rel="manifest" href="manifest.json">
+    <script src="service-worker.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechUIT</title>
+    <title>TechUIT | Plataforma de Expertos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* CSS para un diseño 'Luxury' */
+        /* --- ESQUEMA VISUAL UNIFICADO --- */
+        :root {
+            --color-primary: #007bff; /* Azul de énfasis */
+            --color-dark-bg: #0d1117; /* Fondo oscuro principal (similar a tu fondo negro) */
+            --color-card-bg: #161b22; /* Fondo de contenedor (similar a tu gris oscuro) */
+            --color-text-light: #f3f4f6;
+            --color-border: #30363d; /* Borde sutil */
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #000; /* Fondo negro elegante */
-            color: #fff; /* Texto blanco para contraste */
+            padding: 20px; 
+            background-color: var(--color-dark-bg); 
+            color: var(--color-text-light);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            align-items: center; 
         }
-        .app-container {
-            width: 90%;
-            max-width: 400px;
-            background-color: #1a1a1a; /* Un gris oscuro para el contenedor */
-            padding: 25px;
-            box-sizing: border-box;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            border-radius: 15px;
-            border: 1px solid #333; /* Borde sutil */
-        }
-        .logo-image {
-            width: 150px;
-            height: auto;
-            margin-bottom: 25px;
-        }
-        .app-description {
-            font-size: 16px;
-            color: #ccc;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-        .section-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #007bff; /* Azul de tu logo */
-            margin-bottom: 20px;
-        }
-        .main-button {
-            display: inline-block;
-            background-color: #007bff;
-            color: #fff;
-            padding: 15px 30px;
-            border-radius: 50px; /* Botones más suaves y modernos */
-            font-size: 18px;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
-            font-weight: bold;
-        }
-        .main-button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-        .spacer {
-            height: 30px;
-        }
-        .secondary-button {
-            display: inline-block;
-            background-color: #333;
-            color: #fff;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 16px;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .secondary-button:hover {
-            background-color: #555;
+
+        .main-card {
+            /* Estilo de la tarjeta principal (App feel) */
+            max-width: 440px;
+            width: 100%;
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            padding: 3rem 1.5rem; /* Espaciado interno */
+            border-radius: 1.5rem; /* Bordes muy redondeados */
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15); /* Sombra elegante */
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <img src="Logo.png" alt="Logo de TechUIT" class="logo-image">
+
+<div class="main-card">
+    <div class="text-center mb-10">
+        <!-- RUTA DEFINITIVA: Usando 'Logo.png' según tu confirmación -->
+        <img 
+            src="Logo.png" 
+            alt="Logo de TechUIT" 
+            class="h-16 w-auto mx-auto mb-4 object-contain">
         
-        <p class="app-description">Conectamos a los mejores técnicos verificados con clientes como tú. Describe tu problema y buscaremos a un experto.</p>
-        <h2 class="section-title">¿Necesitas un técnico?</h2>
-        <a href="terminos-clientes.html" class="main-button">
-            Buscar un experto
-        </a>
-        
-        <div class="spacer"></div>
-        <h2 class="section-title">¿Eres un técnico?</h2>
-        <a href="terminos-tecnicos.html" class="secondary-button">
-            Únete a nuestra red
-        </a>
+        <h1 class="text-3xl font-extrabold mb-1" style="color: var(--color-primary);">TechUIT</h1>
+        <p class="text-md text-gray-300 font-light">Conecta con tu experto informático.</p>
     </div>
+
+    <h2 class="text-2xl font-bold mb-6 text-center text-white border-b border-[--color-border] pb-3">¿Cómo deseas ingresar?</h2>
+    
+    <div class="space-y-6">
+        <!-- SECCIÓN CLIENTE -->
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-[--color-primary] transition duration-300">
+            <h3 class="text-lg font-semibold text-white mb-2 flex items-center space-x-2">
+                <!-- Icono de Usuario -->
+                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <span>Soy un Cliente</span>
+            </h3>
+            <p class="text-gray-400 text-sm mb-4">
+                Necesito un servicio de reparación, diagnóstico de PC, red o software.
+            </p>
+            <a href="terminos-clientes.html" 
+                class="w-full bg-[--color-primary] text-white font-extrabold py-3 rounded-full hover:bg-[#005bb5] transition duration-200 ease-in-out transform hover:scale-[1.01] shadow-lg shadow-[--color-primary]/40 block text-center">
+                Buscar un Experto Ahora
+            </a>
+        </div>
+
+        <!-- SECCIÓN TÉCNICO -->
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-green-500 transition duration-300">
+            <h3 class="text-lg font-semibold text-white mb-2 flex items-center space-x-2">
+                <!-- Icono de Herramienta/Técnico -->
+                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Soy un Técnico</span>
+            </h3>
+            <p class="text-gray-400 text-sm mb-4">
+                Quiero unirme a la red de expertos y recibir solicitudes de servicio.
+            </p>
+            <a href="formulario-tecnicos.html" 
+                class="w-full bg-green-600 text-white font-extrabold py-3 rounded-full hover:bg-green-700 transition duration-200 ease-in-out transform hover:scale-[1.01] shadow-lg shadow-green-600/40 block text-center">
+                Registrarme como Experto
+            </a>
+        </div>
+    </div>
+    
+    <p class="text-xs text-gray-500 text-center mt-8">
+        <a href="terminos-legales.html" class="text-gray-500 hover:text-white transition duration-200 underline">Términos Legales y Privacidad</a>
+    </p>
+</div>
+
 </body>
 </html>

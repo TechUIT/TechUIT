@@ -1,34 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<link rel="manifest" href="manifest.json">
-<script src="service-worker.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Términos y Condiciones - Técnicos</title>
+    <!-- Incluir Tailwind CSS para facilitar la estética de app-móvil -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Estilos base consistentes con el diseño oscuro de la App */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #000;
+            padding: 0; 
+            background-color: #000; /* Fondo negro elegante */
             color: #fff;
             line-height: 1.6;
+            text-align: justify;
+            min-height: 100vh;
         }
-        .container {
+        /* La clase container se convierte en el contenedor principal con estilo de App Card */
+        .app-container {
             max-width: 800px;
-            margin: auto;
-            background-color: #1a1a1a;
-            padding: 20px;
-            border-radius: 10px;
+            margin: 20px auto;
+            background-color: #1a1a1a; /* Oscuro consistente */
+            padding: 30px 20px;
+            border-radius: 15px; /* Bordes redondeados consistentes */
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2); /* Sombra azul para acento */
+        }
+        
+        h1, h2 {
+            color: #007bff; /* Azul primario para títulos */
+            font-weight: 700;
+            margin-top: 25px;
             text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.2);
         }
-        .back-button {
-            display: block;
-            text-align: left;
-            margin-bottom: 20px;
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
         }
+        h2 {
+            font-size: 1.5rem;
+            border-bottom: 1px solid #2a2a2a; 
+            padding-bottom: 5px;
+            text-align: left; /* Títulos de sección alineados a la izquierda */
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: #ccc;
+            text-align: justify;
+        }
+        
+        /* Estilo del botón de Volver (píldora consistente) */
         .back-button-content {
             display: inline-flex;
             align-items: center;
@@ -43,72 +67,114 @@
         .back-button-content:hover {
             background-color: #555;
         }
-        h1, h2 {
-            color: #007bff;
-            margin-top: 20px;
+
+        /* Estilo para los puntos importantes dentro del texto */
+        .process-item {
+            background-color: #2a2a2a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #007bff;
         }
-        p {
-            text-align: justify;
-        }
-        .button {
-            display: inline-block;
-            background-color: #25D366; /* WhatsApp Green */
+
+        /* ESTILOS DE BOTÓN DINÁMICOS Y ATRACTIVOS */
+        .action-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, #007bff, #0056b3);
             color: #fff;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 50px;
-            margin-top: 20px;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            cursor: pointer;
             border: none;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+            max-width: 350px;
+            margin: 15px auto;
+            display: block; 
+            text-align: center;
         }
-        .button:hover {
-            background-color: #1FAF59;
+        .action-button:hover {
+            background: linear-gradient(145deg, #0056b3, #007bff);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.7);
         }
+        
+        /* Estilo del botón de WhatsApp (Gris/Plata profesional) */
+        .whatsapp-button {
+            background: linear-gradient(145deg, #707070, #505050); 
+            box-shadow: 0 6px 20px rgba(100, 100, 100, 0.6);
+            margin-top: 5px; /* Ajuste de margen */
+        }
+        .whatsapp-button:hover {
+            background: linear-gradient(145deg, #505050, #707070);
+            box-shadow: 0 8px 25px rgba(100, 100, 100, 0.8);
+        }
+        
         .terms-link {
             display: block;
-            font-size: 14px;
-            margin-top: 15px;
+            font-size: 12px;
+            margin-top: 20px;
             color: #aaa;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="back-button">
-        <a href="index.html" class="back-button-content">
+<div class="app-container">
+    
+    <!-- Botón Volver Consistente -->
+    <a href="index.html" class="back-button" style="text-decoration: none;">
+        <div class="back-button-content">
             <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
             <span style="font-size: 16px;">Inicio</span>
-        </a>
-    </div>
+        </div>
+    </a>
 
     <h1>Términos para Técnicos</h1>
-    <p style="font-size: 18px; color: #ccc;">Proceso y Recompensas al ser parte de TechUIT.</p>
+    <p class="text-center text-gray-400">Proceso, Recompensas y Requisitos para ser un profesional TechUIT.</p>
 
-    <h2>Verificación de Calidad (Obligatoria)</h2>
-    <p>Todos nuestros técnicos deben pasar por un proceso de verificación que incluye: validación de identidad (DPI/Cédula), verificación de credenciales y envío de una foto de rostro con documento. Este paso es fundamental para la confianza de nuestros clientes.</p>
+    <h2 class="mt-8">1. Verificación de Calidad (Obligatoria)</h2>
+    <p>Todos nuestros técnicos deben pasar por un riguroso proceso de verificación. Este proceso incluye: validación de identidad (DPI/Cédula), verificación de credenciales y envío de una foto de rostro con documento. Este paso es fundamental para la seguridad y la confianza de nuestros clientes.</p>
 
-    <h2>Proceso y Ganancias</h2>
-    <p>1. **Ingreso por Diagnóstico:** Por cada servicio, recibirás una parte del pago de diagnóstico, que es tu compensación por el tiempo y desplazamiento. Este pago es procesado por la plataforma.</p>
-    <p>2. **Manejo de Pagos:** Todos los pagos de diagnóstico se realizan a través de la plataforma. Una vez confirmado el pago del cliente y el servicio, te enviaremos tu parte directamente. Esto garantiza tu pago y te protege de clientes que no se presentan.</p>
-    <p>3. **Evitar Pagos Externos:** No se aceptarán pagos en efectivo para el diagnóstico. Cualquier intento de confabular con un cliente para saltarse la plataforma resultará en la eliminación inmediata y permanente de nuestra red.</p>
-    <p>4. **Pago por Reparación:** La ganancia por la reparación se acuerda directamente entre tú y el cliente. La plataforma no participa en este proceso.</p>
-    <p>5. **Transparencia:** Te pedimos que mantengas los precios de reparación justos y transparentes con el cliente. La confianza es la base de nuestra red.</p>
+    <h2 class="mt-8">2. Proceso de Servicio y Ganancias</h2>
+    
+    <div class="process-item">
+        <strong>1. Ingreso por Diagnóstico:</strong> Por cada servicio solicitado, recibirás una parte del pago de diagnóstico, que es tu compensación por el tiempo y desplazamiento. Este pago es procesado y garantizado por la plataforma.
+    </div>
+    
+    <div class="process-item">
+        <strong>2. Manejo de Pagos:</strong> Todos los pagos de diagnóstico se realizan a través de la plataforma. Una vez confirmado el pago del cliente y finalizado el diagnóstico, te enviaremos tu parte directamente. Esto asegura tu pago y te protege.
+    </div>
+    
+    <div class="process-item">
+        <strong>3. Evitar Pagos Externos:</strong> **No se aceptarán pagos en efectivo para el diagnóstico.** Cualquier intento de confabular con un cliente para saltarse la plataforma resultará en la eliminación inmediata y permanente de nuestra red.
+    </div>
+    
+    <div class="process-item">
+        <strong>4. Pago por Reparación:</strong> La ganancia por la reparación se acuerda directamente entre tú y el cliente. La plataforma no participa ni toma comisión de este pago final.
+    </div>
+    
+    <div class="process-item">
+        <strong>5. Transparencia:</strong> Te pedimos que mantengas los precios de reparación justos y transparentes con el cliente. La confianza mutua es la base de nuestra red de profesionales.
+    </div>
     
     <span class="terms-link">
-        Al hacer clic, también confirmas que has leído y aceptado nuestros
+        Al hacer clic en el botón, también confirmas que has leído y aceptado nuestros
         <a href="terminos-legales.html" style="color: #007bff; text-decoration: underline;">Términos de Servicio completos</a> y nuestra Política de Privacidad.
     </span>
 
-    <!-- Aquí cambiamos el enlace al nuevo formulario HTML -->
-    <a href="formulario-tecnicos.html" class="button">Acepto los términos y quiero registrarme</a>
-    
-    <p style="margin-top: 30px;">¿Necesitas ayuda con el registro?</p>
-    <!-- Asegúrate de reemplazar TU_NUMERO_DE_TELEFONO_AQUÍ con tu número -->
-    <a href="https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20el%20registro%20de%20técnicos." class="button" style="background-color: #333; box-shadow: none;">Contáctanos por WhatsApp</a>
+    <!-- Botones centrados y con estilo de app -->
+    <div class="flex flex-col items-center">
+        <!-- Enlace al futuro formulario de registro de técnicos -->
+        <a href="formulario-tecnicos.html" class="action-button">Acepto los términos y quiero registrarme</a>
+        
+        <p style="margin-top: 20px;">¿Necesitas ayuda con el proceso?</p>
+        <a href="https://wa.me/TU_NUMERO_DE_TELEFONO_AQUÍ?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20el%20registro%20de%20técnicos." class="action-button whatsapp-button">
+            Contáctanos por WhatsApp
+        </a>
+    </div>
 
 </div>
 </body>

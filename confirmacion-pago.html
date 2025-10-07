@@ -5,40 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitud Recibida</title>
     <style>
+        /* --- APP SHELL CSS (Para forzar apariencia de App móvil) --- */
+        :root {
+            --color-primary: #007bff; /* Azul de énfasis */
+            --color-dark-bg: #111827; /* Fondo oscuro exterior */
+            --color-card-bg: #1f2937; /* Fondo de contenedor/card */
+            --color-text-light: #f3f4f6;
+            --color-success: #25D366; /* Verde de éxito */
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            /* ESTILOS DE APP SHELL */
+            font-family: 'Inter', sans-serif; /* Fuente consistente */
             margin: 0;
-            padding: 20px;
-            background-color: #000;
-            color: #fff;
+            padding: 0; 
+            background-color: var(--color-dark-bg);
+            color: var(--color-text-light);
             line-height: 1.6;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; 
+            align-items: flex-start; /* Alineación al inicio de la pantalla (App look) */
             min-height: 100vh;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background-color: #1a1a1a;
-            padding: 30px;
-            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.4);
         }
+
+        .container {
+            /* ESTILOS DE APP SHELL */
+            width: 100%;
+            max-width: 420px; /* Límite de ancho para vista móvil */
+            padding: 30px 20px; /* Padding interno y menos ancho por ser móvil */
+            box-sizing: border-box;
+            background-color: var(--color-card-bg); 
+            min-height: 100vh; /* Ocupa todo el alto */
+            box-shadow: none; /* Quitamos sombras de página web */
+            margin: 0;
+            border-radius: 0; /* Sin bordes redondeados en los bordes de la pantalla */
+        }
+        /* --- FIN APP SHELL CSS --- */
+
         h2 {
-            color: #25D366; /* Verde de éxito */
+            color: var(--color-success); /* Verde de éxito */
             margin-bottom: 10px;
             font-size: 28px;
         }
         h1 {
-            color: #007bff;
+            color: var(--color-primary);
             font-size: 22px;
             margin-bottom: 25px;
         }
         p {
             font-size: 18px;
             margin-bottom: 30px;
+            text-align: center;
         }
         .button, .home-button {
             display: block;
@@ -47,27 +65,28 @@
             text-decoration: none;
             border-radius: 50px;
             margin: 15px auto;
-            width: 80%;
+            width: 100%; /* Ajuste al 100% del contenedor móvil */
             max-width: 300px;
             font-size: 18px;
             font-weight: bold;
             transition: background-color 0.3s ease, transform 0.3s ease;
             cursor: pointer;
             border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
         }
         .button {
-            background-color: #007bff; /* Botón de acción principal (Pago) */
+            background-color: var(--color-primary); /* Botón de acción principal (Pago) */
         }
         .button:hover {
             background-color: #0056b3;
             transform: translateY(-2px);
         }
         .home-button {
-            background-color: #333; /* Botón secundario (Volver a inicio) */
+            background-color: #374151; /* Color oscuro secundario */
             font-size: 16px;
         }
         .home-button:hover {
-            background-color: #555;
+            background-color: #4b5563;
         }
     </style>
 </head>

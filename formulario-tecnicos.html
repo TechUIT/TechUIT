@@ -3,224 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Técnico</title>
+    <title>Registro de Técnico Profesional (Storage)</title>
+    <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de Supabase SDK para la base de datos y Storage -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        /* --- ESTILOS CLONADOS DEL FORMULARIO DE CLIENTES --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
         body {
             font-family: 'Inter', sans-serif;
             background-color: #000;
+            color: #fff;
+            padding: 20px 10px;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
             min-height: 100vh;
-            padding: 20px;
         }
-        .container {
+        .form-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
             background-color: #1a1a1a;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.3);
-            margin-top: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2);
         }
         h1 {
-            color: #25D366; /* Verde para destacar el registro */
-            border-bottom: 2px solid #25D366;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            text-align: center;
+            color: #007bff;
+            font-size: 1.8rem;
             font-weight: 700;
+            margin-bottom: 5px;
+            text-align: center;
         }
-        label {
+        .subtitle {
             color: #ccc;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 8px;
+            margin-bottom: 25px;
+            text-align: center;
         }
-        input, select, textarea {
+        .input-field {
             width: 100%;
             padding: 12px;
+            margin-top: 5px;
             margin-bottom: 15px;
-            border: 1px solid #333;
-            border-radius: 8px;
             background-color: #2a2a2a;
+            border: 1px solid #374151;
+            border-radius: 8px;
             color: #fff;
-            transition: border-color 0.3s;
             box-sizing: border-box;
+            transition: border-color 0.3s;
         }
-        input:focus, select:focus, textarea:focus {
-            border-color: #25D366;
+        .input-field:focus {
+            border-color: #007bff;
             outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
         }
+        /* Estilo para input[type="file"] */
+        input[type="file"].input-field {
+            padding-top: 9px;
+            padding-bottom: 9px;
+        }
+
         .submit-button {
             width: 100%;
-            background-color: #007bff; /* Azul para destacar el envío */
-            color: #fff;
             padding: 15px;
+            background: linear-gradient(145deg, #007bff, #0056b3);
+            color: #fff;
+            border: none;
             border-radius: 50px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
             margin-top: 20px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
         }
         .submit-button:hover {
-            background-color: #0056b3;
+            background: linear-gradient(145deg, #0056b3, #007bff);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.7);
+        }
+        .submit-button:disabled {
+            background: #505050;
+            cursor: not-allowed;
+            box-shadow: none;
         }
         #message-box {
-            margin-top: 20px;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
+            margin-top: 20px;
             text-align: center;
             font-weight: bold;
             display: none;
         }
-        .error {
-            background-color: #ff3b30;
-            color: #fff;
-        }
-        .loading {
-            background-color: #007bff;
-            color: #fff;
-        }
-        .success {
-            background-color: #25D366;
-            color: #fff;
-        }
+        .success { background-color: #16a34a; color: #fff; }
+        .error { background-color: #dc2626; color: #fff; }
+        .loading { background-color: #f59e0b; color: #fff; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Registro de Técnico</h1>
-    <p class="text-gray-400 mb-6 text-center">Únete a nuestra red de soporte informático.</p>
+<div class="form-container">
+    <h1>Registro TechUIT Profesional</h1>
+    <p class="subtitle">Completa tus datos y adjunta tu documentación. Las fotos se guardarán en Supabase Storage.</p>
 
     <form id="techForm">
-        <label for="nombre_tecnico">Nombre Completo</label>
-        <input type="text" id="nombre_tecnico" name="nombre_tecnico" required placeholder="Tu nombre legal">
-
-        <label for="cedula">Cédula o Identificación</label>
-        <input type="text" id="cedula" name="cedula" required placeholder="Número de identificación oficial">
-
-        <label for="telefono_tecnico">Número de Teléfono</label>
-        <input type="tel" id="telefono_tecnico" name="telefono_tecnico" required placeholder="Ej: +502 5555 5555">
         
-        <label for="email_tecnico">Correo Electrónico</label>
-        <input type="email" id="email_tecnico" name="email_tecnico" required placeholder="Correo para notificaciones">
+        <!-- Nombre Completo -->
+        <label for="nombre" class="block text-sm font-medium mb-1">Nombre Completo *</label>
+        <input type="text" id="nombre" name="nombre" class="input-field" required placeholder="Tu nombre y apellido">
 
-        <label for="especialidad">Especialidad Principal</label>
-        <select id="especialidad" name="especialidad" required>
-            <option value="">Selecciona tu área</option>
-            <option value="Hardware - PC/Laptop">Hardware (Reparación de PC/Laptop)</option>
-            <option value="Software/Sistemas">Software, Sistemas Operativos y Virus</option>
-            <option value="Redes y Conectividad">Redes, Servidores, y Conectividad</option>
-            <option value="Desarrollo Web/Móvil">Desarrollo Web/Móvil</option>
+        <!-- Cédula (COLUMNA REQUERIDA EN SU TABLA) -->
+        <label for="cedula" class="block text-sm font-medium mb-1">Cédula o Identificación *</label>
+        <input type="text" id="cedula" name="cedula" class="input-field" required placeholder="Número de identificación oficial">
+
+        <!-- Email -->
+        <label for="email" class="block text-sm font-medium mb-1">Correo Electrónico *</label>
+        <input type="email" id="email" name="email" class="input-field" required placeholder="ejemplo@servicio.com">
+
+        <!-- Teléfono -->
+        <label for="telefono" class="block text-sm font-medium mb-1">Teléfono (WhatsApp) *</label>
+        <input type="tel" id="telefono" name="telefono" class="input-field" required placeholder="+555...">
+        
+        <!-- Especialidad -->
+        <label for="especialidad" class="block text-sm font-medium mb-1">Especialidad Principal *</label>
+        <select id="especialidad" name="especialidad" class="input-field" required>
+            <option value="" disabled selected>Selecciona tu área</option>
+            <option value="Hardware - PC/Laptop">Hardware (Reparación, Ensamblaje)</option>
+            <option value="Software/Sistemas">Software, Sistemas Operativos</option>
+            <option value="Redes y Conectividad">Redes y Configuración</option>
+            <option value="Desarrollo Web/Móvil">Desarrollo y Apps Móviles</option>
             <option value="Otros">General / Múltiples Áreas</option>
         </select>
         
-        <label for="experiencia">Años de Experiencia</label>
-        <input type="number" id="experiencia" name="experiencia" min="1" max="50" required placeholder="Mínimo 1 año">
+        <!-- Años de Experiencia -->
+        <label for="experiencia" class="block text-sm font-medium mb-1">Años de Experiencia *</label>
+        <input type="number" id="experiencia" name="experiencia" class="input-field" min="1" max="50" required placeholder="Mínimo 1 año comprobado">
         
-        <label for="bio">Breve Biografía / Descripción de Servicios</label>
-        <textarea id="bio" name="bio" rows="3" required placeholder="Máximo 200 caracteres sobre tu experiencia y áreas de servicio."></textarea>
+        <!-- Biografía/Descripción (COLUMNA REQUERIDA EN SU TABLA) -->
+        <label for="bio" class="block text-sm font-medium mb-1">Breve Biografía / Servicios (Máx. 200 caracteres) *</label>
+        <textarea id="bio" name="bio" rows="3" class="input-field resize-y" maxlength="200" required placeholder="Experto en diagnóstico, solución remota y reparaciones físicas de equipos..."></textarea>
+
+        <!-- --- CAMPOS DE SUBIDA DE ARCHIVOS (SUBEN A STORAGE) --- -->
+        <p class="text-sm text-gray-400 mt-4 mb-2 font-bold border-t border-gray-700 pt-4">Documentación Obligatoria (Imágenes)</p>
         
-        <button type="submit" class="submit-button">Registrarme como Técnico</button>
+        <label for="id_file" class="block text-sm font-medium mb-1">1. Foto de Identidad (Cédula/DPI) *</label>
+        <input type="file" id="id_file" name="id_file" class="input-field" accept="image/png, image/jpeg" required>
+
+        <label for="selfie_file" class="block text-sm font-medium mb-1">2. Foto Selfie con Identidad *</label>
+        <input type="file" id="selfie_file" name="selfie_file" class="input-field" accept="image/png, image/jpeg" required>
+        <!-- --- FIN CAMPOS DE SUBIDA DE ARCHIVOS --- -->
+        
+        <button type="submit" id="submitButton" class="submit-button">Enviar Solicitud y Documentos</button>
     </form>
+
+    <div id="message-box" role="alert"></div>
     
-    <div id="message-box"></div>
+    <div class="text-center mt-4">
+        <a href="terms_tecnicos.html" class="text-xs text-gray-500 hover:text-gray-400 transition-colors">Volver a los Términos</a>
+    </div>
+
 </div>
 
+<!-- SCRIPT DE MANEJO DEL FORMULARIO - AHORA USA SUPABASE STORAGE -->
 <script>
     // **********************************************
-    // ¡CRÍTICO! REEMPLAZA ESTOS VALORES CON TUS CLAVES REALES DE SUPABASE
+    // 1. CONFIGURACIÓN DE SUPABASE
     // **********************************************
-    const SUPABASE_URL = 'TU_URL_DE_PROYECTO_SUPABASE'; 
-    const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_DE_SUPABASE'; 
-    // **********************************************
+    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
+    
+    // 🛑 NOMBRE DEL BUCKET: ¡DEBE CREAR ESTE EN SU PANEL DE SUPABASE STORAGE!
+    const BUCKET_NAME = 'tech-documents'; 
 
-    // 1. Inicializar el cliente Supabase
     let supabaseClient = null;
-    try {
-        if (SUPABASE_URL === 'TU_URL_DE_PROYECTO_SUPABASE' || SUPABASE_ANON_KEY === 'TU_CLAVE_ANON_DE_SUPABASE') {
-            throw new Error("Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY.");
-        }
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch (error) {
-        showMessage('Error al inicializar Supabase: ' + error.message, 'error');
-        // Prevenir el envío si la inicialización falla
-        document.getElementById('techForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-        });
-    }
-
     const form = document.getElementById('techForm');
     const messageBox = document.getElementById('message-box');
+    const submitButton = document.getElementById('submitButton');
+
+    try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (error) {
+        console.error("DEBUG: Fallo al inicializar el cliente:", error.message);
+        showMessage('Error al inicializar Supabase. Revisa las claves de configuración.', 'error');
+    }
 
     function showMessage(message, type) {
         messageBox.textContent = message;
-        messageBox.className = type;
         messageBox.style.display = 'block';
+        messageBox.classList.remove('success', 'error', 'loading');
+        messageBox.classList.add(type);
     }
 
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        if (!supabaseClient) {
-            showMessage("Error: La conexión a la base de datos no está activa.", 'error');
-            return;
-        }
+    function generateUniqueId() {
+        const date = new Date();
+        const yyyymmdd = date.getFullYear().toString() + 
+                         (date.getMonth() + 1).toString().padStart(2, '0') + 
+                         date.getDate().toString().padStart(2, '0');
+        const uuid = crypto.randomUUID().split('-')[0].toUpperCase();
+        return `TECH-${yyyymmdd}-${uuid}`;
+    }
 
-        showMessage("Registrando técnico...", 'loading');
-
-        // 2. Recolectar datos del formulario
-        const formData = new FormData(form);
-        const data = {
-            // Mapeo a las columnas de Supabase (Asegúrate que estas columnas existan en tu tabla 'technicians' o 'tecnicos')
-            nombre_tecnico: formData.get('nombre_tecnico'),
-            cedula: formData.get('cedula'),
-            telefono_tecnico: formData.get('telefono_tecnico'),
-            email_tecnico: formData.get('email_tecnico'),
-            especialidad: formData.get('especialidad'),
-            experiencia: parseInt(formData.get('experiencia')),
-            bio: formData.get('bio'),
-            // Campo de control: Poner en 'pending' hasta que sea aprobado
-            status: 'Pending', 
-            registro_fecha: new Date().toISOString()
-        };
-
-        try {
-            // 3. Insertar datos en la tabla 'technicians'
-            const { error } = await supabaseClient
-                .from('technicians') // O usa 'tecnicos' si ese es el nombre de tu tabla
-                .insert([data]);
-
-            if (error) {
-                 showMessage('ERROR DE INSERCIÓN: Permiso denegado por RLS. Revisa la política de inserción en la tabla "technicians".', 'error');
-                console.error("Supabase Error:", error);
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!supabaseClient) {
+                showMessage("Error: Conexión a base de datos inactiva.", 'error');
                 return;
             }
 
-            // 4. Éxito: Mostrar mensaje de confirmación
-            showMessage('Registro exitoso. Serás contactado para validación.', 'success');
-            form.reset(); // Limpiar el formulario
+            submitButton.disabled = true;
+            submitButton.textContent = "Subiendo fotos y enviando datos...";
+            showMessage("Iniciando subida de archivos...", 'loading');
 
-        } catch (error) {
-            // Error de red o error de promesa general
-            console.error("Error al enviar la solicitud:", error);
-            showMessage('ERROR DE CONEXIÓN: ' + error.message + '. Revisa tu conexión de red o las URL de Supabase.', 'error');
-        } finally {
-            // Quitar el mensaje de carga
-            setTimeout(() => {
-                if (messageBox.className === 'loading') {
-                    messageBox.style.display = 'none';
+            const formData = new FormData(form);
+            const uniqueTechId = generateUniqueId();
+            
+            const idFile = document.getElementById('id_file').files[0];
+            const selfieFile = document.getElementById('selfie_file').files[0];
+
+            let fotoDpiUrl = null;
+            let fotoSelfieUrl = null;
+
+            try {
+                // --- 2. SUBIDA DE FOTOS A SUPABASE STORAGE ---
+                // Se define una ruta única dentro del bucket: TECH-ID/nombre-de-archivo.ext
+                const idPath = `${uniqueTechId}/dpi-${Date.now()}.${idFile.name.split('.').pop()}`;
+                const selfiePath = `${uniqueTechId}/selfie-${Date.now()}.${selfieFile.name.split('.').pop()}`;
+
+                // 2a. Subir Archivo de Identidad (DPI/Cédula)
+                showMessage("Subiendo ID...", 'loading');
+                const { error: idUploadError } = await supabaseClient.storage
+                    .from(BUCKET_NAME)
+                    .upload(idPath, idFile, { cacheControl: '3600', upsert: false });
+
+                if (idUploadError) throw new Error(`Fallo al subir ID: ${idUploadError.message}`);
+
+                // 2b. Obtener URL Pública del ID
+                const { data: idUrlData } = supabaseClient.storage
+                    .from(BUCKET_NAME)
+                    .getPublicUrl(idPath);
+                fotoDpiUrl = idUrlData.publicUrl;
+
+                // 2c. Subir Archivo Selfie
+                showMessage("Subiendo Selfie...", 'loading');
+                const { error: selfieUploadError } = await supabaseClient.storage
+                    .from(BUCKET_NAME)
+                    .upload(selfiePath, selfieFile, { cacheControl: '3600', upsert: false });
+
+                if (selfieUploadError) throw new Error(`Fallo al subir Selfie: ${selfieUploadError.message}`);
+
+                // 2d. Obtener URL Pública del Selfie
+                const { data: selfieUrlData } = supabaseClient.storage
+                    .from(BUCKET_NAME)
+                    .getPublicUrl(selfiePath);
+                fotoSelfieUrl = selfieUrlData.publicUrl;
+
+                showMessage("Archivos subidos. Insertando datos del técnico...", 'loading');
+
+                // --- 3. INSERCIÓN DE DATOS EN LA TABLA CON LAS NUEVAS URLS ---
+                const payloadData = {
+                    tecnico_id: uniqueTechId, 
+                    nombre: formData.get('nombre'),
+                    cedula: formData.get('cedula'), // Columna 'cedula' DEBE existir
+                    email: formData.get('email'),
+                    telefono: formData.get('telefono'),
+                    especialidad: formData.get('especialidad'),
+                    experiencia: parseInt(formData.get('experiencia'), 10),
+                    bio: formData.get('bio'), // Columna 'bio' DEBE existir
+                    
+                    // Solo se guardan las URLs del Storage
+                    foto_dpi_url: fotoDpiUrl, 
+                    foto_selfie_url: fotoSelfieUrl, 
+
+                    status: 'Pendiente de Revisión', 
+                    fecha_registro: new Date().toISOString()
+                };
+
+                const { error: dbInsertError } = await supabaseClient
+                    .from('tecnicos')
+                    .insert([payloadData]);
+
+                if (dbInsertError) {
+                    let errorMessage = `ERROR DE SUPABASE (DB): ${dbInsertError.message}`;
+                    if (dbInsertError.message.includes("column of 'tecnicos'")) {
+                        errorMessage = "🔴 ¡FALLO DE COLUMNA! Aún faltan las columnas 'cedula' o 'bio' en su tabla. ¡DEBE AÑADIRLAS!";
+                    }
+                    throw new Error(errorMessage);
+                } else {
+                    showMessage(`✅ Registro y subida de archivos exitosa! Tu ID de Técnico es: ${uniqueTechId}.`, 'success');
+                    form.reset();
                 }
-            }, 3000);
-        }
-    });
+
+            } catch (error) {
+                // Captura errores de Storage o de DB
+                showMessage(`ERROR: ${error.message}`, 'error');
+                console.error("Error completo:", error);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "Enviar Solicitud y Documentos";
+            }
+        });
+    }
+
 </script>
 </body>
 </html>
