@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -27,233 +27,169 @@
             background-color: #1a1a1a;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2); 
+            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.3);
         }
-        h1 {
-            color: #007bff; /* Azul primario */
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-            text-align: center;
-        }
-        .subtitle {
-            color: #ccc;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        .input-field {
+        .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 12px;
             margin-top: 5px;
-            margin-bottom: 15px;
-            background-color: #2a2a2a;
-            border: 1px solid #374151;
+            margin-bottom: 20px;
             border-radius: 8px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
             color: #fff;
-            box-sizing: border-box;
-            resize: none; 
+            font-size: 16px;
             transition: border-color 0.3s;
         }
-        .input-field:focus {
-            border-color: #007bff; 
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #007bff;
             outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
         }
         .submit-button {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(145deg, #007bff, #0056b3);
+            border-radius: 10px;
+            background-color: #007bff;
             color: #fff;
-            border: none;
-            border-radius: 50px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
-            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.1s;
+            border: none;
         }
-        .submit-button:hover {
-            background: linear-gradient(145deg, #0056b3, #007bff);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.7);
+        .submit-button:hover:not(:disabled) {
+            background-color: #0056b3;
+            transform: translateY(-1px);
         }
         .submit-button:disabled {
-            background: #505050;
+            background-color: #4b5563;
             cursor: not-allowed;
-            box-shadow: none;
         }
-        #message-box {
-            padding: 12px;
+        .message-box {
+            padding: 15px;
             border-radius: 8px;
             margin-top: 20px;
             text-align: center;
-            font-weight: bold;
-            display: none;
+            font-weight: 600;
+            display: none; /* Oculto por defecto */
         }
-        .success { background-color: #16a34a; color: #fff; }
-        .error { background-color: #dc2626; color: #fff; }
-        .loading { background-color: #f59e0b; color: #fff; }
+        .message-box.success {
+            background-color: #10B981; /* Verde esmeralda */
+            color: #064E3B;
+        }
+        .message-box.error {
+            background-color: #F87171; /* Rojo */
+            color: #7F1D1D;
+        }
     </style>
 </head>
 <body>
 
-<div class="form-container">
-    <h1>Solicitud de Servicio Informático</h1>
-    
+    <div class="form-container">
+        <h1 class="text-2xl font-bold text-center mb-6">Solicitud de Servicio Técnico</h1>
+        <p class="text-gray-400 text-center mb-8">Ingresa tus datos para que un experto pueda contactarte.</p>
 
-    <!-- FORMULARIO PRINCIPAL DE REGISTRO DE CLIENTES -->
-    <form id="clientForm">
-        
-        <!-- Columna: "nombre" -->
-        <label for="nombre" class="block text-sm font-medium mb-1">Nombre Completo *</label>
-        <input type="text" id="nombre" name="nombre" class="input-field" required placeholder="Su nombre">
+        <form id="clientForm">
+            <!-- CAMPO 1: NOMBRE -->
+            <label for="nombre" class="block mb-2 font-medium">Tu Nombre Completo</label>
+            <input type="text" id="nombre" name="nombre" class="form-input" placeholder="Ej. Enrique Bon" required>
 
-        <!-- Correo Electrónico (Solo para UX, no se envía a la DB) -->
-        <label for="email_cliente" class="block text-sm font-medium mb-1">Correo Electrónico</label>
-        <input type="email" id="email_cliente" name="email_cliente" class="input-field" placeholder="ejemplo@casa.com">
+            <!-- CAMPO 2: TELÉFONO -->
+            <label for="telefono" class="block mb-2 font-medium">Teléfono de Contacto</label>
+            <input type="tel" id="telefono" name="telefono" class="form-input" placeholder="Ej. +5555 99xxxxxx" required>
 
-        <!-- Columna: "telefono" -->
-        <label for="telefono" class="block text-sm font-medium mb-1">Teléfono (WhatsApp) *</label>
-        <input type="tel" id="telefono" name="telefono" class="input-field" required placeholder="+555...">
-        
-        <!-- Columna: "tipo_servicio" - CORREGIDO A OPCIONES INFORMÁTICAS -->
-        <label for="tipo_servicio" class="block text-sm font-medium mb-1">Tipo de Servicio Informático *</label>
-        <select id="tipo_servicio" name="tipo_servicio" class="input-field" required>
-            <option value="" disabled selected>Selecciona el área de TI</option>
-            <option value="Soporte Tecnico">Soporte Técnico (Hardware/Software)</option>
-            <option value="Desarrollo Web">Desarrollo Web / Aplicaciones</option>
-            <option value="Redes">Redes y Conectividad</option>
-            <option value="Recuperacion Datos">Recuperación de Datos</option>
-            <option value="Ciberseguridad">Ciberseguridad / Protección</option>
-            <option value="Mantenimiento Preventivo">Mantenimiento Preventivo</option>
-            <option value="otro">Otro (Especificar en descripción)</option>
-        </select>
-        
-        <!-- Columna: "direccion" -->
-        <label for="direccion" class="block text-sm font-medium mb-1">Dirección de Servicio / Ubicación *</label>
-        <input type="text" id="direccion" name="direccion" class="input-field" required placeholder="Calle, número, colonia/barrio">
+            <!-- CAMPO 3: DIRECCIÓN -->
+            <label for="direccion" class="block mb-2 font-medium">Tu Dirección Exacta (Residencia/Trabajo)</label>
+            <input type="text" id="direccion" name="direccion" class="form-input" placeholder="Ej. Colonia El Dorado, Casa #25" required>
 
-        <!-- Columna: "problema" -->
-        <label for="problema" class="block text-sm font-medium mb-1">Descripción Detallada del Problema *</label>
-        <textarea id="problema" name="problema" class="input-field h-24" required placeholder="Ej: La computadora no arranca o la red tiene fallas..."></textarea>
-        
-        <button type="submit" id="submitButton" class="submit-button">Solicitar Técnico Ahora</button>
-    </form>
+            <!-- CAMPO 4: TIPO DE SERVICIO -->
+            <label for="tipo_servicio" class="block mb-2 font-medium">Tipo de Servicio Requerido</label>
+            <select id="tipo_servicio" name="tipo_servicio" class="form-select" required>
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Reparación de Hardware">Reparación de Hardware</option>
+                <option value="Mantenimiento de Software">Mantenimiento de Software</option>
+                <option value="Configuración de Redes">Configuración de Redes</option>
+                <option value="Eliminación de Virus/Malware">Eliminación de Virus/Malware</option>
+                <option value="Soporte Remoto/Consultoría">Soporte Remoto/Consultoría</option>
+                <option value="Otro">Otro (Especificar en Problema)</option>
+            </select>
 
-    <div id="message-box" role="alert"></div>
+            <!-- CAMPO 5: PROBLEMA -->
+            <label for="problema" class="block mb-2 font-medium">Describe tu Problema (Máximo 200 palabras)</label>
+            <textarea id="problema" name="problema" class="form-textarea" rows="4" placeholder="Mi laptop no enciende y hace un ruido extraño..." maxlength="1000" required></textarea>
 
-</div>
+            <button type="submit" id="submitButton" class="submit-button mt-4">Solicitar Técnico Ahora</button>
+        </form>
 
-<!-- SCRIPT DE CONECTIVIDAD SUPABASE CON ESQUEMA CORREGIDO -->
+        <div id="message" class="message-box"></div>
+    </div>
+
 <script>
-    // **********************************************
-    // 1. CONFIGURACIÓN DE SUPABASE (Claves que usted proporcionó)
-    // **********************************************
-    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
+    // Configuración de Supabase (Debes reemplazar estas variables con tus propias credenciales)
+    // NOTA IMPORTANTE: Para este entorno, las claves de Supabase se proveen de forma global. 
+    // Por favor, asegúrate de que tus variables de entorno estén configuradas en tu proyecto.
+    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; 
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; 
     
-    let supabaseClient = null;
-
- if (SUPABASE_URL === "TU_URL_DE_SUPABASE_AQUI" || SUPABASE_ANON_KEY === "TU_CLAVE_ANON_AQUI") {
-        console.error("🔴 ¡ADVERTENCIA CRÍTICA! Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY en el script.");
-        // Dejar el cliente como null para forzar un error si se intenta usar
-    } else {
-        try {
+    // Inicialización del cliente Supabase
+    // En un entorno de producción o de desarrollo normal, usarías las variables globales si están disponibles.
+    let supabaseClient;
+    try {
+        if (typeof supabase !== 'undefined') {
+             // Si el script de Supabase SDK se cargó correctamente, inicializamos
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.error("Error al inicializar el cliente de Supabase:", e);
+            console.log("Supabase inicializado correctamente.");
+        } else {
+            console.error("El SDK de Supabase no se cargó. Verifica la etiqueta <script>.");
+            showMessage("🔴 ERROR: El SDK de Supabase no se ha cargado correctamente.", 'error');
         }
+    } catch (e) {
+        console.error("Error al crear cliente Supabase:", e);
+        showMessage("🔴 ERROR: Fallo al crear el cliente Supabase. Revisa las URL/Keys.", 'error');
     }
-
-
 
     const form = document.getElementById('clientForm');
-    const messageBox = document.getElementById('message-box');
     const submitButton = document.getElementById('submitButton');
+    const messageBox = document.getElementById('message');
 
-    // Función auxiliar para mostrar mensajes
-    function showMessage(message, type) {
-        messageBox.textContent = message;
+    /**
+     * Muestra un mensaje en la interfaz.
+     * @param {string} msg - El mensaje a mostrar.
+     * @param {('success'|'error')} type - El tipo de mensaje.
+     */
+    function showMessage(msg, type) {
+        messageBox.textContent = msg;
+        messageBox.className = `message-box ${type}`;
         messageBox.style.display = 'block';
-        messageBox.classList.remove('success', 'error', 'loading');
-        messageBox.classList.add(type);
+    }
 
-    // Ocultar el mensaje después de 5 segundos
-        setTimeout(() => {
+    // Lógica de Envío del Formulario
+    if (form && supabaseClient) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showMessage("", 'success'); // Limpiar mensajes
             messageBox.style.display = 'none';
-        }, 5000);
-    }
-
-    if (form && submitButton) {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-
-    // Inicialización de Supabase
-    try {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch (error) { // Inicialización de Supabase
-    try {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch (error) {
-        showMessage('Error al inicializar Supabase. Verifique las claves.', 'error');
-    }
-
-    // Lógica principal de envío
-    if (form) {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!supabaseClient) {
-                showMessage("Error: Conexión a Supabase inactiva.", 'error');
-                return;
-            }
-        showMessage('Error al inicializar Supabase. Verifique las claves.', 'error');
-    }
-
-    // Lógica principal de envío
-    if (form) {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!supabaseClient) {
-                showMessage("Error: Conexión a Supabase inactiva.", 'error');
-                return;
-            }
 
             submitButton.disabled = true;
-            submitButton.textContent = "Guardando solicitud...";
-            showMessage("Enviando datos a la base de datos...", 'loading');
+            submitButton.textContent = "Enviando Solicitud...";
 
-            const formData = new FormData(form);
-
-            // 2. PAYLOAD DE DATOS - COINCIDE 100% CON SU ESQUEMA
-            const payloadData = {
-                // Columna: "nombre" (text)
-                nombre: formData.get('nombre'),
-                // Columna: "telefono" (text)
-                telefono: formData.get('telefono'),
-                // Columna: "tipo_servicio" (text) - Contiene el nuevo valor IT
-                tipo_servicio: formData.get('tipo_servicio'),
-                // Columna: "direccion" (text)
-                direccion: formData.get('direccion'),
-                // Columna: "problema" (text)
-                problema: formData.get('problema'),
-                
-                // Columna: "status" (text)
-                status: 'Pendiente - Pago Diagnóstico', 
-                
-                // Columna: "fecha_solicitud" (timestamp with time zone)
-                fecha_solicitud: new Date().toISOString()
-            };
-
-            // 3. Envío de Datos a la tabla 'clientes'
             try {
-                const { error, data } = await supabaseClient
-                    .from('clientes') 
-                    .insert([payloadData])
-                    .select();
+                // 1. OBTENER VALORES DEL FORMULARIO CON LOS NOMBRES EXACTOS DE LA TABLA
+                const data = {
+                    nombre: document.getElementById('nombre').value,
+                    telefono: document.getElementById('telefono').value,
+                    direccion: document.getElementById('direccion').value,
+                    tipo_servicio: document.getElementById('tipo_servicio').value,
+                    problema: document.getElementById('problema').value,
+                    // NOTA: 'fecha_solicitud' y 'status' son manejados por DEFAULT en tu esquema, 
+                    // por lo que no se envían aquí.
+                };
+
+                // 2. INSERCIÓN DE DATOS en la tabla 'clientes'
+                const { error, data: insertedData } = await supabaseClient
+                    .from('clientes')
+                    .insert([data])
+                    .select(); // Devolvemos los datos insertados, incluyendo el ID
 
                 if (error) {
                     let errorMessage = `🔴 FALLO: Código Supabase: ${error.code}.`;
@@ -270,16 +206,18 @@
                     console.error("Supabase Error Completo:", error);
 
                 } else {
-                    const id = data && data.length > 0 ? data[0].id : 'N/A';
-                      console.log(`✅ Solicitud registrada con éxito (ID: ${id}). Redirigiendo a confirmación de pago...`);
-                    window.location.href = `confirmacion-pago.html?solicitud_id=${id}`;
+                    // ÉXITO: Redirigir a la página de confirmación de pago.
+                    const id = insertedData && insertedData.length > 0 ? insertedData[0].id : 'N/A';
+                    console.log(`✅ ¡Solicitud registrada con éxito! ID: ${id}. Redirigiendo a pago...`);
+                    // Redirección forzada al flujo de pago.
+                    window.location.href = 'confirmacion-pago.html?solicitud=' + id;
                 }
 
             } catch (error) {
                 showMessage("ERROR DE CONEXIÓN DE RED: Fallo al contactar a Supabase.", 'error');
                 console.error("Error de Fetch o Desconocido:", error);
             } finally {
-               if (submitButton.textContent === "Procesando...") {
+                // Si la redirección falla o hay un error, el botón se reestablece.
                 submitButton.disabled = false;
                 submitButton.textContent = "Solicitar Técnico Ahora";
             }
@@ -289,4 +227,3 @@
 </script>
 </body>
 </html>
-
