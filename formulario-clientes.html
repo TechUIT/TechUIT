@@ -100,7 +100,7 @@
 
 <div class="form-container">
     <h1>Solicitud de Servicio Informático</h1>
-    <p class="subtitle">Usando las columnas exactas de su tabla: 'nombre', 'telefono', 'problema', etc.</p>
+    
 
     <!-- FORMULARIO PRINCIPAL DE REGISTRO DE CLIENTES -->
     <form id="clientForm">
@@ -127,6 +127,7 @@
             <option value="Recuperacion Datos">Recuperación de Datos</option>
             <option value="Ciberseguridad">Ciberseguridad / Protección</option>
             <option value="Mantenimiento Preventivo">Mantenimiento Preventivo</option>
+            <option value="otro">Otro (Especificar en descripción)</option>
         </select>
         
         <!-- Columna: "direccion" -->
@@ -153,6 +154,20 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
     
     let supabaseClient = null;
+
+ if (SUPABASE_URL === "TU_URL_DE_SUPABASE_AQUI" || SUPABASE_ANON_KEY === "TU_CLAVE_ANON_AQUI") {
+        console.error("🔴 ¡ADVERTENCIA CRÍTICA! Por favor, actualiza SUPABASE_URL y SUPABASE_ANON_KEY en el script.");
+        // Dejar el cliente como null para forzar un error si se intenta usar
+    } else {
+        try {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.error("Error al inicializar el cliente de Supabase:", e);
+        }
+    }
+
+
+
     const form = document.getElementById('clientForm');
     const messageBox = document.getElementById('message-box');
     const submitButton = document.getElementById('submitButton');
@@ -163,12 +178,37 @@
         messageBox.style.display = 'block';
         messageBox.classList.remove('success', 'error', 'loading');
         messageBox.classList.add(type);
+
+    // Ocultar el mensaje después de 5 segundos
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 5000);
     }
+
+    if (form && submitButton) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
 
     // Inicialización de Supabase
     try {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (error) { // Inicialización de Supabase
+    try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } catch (error) {
+        showMessage('Error al inicializar Supabase. Verifique las claves.', 'error');
+    }
+
+    // Lógica principal de envío
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!supabaseClient) {
+                showMessage("Error: Conexión a Supabase inactiva.", 'error');
+                return;
+            }
         showMessage('Error al inicializar Supabase. Verifique las claves.', 'error');
     }
 
@@ -231,14 +271,15 @@
 
                 } else {
                     const id = data && data.length > 0 ? data[0].id : 'N/A';
-                    showMessage(`✅ ¡Solicitud registrada con éxito! ID: ${id}`, 'success');
-                    form.reset();
+                      console.log(`✅ Solicitud registrada con éxito (ID: ${id}). Redirigiendo a confirmación de pago...`);
+                    window.location.href = `confirmacion-pago.html?solicitud_id=${id}`;
                 }
 
             } catch (error) {
                 showMessage("ERROR DE CONEXIÓN DE RED: Fallo al contactar a Supabase.", 'error');
                 console.error("Error de Fetch o Desconocido:", error);
             } finally {
+               if (submitButton.textContent === "Procesando...") {
                 submitButton.disabled = false;
                 submitButton.textContent = "Solicitar Técnico Ahora";
             }
@@ -248,3 +289,4 @@
 </script>
 </body>
 </html>
+
