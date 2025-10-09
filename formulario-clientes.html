@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -29,6 +29,7 @@
             border-radius: 15px;
             box-shadow: 0 8px 30px rgba(0, 123, 255, 0.3);
         }
+        /* Corregida la clase form-input para que aplique a todos los elementos del formulario */
         .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 12px;
@@ -90,19 +91,19 @@
         <p class="text-gray-400 text-center mb-8">Ingresa tus datos para que un experto pueda contactarte.</p>
 
         <form id="clientForm">
-            <!-- CAMPO 1: NOMBRE -->
+            <!-- CAMPO 1: NOMBRE (Columna: nombre) -->
             <label for="nombre" class="block mb-2 font-medium">Tu Nombre Completo</label>
             <input type="text" id="nombre" name="nombre" class="form-input" placeholder="Ej. Enrique Bon" required>
 
-            <!-- CAMPO 2: TELÉFONO -->
+            <!-- CAMPO 2: TELÉFONO (Columna: telefono) -->
             <label for="telefono" class="block mb-2 font-medium">Teléfono de Contacto</label>
             <input type="tel" id="telefono" name="telefono" class="form-input" placeholder="Ej. +5555 99xxxxxx" required>
 
-            <!-- CAMPO 3: DIRECCIÓN -->
+            <!-- CAMPO 3: DIRECCIÓN (Columna: direccion) -->
             <label for="direccion" class="block mb-2 font-medium">Tu Dirección Exacta (Residencia/Trabajo)</label>
             <input type="text" id="direccion" name="direccion" class="form-input" placeholder="Ej. Colonia El Dorado, Casa #25" required>
 
-            <!-- CAMPO 4: TIPO DE SERVICIO -->
+            <!-- CAMPO 4: TIPO DE SERVICIO (Columna: tipo_servicio) -->
             <label for="tipo_servicio" class="block mb-2 font-medium">Tipo de Servicio Requerido</label>
             <select id="tipo_servicio" name="tipo_servicio" class="form-select" required>
                 <option value="" disabled selected>Selecciona una opción</option>
@@ -114,7 +115,7 @@
                 <option value="Otro">Otro (Especificar en Problema)</option>
             </select>
 
-            <!-- CAMPO 5: PROBLEMA -->
+            <!-- CAMPO 5: PROBLEMA (Columna: problema) -->
             <label for="problema" class="block mb-2 font-medium">Describe tu Problema (Máximo 200 palabras)</label>
             <textarea id="problema" name="problema" class="form-textarea" rows="4" placeholder="Mi laptop no enciende y hace un ruido extraño..." maxlength="1000" required></textarea>
 
@@ -126,17 +127,14 @@
 
 <script>
     // Configuración de Supabase (Debes reemplazar estas variables con tus propias credenciales)
-    // NOTA IMPORTANTE: Para este entorno, las claves de Supabase se proveen de forma global. 
-    // Por favor, asegúrate de que tus variables de entorno estén configuradas en tu proyecto.
-    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; 
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; 
+    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; // REEMPLAZA CON TU URL
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; // REEMPLAZA CON TU CLAVE ANON
     
     // Inicialización del cliente Supabase
-    // En un entorno de producción o de desarrollo normal, usarías las variables globales si están disponibles.
     let supabaseClient;
     try {
+        // SOLUCIÓN AL ERROR: La variable global es 'supabase' (minúscula)
         if (typeof supabase !== 'undefined') {
-             // Si el script de Supabase SDK se cargó correctamente, inicializamos
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log("Supabase inicializado correctamente.");
         } else {
@@ -147,6 +145,9 @@
         console.error("Error al crear cliente Supabase:", e);
         showMessage("🔴 ERROR: Fallo al crear el cliente Supabase. Revisa las URL/Keys.", 'error');
     }
+
+    // Nombre de tu tabla, confirmado como 'clientes'
+    const TABLE_NAME = 'clientes'; 
 
     const form = document.getElementById('clientForm');
     const submitButton = document.getElementById('submitButton');
@@ -161,6 +162,10 @@
         messageBox.textContent = msg;
         messageBox.className = `message-box ${type}`;
         messageBox.style.display = 'block';
+        // Ocultar después de 4 segundos
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 4000);
     }
 
     // Lógica de Envío del Formulario
@@ -174,20 +179,19 @@
             submitButton.textContent = "Enviando Solicitud...";
 
             try {
-                // 1. OBTENER VALORES DEL FORMULARIO CON LOS NOMBRES EXACTOS DE LA TABLA
+                // 1. OBTENER VALORES DEL FORMULARIO USANDO LOS NOMBRES EXACTOS DE LAS COLUMNAS EN TU TABLA
                 const data = {
                     nombre: document.getElementById('nombre').value,
                     telefono: document.getElementById('telefono').value,
                     direccion: document.getElementById('direccion').value,
                     tipo_servicio: document.getElementById('tipo_servicio').value,
                     problema: document.getElementById('problema').value,
-                    // NOTA: 'fecha_solicitud' y 'status' son manejados por DEFAULT en tu esquema, 
-                    // por lo que no se envían aquí.
+                    // 'fecha_solicitud' y 'status' tienen valores por defecto en la tabla, no se envían
                 };
 
                 // 2. INSERCIÓN DE DATOS en la tabla 'clientes'
                 const { error, data: insertedData } = await supabaseClient
-                    .from('clientes')
+                    .from(TABLE_NAME)
                     .insert([data])
                     .select(); // Devolvemos los datos insertados, incluyendo el ID
 
@@ -195,9 +199,9 @@
                     let errorMessage = `🔴 FALLO: Código Supabase: ${error.code}.`;
                     
                     if (error.code === '23502') {
-                        errorMessage = "🔴 ¡ERROR DE COLUMNA! Le falta un campo obligatorio (NOT NULL).";
+                        errorMessage = "🔴 ¡ERROR DE COLUMNA! Le falta un campo obligatorio (NOT NULL) o los datos no coinciden con los tipos.";
                     } else if (error.code === '42501') {
-                         errorMessage = "🔴 ¡ERROR RLS! Se deniega el permiso. Verifique las políticas de seguridad de su base de datos.";
+                         errorMessage = "🔴 ¡ERROR RLS! Se deniega el permiso. Verifique las políticas de seguridad (RLS) de su tabla 'clientes'.";
                     } else {
                         errorMessage = `🔴 ¡FALLO DESCONOCIDO! Revise la consola (F12) para ver el mensaje completo: ${error.message}`;
                     }
@@ -208,9 +212,17 @@
                 } else {
                     // ÉXITO: Redirigir a la página de confirmación de pago.
                     const id = insertedData && insertedData.length > 0 ? insertedData[0].id : 'N/A';
-                    console.log(`✅ ¡Solicitud registrada con éxito! ID: ${id}. Redirigiendo a pago...`);
-                    // Redirección forzada al flujo de pago.
-                    window.location.href = 'confirmacion-pago.html?solicitud=' + id;
+                    
+                    if (id !== 'N/A') {
+                        showMessage(`✅ ¡Solicitud #${id} registrada! Redirigiendo a pago...`, 'success');
+                        // Redirección con el ID del registro
+                        setTimeout(() => {
+                            window.location.href = 'confirmacion-pago.html?solicitud=' + id;
+                        }, 1000);
+                    } else {
+                        showMessage("✅ Solicitud registrada, pero no se recibió el ID. Recarga la página.", 'success');
+                        form.reset();
+                    }
                 }
 
             } catch (error) {
