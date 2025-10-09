@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<!-- Metadatos PWA y Solución Móvil -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="TechUIT App">
+<meta name="theme-color" content="#000000">
+
     <!-- Metadatos y scripts -->
     <link rel="manifest" href="manifest.json">
     <script src="service-worker.js"></script>
@@ -98,6 +105,23 @@
         <a href="terminos-legales.html" class="text-gray-500 hover:text-white transition duration-200 underline">Términos Legales y Privacidad</a>
     </p>
 </div>
+<!-- REGISTRO DEL SERVICE WORKER (Para la PWA) -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // Asegúrate de que el nombre del archivo sea 'service-worker.js'
+            navigator.serviceWorker.register('service-worker.js')
+                .then(registration => {
+                    console.log('ServiceWorker registrado con éxito:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('Fallo en el registro de ServiceWorker:', error);
+                });
+        });
+    } else {
+        console.log('El navegador no soporta Service Workers (PWA).');
+    }
+</script>
 
 </body>
 </html>
