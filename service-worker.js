@@ -1,29 +1,36 @@
+// Nombre de la caché (versión 3 - Aumenté la versión para forzar la actualización)
+const CACHE_NAME = 'techuit-cache-v3'; 
 
+// IMPORTANTE: Definir la ruta base del repositorio para que funcione correctamente en GitHub Pages.
+// Debe ser el nombre exacto de tu repositorio.
+const REPO_BASE = '/TechUIT/'; 
 
-
-// Nombre de la caché (versión 1)
-const CACHE_NAME = 'techuit-cache-v1';
-
-// Lista de archivos esenciales para que la app funcione sin conexión
+// Lista de ARCHIVOS ESENCIALES que deben cachearse
 const urlsToCache = [
-    '/',
+    // El punto de inicio DEBE ser la ruta base del repositorio: /TechUIT/
+    REPO_BASE, 
+    // Todos los demás archivos deben ser rutas relativas o simples si están en la raíz del repo
     'index.html',
+    'manifest.json', 
+    'service-worker.js', 
     'formulario-clientes.html',
     'formulario-tecnicos.html',
     'confirmacion-pago.html',
-    // IMPORTANTE: Asegúrate de que el nombre del logo coincida exactamente con tu manifest
     'Logo.png' 
 ];
 
 // Instalación del Service Worker (cachea los archivos iniciales)
 self.addEventListener('install', event => {
-    // Forzar la activación inmediatamente para que la PWA esté lista
     self.skipWaiting(); 
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
                 console.log('Service Worker: Cacheando shell de la aplicación');
+                // Esto intentará cachear todos los archivos con las rutas definidas.
                 return cache.addAll(urlsToCache);
+            })
+            .catch(error => {
+                console.error('Service Worker: FALLO CRÍTICO al cachear archivos. Revise la lista de URLs.', error);
             })
     );
 });
@@ -50,12 +57,9 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                // Si encontramos algo en la caché, lo devolvemos
                 if (response) {
                     return response;
                 }
-                
-                // Si no, vamos a la red
                 return fetch(event.request);
             })
     );
