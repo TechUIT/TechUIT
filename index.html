@@ -106,20 +106,21 @@
     </p>
 </div>
 <!-- REGISTRO DEL SERVICE WORKER (Para la PWA) -->
+<!-- ... todo el contenido del <body> arriba ... -->
+
 <script>
+    // Registra el service worker justo antes del cierre del body
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            // Asegúrate de que el nombre del archivo sea 'service-worker.js'
-            navigator.serviceWorker.register('service-worker.js')
-                .then(registration => {
-                    console.log('ServiceWorker registrado con éxito:', registration.scope);
-                })
-                .catch(error => {
-                    console.log('Fallo en el registro de ServiceWorker:', error);
-                });
-        });
-    } else {
-        console.log('El navegador no soporta Service Workers (PWA).');
+      window.addEventListener('load', () => {
+        // La ruta debe ser '/' si está en la raíz del repo de Pages
+        navigator.serviceWorker.register('/service-worker.js') 
+          .then(reg => {
+            console.log('Service worker registrado con éxito:', reg);
+          })
+          .catch(err => {
+            console.log('Fallo al registrar el service worker:', err);
+          });
+      });
     }
 </script>
 
