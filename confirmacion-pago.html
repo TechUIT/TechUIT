@@ -3,152 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud Recibida - Pago</title>
-    <!-- Carga de Supabase SDK para la base de datos -->
+    <title>Solicitud Aprobada | Pago Requerido</title>
+    <!-- Carga de Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* --- APP SHELL CSS (Diseño original del usuario) --- */
+        /* --- ESTILOS APP MINIMALISTA Y DE LUJO --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;800&display=swap');
+        
         :root {
-            --color-primary: #007bff; /* Azul de énfasis */
-            --color-dark-bg: #111827; /* Fondo oscuro exterior */
-            --color-card-bg: #1f2937; /* Fondo de contenedor/card */
+            /* Consistente con tus archivos: Fondo Negro Puro y Card Gris Oscuro */
+            --color-dark-bg: #000;      
+            --color-card-bg: #1a1a1a;   
+            --color-primary: #007bff;   
             --color-text-light: #f3f4f6;
-            --color-success: #25D366; /* Verde de éxito */
+            --color-text-secondary: #a0a0a0;
+            --color-success: #25D366;   
+            --color-danger: #ff4d4d;
         }
         
         body {
-            /* ESTILOS DE APP SHELL */
-            font-family: 'Inter', sans-serif; /* Fuente consistente */
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 0; 
+            padding: 20px;
             background-color: var(--color-dark-bg);
             color: var(--color-text-light);
-            line-height: 1.6;
             display: flex;
             justify-content: center; 
-            align-items: flex-start; /* Alineación al inicio de la pantalla (App look) */
+            align-items: center; 
             min-height: 100vh;
             text-align: center;
         }
 
-        .container {
-            width: 90%;
-            max-width: 400px; /* Tamaño máximo para móviles */
+        .app-container {
+            width: 100%;
+            max-width: 380px; /* Tamaño de card más pequeño para look móvil */
             background-color: var(--color-card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            margin-top: 50px; 
+            padding: 40px 30px;
+            border-radius: 15px;
+            /* Sombra de lujo y borde superior de acento */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), inset 0 0 0 1px #2a2a2a; 
+            border-top: 3px solid var(--color-primary); 
         }
         
+        /* TÍTULO ÚNICO Y CLARO */
         h1 {
             color: var(--color-text-light);
-            font-size: 1.5rem;
+            font-size: 1.4rem; 
             font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        /* Contenedor del ID para resaltarlo */
+        .id-wrapper {
+            background-color: #2b2b2b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0 30px; /* Más espacio para separar de los botones */
+        }
+
+        .id-label {
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            font-size: 0.8rem;
+            display: block;
             margin-bottom: 5px;
         }
+
+        #solicitudIdDisplay {
+            color: var(--color-primary);
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: block; 
+        }
         
-        h2 {
-            color: var(--color-success);
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        p {
-            color: #ccc;
-            margin-bottom: 25px;
-            font-size: 1rem;
-        }
-
+        /* BOTONES - SOLUCIÓN PARA QUE NO ESTÉN 'FUERA DEL MARCO' */
         .button-group {
             display: flex;
             flex-direction: column;
-            align-items: center; 
             gap: 15px;
             margin-top: 30px;
         }
 
         .action-button {
-            padding: 15px 20px;
+            padding: 14px 20px;
             border-radius: 8px;
-            width: 100%; 
-            max-width: 300px;
-            font-size: 18px;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.3s ease;
+            width: 100%; /* Ocupa todo el ancho de la card, SOLUCIONANDO EL DESCUADRE */
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.3s ease;
             cursor: pointer;
             border: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             text-decoration: none; 
             display: block;
             text-align: center;
         }
         .button-primary {
             background-color: var(--color-primary); 
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5);
         }
         .button-primary:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
+            background-color: #0069d9;
+            transform: translateY(-1px);
         }
         .button-secondary {
-            background-color: #374151; 
-            font-size: 16px;
+            background-color: #333; 
+            color: var(--color-text-light);
+            font-size: 14px;
         }
         .button-secondary:hover {
-            background-color: #4b5563;
-        }
-        
-        /* Estilos para el ID y el mensaje de estado */
-        #solicitudIdDisplay {
-            color: var(--color-primary);
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-top: 5px;
-            margin-bottom: 20px;
-            display: block; /* Para que el ID se vea bien */
+            background-color: #444;
         }
         
         #statusMessage {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #9CA3AF;
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            min-height: 20px;
+        }
+        .error-state {
+            color: var(--color-danger) !important;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Títulos SIMPLIFICADOS (Solicitado por el usuario) -->
-        <h2>✅ Solicitud Recibida</h2>
-        <h1>Proceder al Pago de Diagnóstico</h1>
-        
-        <!-- Párrafo simple + ID de la solicitud -->
-        <p>Tu ID de solicitud es: <span id="solicitudIdDisplay">Cargando...</span></p>
+    <div class="app-container">
+        <!-- Icono de Check Minimalista -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--color-success)" width="35" height="35" style="margin-bottom: 10px;">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
 
-        <!-- Mensaje simple y práctico (Solicitado por el usuario) -->
-        <p>Por favor, haz clic en el botón para realizar el pago de diagnóstico (tarifa única). Esto nos permite asignarte un técnico inmediatamente.</p>
+        <h1>Tu solicitud fue aprobada.</h1>
+        
+        <!-- Contenedor del ID -->
+        <div class="id-wrapper">
+            <span class="id-label">ID ÚNICO DE LA SOLICITUD:</span>
+            <span id="solicitudIdDisplay">Cargando ID...</span>
+        </div>
+
         
         <div class="button-group">
-            <!-- Botón principal de pago -->
-            <!-- URL de pago REAL: Sustituye por tu URL de pago (Ko-fi, Stripe, etc.) -->
-            <a href="https://ko-fi.com/c/8d720c6c86" id="payButton" class="action-button button-primary">
-                Pagar Diagnóstico Ahora
+            <!-- BOTÓN PRINCIPAL DE ACCIÓN -->
+            <!-- ¡RECUERDA SUSTITUIR ESTA URL POR TU ENLACE REAL DE PAGO! -->
+            <a href="https://ko-fi.com/c/8d720c6c86" id="payButton" class="action-button button-primary" target="_blank">
+                PAGO URGENTE PARA CLASIFICAR
             </a>
             
-            <!-- Botón secundario -->
+            <!-- BOTÓN SECUNDARIO -->
             <a href="index.html" class="action-button button-secondary">
-                Volver al Inicio
+                Volver
             </a>
         </div>
         
-        <!-- Mensaje de estado para la conexión a Supabase -->
-        <p id="statusMessage">Verificando conexión...</p>
+        <!-- Mensaje de estado -->
+        <p id="statusMessage">Inicia el pago para que tu servicio sea **URGENTE**.</p>
     </div>
 
 <script>
-    // --- CONFIGURACIÓN DE SUPABASE ---
-    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; // ¡RECUERDA REEMPLAZAR CON TU URL!
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; // ¡RECUERDA REEMPLAZAR CON TU CLAVE ANON!
+    // --- CONFIGURACIÓN DE SUPABASE (SIN CAMBIOS) ---
+    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; // ¡REEMPLAZA CON TU URL!
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; // ¡REEMPLAZA CON TU CLAVE ANON!
     const TABLE_NAME = 'clientes'; 
     
     let supabaseClient;
@@ -162,7 +176,6 @@
     const payButton = document.getElementById('payButton');
     const statusMessage = document.getElementById('statusMessage');
 
-    // Función para obtener el ID de la URL
     function getUrlParameter(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -173,46 +186,56 @@
     const solicitudId = getUrlParameter('solicitud');
 
     if (solicitudId && supabaseClient) {
-        solicitudIdDisplay.textContent = solicitudId;
-        statusMessage.textContent = `ID #${solicitudId} cargado. Listo para proceder al pago.`;
-
+        solicitudIdDisplay.textContent = `#${solicitudId}`;
+        
+        // LÓGICA DE ACTUALIZACIÓN DEL ESTADO AL HACER CLIC EN EL BOTÓN DE PAGO
         payButton.addEventListener('click', async (e) => {
-            e.preventDefault(); 
+            // El e.preventDefault() NO es necesario aquí porque usamos target="_blank", 
+            // pero lo dejamos para ejecutar la auditoría ANTES de la apertura de la nueva pestaña.
 
             payButton.disabled = true;
-            payButton.textContent = "Actualizando Estado...";
-            statusMessage.textContent = "Registrando inicio de pago en la base de datos...";
+            payButton.textContent = "REGISTRANDO PAGO...";
+            statusMessage.textContent = "Auditoría registrada. Abriendo Ko-fi...";
+            statusMessage.classList.remove('error-state');
 
             try {
-                // 1. ACTUALIZAR EL REGISTRO EN SUPABASE
+                // 1. AUDITAR EL REGISTRO EN SUPABASE (El pago real se hace en Ko-fi)
                 const { error } = await supabaseClient
                     .from(TABLE_NAME)
-                    .update({ status: 'Pendiente - Pago Iniciado' }) // Nuevo estado
+                    .update({ status: 'Pendiente - Pago Iniciado' }) 
                     .eq('id', solicitudId); 
 
                 if (error) {
-                    throw new Error(error.message || "Error desconocido de Supabase al actualizar.");
+                    throw new Error(error.message || "Error desconocido de Supabase.");
                 }
 
-                // 2. ÉXITO: Redirigir a la URL de pago
-                statusMessage.textContent = "✅ Estado actualizado. Redirigiendo al sitio de pago...";
+                // 2. ÉXITO: Abrir la URL de pago en una nueva pestaña
+                statusMessage.textContent = "✅ Proceso de pago iniciado. No cierres esta pestaña.";
+                // Usar window.open para asegurar que se abre en una nueva ventana/tab
+                window.open(payButton.href, '_blank'); 
+
+                // 3. Reestablecer el botón (ya que la página principal debe permanecer abierta)
                 setTimeout(() => {
-                    window.location.href = payButton.href; 
-                }, 1000);
+                    payButton.disabled = false;
+                    payButton.textContent = "PAGO URGENTE PARA CLASIFICAR";
+                }, 1500);
+
 
             } catch (error) {
-                console.error("Fallo en la actualización o conexión:", error);
-                statusMessage.textContent = "🔴 ERROR: No se pudo actualizar el estado. Contacte a soporte.";
+                console.error("Fallo en la actualización:", error);
+                statusMessage.classList.add('error-state');
+                statusMessage.textContent = "🔴 ERROR: Fallo al auditar. Intenta de nuevo.";
                 payButton.disabled = false;
-                payButton.textContent = "Pagar Diagnóstico Ahora";
+                payButton.textContent = "PAGO URGENTE PARA CLASIFICAR";
             }
         });
 
     } else {
-        solicitudIdDisplay.textContent = 'N/A';
-        statusMessage.textContent = "🔴 ERROR: ID de Solicitud no encontrado. No se puede proceder.";
+        solicitudIdDisplay.textContent = 'ID INVÁLIDO';
+        statusMessage.classList.add('error-state');
+        statusMessage.textContent = "🔴 ID FALTANTE. Contacte a soporte.";
         payButton.disabled = true;
-        payButton.textContent = "ID de Solicitud Faltante";
+        payButton.textContent = "ERROR (ID INVÁLIDO)";
     }
 
 </script>
