@@ -1,7 +1,7 @@
 {
   "name": "TechUIT",
   "short_name": "TechUIT",
-  "start_url": "/index.html",
+  "start_url": "/TechUIT/",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#007bff",
