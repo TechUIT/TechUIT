@@ -9,6 +9,16 @@
 <meta name="theme-color" content="#000000">
 
     <!-- Metadatos y scripts -->
+ <!-- *** CORRECCIÓN CRÍTICA DE ICONO PARA APPLE (iOS) *** -->
+    <!-- Define el icono de 180x180 para dispositivos Apple -->
+    <link rel="apple-touch-icon" href="Logo.png">
+    
+    <!-- Define el icono de 192x192 (usado por otros navegadores) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="Logo.png">
+
+    <!-- Define el 'splash screen' (pantalla de carga de iOS) -->
+    <link rel="apple-touch-startup-image" href="Logo.png">
+    <!-- **************************************************** -->
     <link rel="manifest" href="manifest.json">
     <script src="service-worker.js"></script>
     <meta charset="UTF-8">
