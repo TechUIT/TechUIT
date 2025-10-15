@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud Aprobada | Pago Requerido</title>
-    <!-- Carga de Supabase SDK -->
+    <title>1. Código y Pago | TechUIT</title>
+    <!-- Carga de Supabase SDK y Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- ESTILOS APP MINIMALISTA Y DE LUJO --- */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;800&display=swap');
+        /* --- ESTILOS CONSISTENTES (Fondo Negro, Tarjeta Oscura) --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
         :root {
-            /* Consistente con tus archivos: Fondo Negro Puro y Card Gris Oscuro */
             --color-dark-bg: #000;      
             --color-card-bg: #1a1a1a;   
             --color-primary: #007bff;   
             --color-text-light: #f3f4f6;
-            --color-text-secondary: #a0a0a0;
             --color-success: #25D366;   
-            --color-danger: #ff4d4d;
         }
         
         body {
@@ -28,216 +26,168 @@
             background-color: var(--color-dark-bg);
             color: var(--color-text-light);
             display: flex;
-            justify-content: center; 
-            align-items: center; 
+            justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
-            text-align: center;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 380px; /* Tamaño de card más pequeño para look móvil */
-            background-color: var(--color-card-bg);
-            padding: 40px 30px;
-            border-radius: 15px;
-            /* Sombra de lujo y borde superior de acento */
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), inset 0 0 0 1px #2a2a2a; 
-            border-top: 3px solid var(--color-primary); 
         }
         
-        /* TÍTULO ÚNICO Y CLARO */
-        h1 {
-            color: var(--color-text-light);
-            font-size: 1.4rem; 
-            font-weight: 700;
-            margin-bottom: 25px;
+        .main-card {
+            max-width: 440px; 
+            width: 100%;
+            padding: 24px;
+            background-color: var(--color-card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid #30363d;
         }
 
-        /* Contenedor del ID para resaltarlo */
-        .id-wrapper {
-            background-color: #2b2b2b;
+        .code-display {
+            background-color: #0d1117;
+            border: 2px solid #ffc107; /* Borde amarillo llamativo */
             padding: 15px;
             border-radius: 8px;
-            margin: 20px 0 30px; /* Más espacio para separar de los botones */
-        }
-
-        .id-label {
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            font-size: 0.8rem;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        #solicitudIdDisplay {
-            color: var(--color-primary);
             font-size: 1.8rem;
-            font-weight: 800;
-            display: block; 
-        }
-        
-        /* BOTONES - SOLUCIÓN PARA QUE NO ESTÉN 'FUERA DEL MARCO' */
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .action-button {
-            padding: 14px 20px;
-            border-radius: 8px;
-            width: 100%; /* Ocupa todo el ancho de la card, SOLUCIONANDO EL DESCUADRE */
-            font-size: 15px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-            text-decoration: none; 
-            display: block;
+            font-weight: 900;
+            color: #ffc107; /* Amarillo para el ID */
             text-align: center;
-        }
-        .button-primary {
-            background-color: var(--color-primary); 
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5);
-        }
-        .button-primary:hover {
-            background-color: #0069d9;
-            transform: translateY(-1px);
-        }
-        .button-secondary {
-            background-color: #333; 
-            color: var(--color-text-light);
-            font-size: 14px;
-        }
-        .button-secondary:hover {
-            background-color: #444;
-        }
-        
-        #statusMessage {
-            margin-top: 25px;
-            font-size: 0.85rem;
-            color: var(--color-text-secondary);
-            min-height: 20px;
-        }
-        .error-state {
-            color: var(--color-danger) !important;
+            letter-spacing: 2px;
+            cursor: pointer;
+            user-select: all;
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Icono de Check Minimalista -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="var(--color-success)" width="35" height="35" style="margin-bottom: 10px;">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-        </svg>
 
-        <h1>Tu solicitud fue aprobada.</h1>
-        
-        <!-- Contenedor del ID -->
-        <div class="id-wrapper">
-            <span class="id-label">ID ÚNICO DE LA SOLICITUD:</span>
-            <span id="solicitudIdDisplay">Cargando ID...</span>
-        </div>
+<div class="main-card">
+    <header class="text-center mb-6">
+        <h1 class="text-3xl font-extrabold text-white mb-2">
+            ✅ Solicitud Aprobada
+        </h1>
+        <p class="text-sm text-gray-400">
+            Último paso: Pago para enviar tu servicio como URGENTE.
+        </p>
+    </header>
 
+    <div class="bg-[#0d1117] p-5 rounded-lg border border-[#30363d] mb-6">
+        <!-- Instrucciones Mínimas -->
+        <p class="text-lg font-bold text-red-500 mb-2 text-center">
+            ➡️ 1. COPIA este Código Único (ID):
+        </p>
         
-        <div class="button-group">
-            <!-- BOTÓN PRINCIPAL DE ACCIÓN -->
-            <!-- ¡RECUERDA SUSTITUIR ESTA URL POR TU ENLACE REAL DE PAGO! -->
-            <a href="https://ko-fi.com/c/8d720c6c86" id="payButton" class="action-button button-primary" target="_blank">
-                PAGO URGENTE PARA CLASIFICAR
-            </a>
-            
-            <!-- BOTÓN SECUNDARIO -->
-            <a href="index.html" class="action-button button-secondary">
-                Volver
-            </a>
+        <!-- Código Único del Cliente -->
+        <div id="solicitud-id-display" class="code-display mb-4">
+            Cargando ID...
         </div>
+        <p id="copy-message" class="text-sm font-bold text-green-400 text-center hidden">✅ ¡Código Copiado! Presiona 2.</p>
+
+        <!-- Instrucción de Pago -->
+        <p class="text-lg font-bold text-white mb-3 text-center mt-6">
+            ➡️ 2. Haz el Pago y PÉGALO como NOTA:
+        </p>
         
-        <!-- Mensaje de estado -->
-        <p id="statusMessage">Inicia el pago para que tu servicio sea **URGENTE**.</p>
+        <!-- Botón para ir a Kofi -->
+        <a id="pay-button" href="https://ko-fi.com/tu_pagina" target="_blank"
+            class="w-full bg-green-600 text-white font-extrabold py-3 rounded-lg block text-center hover:bg-green-700 transition duration-200 shadow-xl shadow-green-600/40"
+        >
+            PAGAR AHORA EN KOFI
+        </a>
     </div>
 
-<script>
-    // --- CONFIGURACIÓN DE SUPABASE (SIN CAMBIOS) ---
-    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; // ¡REEMPLAZA CON TU URL!
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; // ¡REEMPLAZA CON TU CLAVE ANON!
-    const TABLE_NAME = 'clientes'; 
+    <!-- Instrucción para el RETORNO (Simple y directo) -->
+    <div class="bg-[#161b22] p-4 rounded-lg border border-[#30363d] text-center">
+        <h2 class="text-xl font-bold text-white mb-2">
+            ¡Ya casi!
+        </h2>
+        <p class="text-gray-400 text-sm mb-3">
+            Una vez pagues, regresa a la App y ve a tu perfil para **ver el estatus**.
+        </p>
+    </div>
+
+    <p id="status-message" class="text-center mt-4 font-semibold"></p>
+</div>
+
+<script type="module">
+    // *** CONFIGURACIÓN CRÍTICA DE SUPABASE ***
+    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
+    const REQUESTS_TABLE = 'service_requests';
     
-    let supabaseClient;
-    try {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch (e) {
-        console.error("Error al crear cliente Supabase:", e);
+    // Asumiendo que Supabase está inicializado en otro lugar, pero lo inicializamos aquí para la auditoría
+    const supabase = SUPABASE_URL !== 'https://hsdhsgyzxalhjdihpuvo.supabase.co' 
+        ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+
+    const solicitudIdDisplay = document.getElementById('solicitud-id-display');
+    const payButton = document.getElementById('pay-button');
+    const statusMessage = document.getElementById('status-message');
+    const copyMessage = document.getElementById('copy-message');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const solicitudId = urlParams.get('solicitudId');
+
+    if (!solicitudId) {
+        solicitudIdDisplay.textContent = 'ID INVÁLIDO';
+        statusMessage.textContent = "🔴 ID FALTANTE.";
+        payButton.disabled = true;
+        return;
     }
 
-    const solicitudIdDisplay = document.getElementById('solicitudIdDisplay');
-    const payButton = document.getElementById('payButton');
-    const statusMessage = document.getElementById('statusMessage');
+    solicitudIdDisplay.textContent = solicitudId;
 
-    function getUrlParameter(name) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        const results = regex.exec(location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-    }
+    // Lógica: Copiar el ID al hacer click
+    solicitudIdDisplay.addEventListener('click', () => {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = solicitudId;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        try {
+            document.execCommand('copy');
+            copyMessage.classList.remove('hidden');
+            setTimeout(() => copyMessage.classList.add('hidden'), 2000);
+        } catch (err) {
+            console.error('Fallo al intentar copiar texto:', err);
+        }
+        document.body.removeChild(tempInput);
+    });
 
-    const solicitudId = getUrlParameter('solicitud');
-
-    if (solicitudId && supabaseClient) {
-        solicitudIdDisplay.textContent = `#${solicitudId}`;
-        
-        // LÓGICA DE ACTUALIZACIÓN DEL ESTADO AL HACER CLIC EN EL BOTÓN DE PAGO
-        payButton.addEventListener('click', async (e) => {
-            // El e.preventDefault() NO es necesario aquí porque usamos target="_blank", 
-            // pero lo dejamos para ejecutar la auditoría ANTES de la apertura de la nueva pestaña.
-
+    // Lógica: Auditoría en Supabase al clickear Pagar
+    if (supabase) {
+        payButton.addEventListener('click', async () => {
             payButton.disabled = true;
-            payButton.textContent = "REGISTRANDO PAGO...";
-            statusMessage.textContent = "Auditoría registrada. Abriendo Ko-fi...";
-            statusMessage.classList.remove('error-state');
+            payButton.textContent = "AUDITANDO...";
+            statusMessage.textContent = "Guardando auditoría de pago...";
 
             try {
-                // 1. AUDITAR EL REGISTRO EN SUPABASE (El pago real se hace en Ko-fi)
-                const { error } = await supabaseClient
-                    .from(TABLE_NAME)
-                    .update({ status: 'Pendiente - Pago Iniciado' }) 
+                // Actualizamos el estado a 'PAGO_EN_CURSO' para que tú sepas que el cliente fue a pagar
+                const { error } = await supabase
+                    .from(REQUESTS_TABLE)
+                    .update({ status: 'PAGO_EN_CURSO' }) 
                     .eq('id', solicitudId); 
 
-                if (error) {
-                    throw new Error(error.message || "Error desconocido de Supabase.");
-                }
+                if (error) throw new Error(error.message || "Error desconocido.");
 
-                // 2. ÉXITO: Abrir la URL de pago en una nueva pestaña
-                statusMessage.textContent = "✅ Proceso de pago iniciado. No cierres esta pestaña.";
-                // Usar window.open para asegurar que se abre en una nueva ventana/tab
+                statusMessage.textContent = "✅ ¡Listo! Ve a Kofi y paga.";
+                statusMessage.classList.add('text-green-400');
+                
+                // Abrir Kofi en una nueva pestaña (como se hacía antes)
                 window.open(payButton.href, '_blank'); 
 
-                // 3. Reestablecer el botón (ya que la página principal debe permanecer abierta)
+                // Reestablecer el botón solo visualmente
                 setTimeout(() => {
                     payButton.disabled = false;
-                    payButton.textContent = "PAGO URGENTE PARA CLASIFICAR";
+                    payButton.textContent = "PAGAR AHORA EN KOFI";
                 }, 1500);
-
 
             } catch (error) {
                 console.error("Fallo en la actualización:", error);
-                statusMessage.classList.add('error-state');
-                statusMessage.textContent = "🔴 ERROR: Fallo al auditar. Intenta de nuevo.";
+                statusMessage.classList.add('text-red-500');
+                statusMessage.textContent = "🔴 ERROR DE AUDITORÍA: Intenta de nuevo.";
                 payButton.disabled = false;
-                payButton.textContent = "PAGO URGENTE PARA CLASIFICAR";
+                payButton.textContent = "PAGAR AHORA EN KOFI";
             }
         });
-
-    } else {
-        solicitudIdDisplay.textContent = 'ID INVÁLIDO';
-        statusMessage.classList.add('error-state');
-        statusMessage.textContent = "🔴 ID FALTANTE. Contacte a soporte.";
-        payButton.disabled = true;
-        payButton.textContent = "ERROR (ID INVÁLIDO)";
     }
-
 </script>
 </body>
 </html>
