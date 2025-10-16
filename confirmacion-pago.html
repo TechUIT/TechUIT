@@ -1,5 +1,4 @@
-    
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -108,18 +107,24 @@
 </div>
 
 <script type="module">
-    // *** CONFIGURACIÓN CRÍTICA DE SUPABASE (CORREGIDA) ***
-    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; // ¡IMPORTANTE: Reemplazar!
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; // ¡IMPORTANTE: Reemplazar!
+    // *** CONFIGURACIÓN CRÍTICA DE SUPABASE (Tus credenciales) ***
+    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
     const REQUESTS_TABLE = 'service_requests';
     
     // Inicialización Corregida del Cliente Supabase
     let supabase = null;
-    if (SUPABASE_URL !== 'https://hsdhsgyzxalhjdihpuvo.supabase.co') {
-        supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-        console.error("🔴 Supabase no está configurado. La auditoría no funcionará.");
+    try {
+        // Se elimina la lógica condicional que impedía la inicialización, ya que las credenciales son correctas.
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            console.error("🔴 Supabase SDK no se detectó. Verifique la carga del CDN.");
+        }
+    } catch(e) {
+        console.error("🔴 Error al inicializar Supabase:", e);
     }
+    
 
     const idDisplay = document.getElementById('id-display');
     const payButton = document.getElementById('pay-button');
@@ -127,25 +132,32 @@
     const copyMessage = document.getElementById('copy-message');
 
     const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
+    
+    // *** CORRECCIÓN CRÍTICA DE LECTURA DE ID (BUSCAMOS MÚLTIPLES NOMBRES) ***
+    let id = urlParams.get('id');
+    if (!id) {
+        // Fallback: Si no es 'id', intentamos con 'solicitud'
+        id = urlParams.get('solicitud'); 
+    }
+    // Fin de corrección de lectura de ID
 
     if (!id) {
-       idDisplay.textContent = 'ID INVÁLIDO';
-        statusMessage.textContent = "🔴 ID FALTANTE.";
+        idDisplay.textContent = 'ID INVÁLIDO';
+        statusMessage.textContent = "🔴 ID FALTANTE. Verifica que la página anterior redirigió correctamente.";
         payButton.disabled = true;
         return;
     }
 
-    idDisplay.textContent = id;
+    idDisplay.textContent = id; // ¡AQUÍ SE MUESTRA EL ID CORREGIDO!
 
     // Lógica: Copiar el ID al hacer click
     idDisplay.addEventListener('click', () => {
         const tempInput = document.createElement('textarea');
-        tempInput.value = id;
+        tempInput.value = id; // Usamos la variable 'id'
         document.body.appendChild(tempInput);
         tempInput.select();
         try {
-            // Reemplazo de navigator.clipboard por document.execCommand('copy') por temas de iFrame/Canvas.
+            // Usamos document.execCommand('copy') por temas de iFrame/Canvas.
             document.execCommand('copy');
             copyMessage.classList.remove('hidden');
             setTimeout(() => copyMessage.classList.add('hidden'), 2000);
@@ -166,23 +178,25 @@
             statusMessage.textContent = "Guardando auditoría de inicio de pago...";
 
             try {
-                // Actualizamos el estado a 'PAGO_EN_CURSO' para que tú sepas que el cliente fue a pagar
+                // Actualizamos el estado a 'PAGO_EN_CURSO' 
+                // *** CORRECCIÓN CRÍTICA: Se agrega el valor del ID a la cláusula .eq() ***
                 const { error } = await supabase
                     .from(REQUESTS_TABLE)
                     .update({ status: 'PAGO_EN_CURSO' }) 
-                    .eq('id'); 
+                    .eq('id', id); // <-- FIX APLICADO AQUÍ
 
-                if (error) throw new Error(error.message || "Error desconocido.");
+                if (error) throw new Error(error.message || "Error desconocido de Supabase.");
 
                 statusMessage.textContent = "✅ ¡Listo! Redirigiendo a Kofi para el pago.";
                 statusMessage.classList.add('text-green-400');
                 
-                // Abrir Kofi en una nueva pestaña (usando la URL original del botón)
-                window.open(payButton.href, 'https://ko-fi.com/c/8d720c6c86'); 
+                // Abrir Kofi en una nueva pestaña (usando la URL del botón)
+                window.open(payButton.href, '_blank'); 
 
-                // Reestablecer el botón solo visualmente, el usuario ya no debería interactuar aquí
+                // Reestablecer el botón
                 setTimeout(() => {
                     payButton.textContent = "PAGO INICIADO";
+                    payButton.disabled = false;
                 }, 1500);
 
             } catch (error) {
@@ -194,8 +208,8 @@
             }
         });
     } else {
-         // Si Supabase no está configurado, el botón sigue funcionando como link, pero sin auditoría
-        statusMessage.textContent = "⚠️ ADVERTENCIA: La verificación de pago es manual.";
+        // Si Supabase es null (no se conectó), el botón funciona como un link normal de Ko-fi
+        statusMessage.textContent = "⚠️ ADVERTENCIA: La auditoría de pago está inactiva. Proceso manual.";
     }
 </script>
 </body>
