@@ -54,6 +54,13 @@
             user-select: all;
             box-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
         }
+        /* Estilo para errores de ID */
+        .code-display.error-state {
+            color: #ff4d4d;
+            border-color: #ff4d4d;
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -103,23 +110,20 @@
         </p>
     </div>
 
-    <p id="status-message" class="text-center mt-4 font-semibold"></p>
+    <p id="status-message" class="text-center mt-4 font-semibold text-gray-400"></p>
 </div>
 
 <script type="module">
-    // *** CONFIGURACIÓN CRÍTICA DE SUPABASE (Tus credenciales) ***
+    // *** TUS CREDENCIALES, NO MODIFICADAS ***
     const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
-    const REQUESTS_TABLE = 'service_requests';
-    
-    // Inicialización Corregida del Cliente Supabase
+    const REQUESTS_TABLE = 'clientes'; // Se usa 'clientes' según el esquema que enviaste
+
+    // Inicialización de Supabase: Se asegura que se inicialice si el SDK está cargado
     let supabase = null;
     try {
-        // Se elimina la lógica condicional que impedía la inicialización, ya que las credenciales son correctas.
         if (window.supabase && typeof window.supabase.createClient === 'function') {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-            console.error("🔴 Supabase SDK no se detectó. Verifique la carga del CDN.");
         }
     } catch(e) {
         console.error("🔴 Error al inicializar Supabase:", e);
@@ -133,31 +137,41 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     
-    // *** CORRECCIÓN CRÍTICA DE LECTURA DE ID (BUSCAMOS MÚLTIPLES NOMBRES) ***
+    // *** CORRECCIÓN CRÍTICA DE LECTURA DE ID ***
+    // 1. Intentamos leer el parámetro 'id' (el más probable para un BIGINT)
     let id = urlParams.get('id');
+    
+    // 2. Si es nulo, intentamos leer el parámetro 'solicitud' (un posible nombre alternativo)
     if (!id) {
-        // Fallback: Si no es 'id', intentamos con 'solicitud'
         id = urlParams.get('solicitud'); 
     }
-    // Fin de corrección de lectura de ID
+    
+    // Mensaje de diagnóstico para la consola.
+    console.log("URL de la página:", window.location.href);
+    console.log("ID capturado de la URL:", id);
+    // *** FIN CORRECCIÓN CRÍTICA ***
 
     if (!id) {
-        idDisplay.textContent = 'ID INVÁLIDO';
-        statusMessage.textContent = "🔴 ID FALTANTE. Verifica que la página anterior redirigió correctamente.";
+        // Fallo: ID no se encontró en la URL.
+        idDisplay.textContent = 'ID FALTANTE (Error de Redirección)';
+        idDisplay.classList.add('error-state');
+        statusMessage.textContent = "🔴 ID FALTANTE. El problema es la redirección de la página anterior.";
         payButton.disabled = true;
+        payButton.classList.remove('bg-green-600');
+        payButton.classList.add('bg-red-600');
         return;
     }
 
-    idDisplay.textContent = id; // ¡AQUÍ SE MUESTRA EL ID CORREGIDO!
+    // Éxito: ID se encontró y se muestra.
+    idDisplay.textContent = id; 
 
     // Lógica: Copiar el ID al hacer click
     idDisplay.addEventListener('click', () => {
         const tempInput = document.createElement('textarea');
-        tempInput.value = id; // Usamos la variable 'id'
+        tempInput.value = id;
         document.body.appendChild(tempInput);
         tempInput.select();
         try {
-            // Usamos document.execCommand('copy') por temas de iFrame/Canvas.
             document.execCommand('copy');
             copyMessage.classList.remove('hidden');
             setTimeout(() => copyMessage.classList.add('hidden'), 2000);
@@ -167,35 +181,32 @@
         document.body.removeChild(tempInput);
     });
 
-    // Lógica: Auditoría en Supabase al clickear Pagar (SOLO SI SUPABASE ESTÁ CONECTADO)
+    // Lógica: Auditoría en Supabase al clickear Pagar
     if (supabase) {
         payButton.addEventListener('click', async (event) => {
-            // Evitamos la redirección inmediata del <a> para hacer la auditoría
-            event.preventDefault(); 
+            event.preventDefault(); // Evitamos la redirección inmediata
             
             payButton.disabled = true;
             payButton.textContent = "AUDITANDO EN SUPABASE...";
             statusMessage.textContent = "Guardando auditoría de inicio de pago...";
 
             try {
-                // Actualizamos el estado a 'PAGO_EN_CURSO' 
-                // *** CORRECCIÓN CRÍTICA: Se agrega el valor del ID a la cláusula .eq() ***
+                // Se usa 'clientes' y se asegura el uso de .eq('id', id)
                 const { error } = await supabase
                     .from(REQUESTS_TABLE)
-                    .update({ status: 'PAGO_EN_CURSO' }) 
-                    .eq('id', id); // <-- FIX APLICADO AQUÍ
+                    .update({ status: 'Pago - Iniciado Diagnóstico' }) // Estado más explícito
+                    .eq('id', id); // <--- CORRECCIÓN APLICADA AQUÍ
 
                 if (error) throw new Error(error.message || "Error desconocido de Supabase.");
 
-                statusMessage.textContent = "✅ ¡Listo! Redirigiendo a Kofi para el pago.";
+                statusMessage.textContent = "✅ ¡Auditoría OK! Redirigiendo a Kofi.";
                 statusMessage.classList.add('text-green-400');
                 
-                // Abrir Kofi en una nueva pestaña (usando la URL del botón)
+                // Abrir Kofi en una nueva pestaña 
                 window.open(payButton.href, '_blank'); 
 
-                // Reestablecer el botón
                 setTimeout(() => {
-                    payButton.textContent = "PAGO INICIADO";
+                    payButton.textContent = "PAGO INICIADO (Revisa Ko-fi)";
                     payButton.disabled = false;
                 }, 1500);
 
@@ -208,8 +219,9 @@
             }
         });
     } else {
-        // Si Supabase es null (no se conectó), el botón funciona como un link normal de Ko-fi
-        statusMessage.textContent = "⚠️ ADVERTENCIA: La auditoría de pago está inactiva. Proceso manual.";
+        // Si Supabase es null, el botón funciona como un link normal, pero sin auditoría
+        statusMessage.textContent = "⚠️ ADVERTENCIA: Auditoría inactiva. Proceso manual (solo el pago).";
+        statusMessage.classList.add('text-yellow-400');
     }
 </script>
 </body>
