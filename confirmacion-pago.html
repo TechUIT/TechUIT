@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+    
+    <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -16,7 +17,6 @@
             --color-card-bg: #1a1a1a;   
             --color-primary: #007bff;   
             --color-text-light: #f3f4f6;
-            --color-success: #25D366;   
         }
         
         body {
@@ -65,7 +65,7 @@
             ✅ Solicitud Aprobada
         </h1>
         <p class="text-sm text-gray-400">
-            Último paso: Pago para enviar tu servicio como URGENTE.
+            Último paso: Pago para clasificar tu servicio como URGENTE.
         </p>
     </header>
 
@@ -100,7 +100,7 @@
             ¡Ya casi!
         </h2>
         <p class="text-gray-400 text-sm mb-3">
-            Una vez pagues, regresa a la App y ve a tu perfil para **ver el estatus**.
+            Una vez pagues, **regresa a la App y ve a tu perfil** para <a href="estatus-servicio.html" class="text-yellow-400 underline hover:text-yellow-300">ver el estatus</a>.
         </p>
     </div>
 
@@ -108,15 +108,18 @@
 </div>
 
 <script type="module">
-    // *** CONFIGURACIÓN CRÍTICA DE SUPABASE ***
-    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
+    // *** CONFIGURACIÓN CRÍTICA DE SUPABASE (CORREGIDA) ***
+    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; // ¡IMPORTANTE: Reemplazar!
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; // ¡IMPORTANTE: Reemplazar!
     const REQUESTS_TABLE = 'service_requests';
     
-    // Asumiendo que Supabase está inicializado en otro lugar, pero lo inicializamos aquí para la auditoría
-    const supabase = SUPABASE_URL !== 'https://hsdhsgyzxalhjdihpuvo.supabase.co' 
-        ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-        : null;
+    // Inicialización Corregida del Cliente Supabase
+    let supabase = null;
+    if (SUPABASE_URL !== 'https://hsdhsgyzxalhjdihpuvo.supabase.co') {
+        supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+        console.error("🔴 Supabase no está configurado. La auditoría no funcionará.");
+    }
 
     const solicitudIdDisplay = document.getElementById('solicitud-id-display');
     const payButton = document.getElementById('pay-button');
@@ -142,6 +145,7 @@
         document.body.appendChild(tempInput);
         tempInput.select();
         try {
+            // Reemplazo de navigator.clipboard por document.execCommand('copy') por temas de iFrame/Canvas.
             document.execCommand('copy');
             copyMessage.classList.remove('hidden');
             setTimeout(() => copyMessage.classList.add('hidden'), 2000);
@@ -151,12 +155,15 @@
         document.body.removeChild(tempInput);
     });
 
-    // Lógica: Auditoría en Supabase al clickear Pagar
+    // Lógica: Auditoría en Supabase al clickear Pagar (SOLO SI SUPABASE ESTÁ CONECTADO)
     if (supabase) {
-        payButton.addEventListener('click', async () => {
+        payButton.addEventListener('click', async (event) => {
+            // Evitamos la redirección inmediata del <a> para hacer la auditoría
+            event.preventDefault(); 
+            
             payButton.disabled = true;
-            payButton.textContent = "AUDITANDO...";
-            statusMessage.textContent = "Guardando auditoría de pago...";
+            payButton.textContent = "AUDITANDO EN SUPABASE...";
+            statusMessage.textContent = "Guardando auditoría de inicio de pago...";
 
             try {
                 // Actualizamos el estado a 'PAGO_EN_CURSO' para que tú sepas que el cliente fue a pagar
@@ -167,26 +174,28 @@
 
                 if (error) throw new Error(error.message || "Error desconocido.");
 
-                statusMessage.textContent = "✅ ¡Listo! Ve a Kofi y paga.";
+                statusMessage.textContent = "✅ ¡Listo! Redirigiendo a Kofi para el pago.";
                 statusMessage.classList.add('text-green-400');
                 
-                // Abrir Kofi en una nueva pestaña (como se hacía antes)
+                // Abrir Kofi en una nueva pestaña (usando la URL original del botón)
                 window.open(payButton.href, '_blank'); 
 
-                // Reestablecer el botón solo visualmente
+                // Reestablecer el botón solo visualmente, el usuario ya no debería interactuar aquí
                 setTimeout(() => {
-                    payButton.disabled = false;
-                    payButton.textContent = "PAGAR AHORA EN KOFI";
+                    payButton.textContent = "PAGO INICIADO";
                 }, 1500);
 
             } catch (error) {
-                console.error("Fallo en la actualización:", error);
+                console.error("Fallo en la auditoría Supabase:", error);
                 statusMessage.classList.add('text-red-500');
-                statusMessage.textContent = "🔴 ERROR DE AUDITORÍA: Intenta de nuevo.";
+                statusMessage.textContent = "🔴 ERROR DE AUDITORÍA: Intenta de nuevo o contacta a soporte.";
                 payButton.disabled = false;
                 payButton.textContent = "PAGAR AHORA EN KOFI";
             }
         });
+    } else {
+         // Si Supabase no está configurado, el botón sigue funcionando como link, pero sin auditoría
+        statusMessage.textContent = "⚠️ ADVERTENCIA: La verificación de pago es manual.";
     }
 </script>
 </body>
