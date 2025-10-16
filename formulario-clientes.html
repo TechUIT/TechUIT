@@ -126,14 +126,14 @@
     </div>
 
 <script>
-    // Configuración de Supabase (Debes reemplazar estas variables con tus propias credenciales)
-    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; // REEMPLAZA CON TU URL
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; // REEMPLAZA CON TU CLAVE ANON
+    // Configuración de Supabase (Ya has colocado tus credenciales reales aquí, las mantendré)
+    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; 
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; 
     
     // Inicialización del cliente Supabase
     let supabaseClient;
     try {
-        // SOLUCIÓN AL ERROR: La variable global es 'supabase' (minúscula)
+        // Aseguramos que el cliente se crea a partir de la variable global 'supabase'
         if (typeof supabase !== 'undefined') {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log("Supabase inicializado correctamente.");
@@ -180,7 +180,7 @@
 
             try {
                 // 1. OBTENER VALORES DEL FORMULARIO USANDO LOS NOMBRES EXACTOS DE LAS COLUMNAS EN TU TABLA
-                const data = {
+                const dataToInsert = { // Renombramos la variable para evitar confusión con el resultado de Supabase
                     nombre: document.getElementById('nombre').value,
                     telefono: document.getElementById('telefono').value,
                     direccion: document.getElementById('direccion').value,
@@ -190,10 +190,12 @@
                 };
 
                 // 2. INSERCIÓN DE DATOS en la tabla 'clientes'
-                const { error, data: insertedData } = await supabaseClient
+                // *** CAMBIO CRÍTICO: Usamos .select('id') y .single() ***
+                const { error, data: insertedRow } = await supabaseClient
                     .from(TABLE_NAME)
-                    .insert([data])
-                    .select(); // Devolvemos los datos insertados, incluyendo el ID
+                    .insert([dataToInsert])
+                    .select('id') // <-- OBLIGAMOS A SUPABASE A DEVOLVER SOLO EL ID GENERADO
+                    .single();    // <-- OBLIGAMOS A QUE LA RESPUESTA SEA UN SOLO OBJETO (NO UN ARRAY)
 
                 if (error) {
                     let errorMessage = `🔴 FALLO: Código Supabase: ${error.code}.`;
@@ -210,16 +212,20 @@
                     console.error("Supabase Error Completo:", error);
 
                 } else {
-                    // ÉXITO: Redirigir a la página de confirmación de pago.
-                    const id = insertedData && insertedData.length > 0 ? insertedData[0].id : 'N/A';
+                    // ÉXITO
+                    // *** CAMBIO CRÍTICO DE EXTRACCIÓN DEL ID ***
+                    // Como usamos .single(), el ID está directamente en insertedRow.id
+                    const id = insertedRow ? insertedRow.id : null; 
                     
-                    if (id !== 'N/A') {
+                    if (id) {
                         showMessage(`✅ ¡Solicitud #${id} registrada! Redirigiendo a pago...`, 'success');
                         // Redirección con el ID del registro
+                        // La URL de redirección en tu código ya estaba correcta: confirmacion-pago.html?solicitud=...
                         setTimeout(() => {
                             window.location.href = 'confirmacion-pago.html?solicitud=' + id;
                         }, 1000);
                     } else {
+                        // Esto solo debería pasar si la inserción fue exitosa pero Supabase no devolvió el ID
                         showMessage("✅ Solicitud registrada, pero no se recibió el ID. Recarga la página.", 'success');
                         form.reset();
                     }
