@@ -83,11 +83,11 @@
 
         <!-- Instrucción de Pago -->
         <p class="text-lg font-bold text-white mb-3 text-center mt-6">
-            ➡️ 2. Haz el Pago y PÉGALO como NOTA:
+            ➡️ 2. Escribe el ID como NOTA en KOFI:
         </p>
         
         <!-- Botón para ir a Kofi -->
-        <a id="pay-button" href="https://ko-fi.com/tu_pagina" target="_blank"
+        <a id="pay-button" href="https://ko-fi.com/c/8d720c6c86" target="_blank"
             class="w-full bg-green-600 text-white font-extrabold py-3 rounded-lg block text-center hover:bg-green-700 transition duration-200 shadow-xl shadow-green-600/40"
         >
             PAGAR AHORA EN KOFI
@@ -127,7 +127,7 @@
     const copyMessage = document.getElementById('copy-message');
 
     const urlParams = new URLSearchParams(window.location.search);
-    const solicitudId = urlParams.get('solicitudId');
+    const solicitudId = urlParams.get('solicitud');
 
     if (!solicitudId) {
         solicitudIdDisplay.textContent = 'ID INVÁLIDO';
@@ -178,7 +178,7 @@
                 statusMessage.classList.add('text-green-400');
                 
                 // Abrir Kofi en una nueva pestaña (usando la URL original del botón)
-                window.open(payButton.href, '_blank'); 
+                window.open(payButton.href, 'https://ko-fi.com/c/8d720c6c86'); 
 
                 // Reestablecer el botón solo visualmente, el usuario ya no debería interactuar aquí
                 setTimeout(() => {
