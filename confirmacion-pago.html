@@ -127,7 +127,7 @@
     const copyMessage = document.getElementById('copy-message');
 
     const urlParams = new URLSearchParams(window.location.search);
-    const solicitudId = urlParams.get('solicitud');
+    const solicitudId = urlParams.get('id');
 
     if (!solicitudId) {
         solicitudIdDisplay.textContent = 'ID INVÁLIDO';
