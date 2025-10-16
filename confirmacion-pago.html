@@ -76,7 +76,7 @@
         </p>
         
         <!-- Código Único del Cliente -->
-        <div id="solicitud-id-display" class="code-display mb-4">
+        <div id="id-display" class="code-display mb-4">
             Cargando ID...
         </div>
         <p id="copy-message" class="text-sm font-bold text-green-400 text-center hidden">✅ ¡Código Copiado! Presiona 2.</p>
@@ -121,27 +121,27 @@
         console.error("🔴 Supabase no está configurado. La auditoría no funcionará.");
     }
 
-    const solicitudIdDisplay = document.getElementById('solicitud-id-display');
+    const idDisplay = document.getElementById('id-display');
     const payButton = document.getElementById('pay-button');
     const statusMessage = document.getElementById('status-message');
     const copyMessage = document.getElementById('copy-message');
 
     const urlParams = new URLSearchParams(window.location.search);
-    const solicitudId = urlParams.get('id');
+    const id = urlParams.get('id');
 
-    if (!solicitudId) {
-        solicitudIdDisplay.textContent = 'ID INVÁLIDO';
+    if (!id) {
+       idDisplay.textContent = 'ID INVÁLIDO';
         statusMessage.textContent = "🔴 ID FALTANTE.";
         payButton.disabled = true;
         return;
     }
 
-    solicitudIdDisplay.textContent = solicitudId;
+    idDisplay.textContent = id;
 
     // Lógica: Copiar el ID al hacer click
-    solicitudIdDisplay.addEventListener('click', () => {
+    idDisplay.addEventListener('click', () => {
         const tempInput = document.createElement('textarea');
-        tempInput.value = solicitudId;
+        tempInput.value = id;
         document.body.appendChild(tempInput);
         tempInput.select();
         try {
@@ -170,7 +170,7 @@
                 const { error } = await supabase
                     .from(REQUESTS_TABLE)
                     .update({ status: 'PAGO_EN_CURSO' }) 
-                    .eq('id', solicitudId); 
+                    .eq('id'); 
 
                 if (error) throw new Error(error.message || "Error desconocido.");
 
