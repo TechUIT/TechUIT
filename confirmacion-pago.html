@@ -8,14 +8,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- ESTILOS CONSISTENTES (Fondo Negro, Tarjeta Oscura) --- */
+        /* --- ESTILOS CONSISTENTES (Luxury / Dark Mode App Feel) --- */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
         :root {
             --color-dark-bg: #000;      
             --color-card-bg: #1a1a1a;   
-            --color-primary: #007bff;   
             --color-text-light: #f3f4f6;
+            --color-accent: #ffc107; /* Amarillo para el ID */
+            --color-success-btn: #25D366; /* Verde Ko-fi */
         }
         
         body {
@@ -31,42 +32,50 @@
         }
         
         .main-card {
-            max-width: 440px; 
+            max-width: 440px; /* Ancho compacto de móvil */
             width: 100%;
             padding: 24px;
             background-color: var(--color-card-bg);
             border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             border: 1px solid #30363d;
         }
 
         .code-display {
             background-color: #0d1117;
-            border: 2px solid #ffc107; /* Borde amarillo llamativo */
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1.8rem;
+            border: 3px solid var(--color-accent); 
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 2rem;
             font-weight: 900;
-            color: #ffc107; /* Amarillo para el ID */
+            color: var(--color-accent); 
             text-align: center;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             cursor: pointer;
             user-select: all;
-            box-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+            transition: all 0.2s;
         }
-        /* Estilo para errores de ID */
+
         .code-display.error-state {
             color: #ff4d4d;
             border-color: #ff4d4d;
             box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
             font-size: 1.2rem;
+            letter-spacing: normal;
+        }
+        
+        /* Botón Ko-fi con sombra más agresiva */
+        #pay-button {
+            background-color: var(--color-success-btn);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
         }
     </style>
 </head>
 <body>
 
 <div class="main-card">
-    <header class="text-center mb-6">
+    <header class="text-center mb-8">
         <h1 class="text-3xl font-extrabold text-white mb-2">
             ✅ Solicitud Aprobada
         </h1>
@@ -75,35 +84,35 @@
         </p>
     </header>
 
-    <div class="bg-[#0d1117] p-5 rounded-lg border border-[#30363d] mb-6">
-        <!-- Instrucciones Mínimas -->
-        <p class="text-lg font-bold text-red-500 mb-2 text-center">
+    <div class="bg-[#0d1117] p-6 rounded-xl border border-[#30363d] mb-6">
+        <!-- Instrucción de Copia del ID -->
+        <p class="text-lg font-bold text-red-400 mb-4 text-center">
             ➡️ 1. COPIA este Código Único (ID):
         </p>
         
         <!-- Código Único del Cliente -->
-        <div id="id-display" class="code-display mb-4">
+        <div id="solicitud-id-display" class="code-display mb-4" title="Clic para Copiar">
             Cargando ID...
         </div>
-        <p id="copy-message" class="text-sm font-bold text-green-400 text-center hidden">✅ ¡Código Copiado! Presiona 2.</p>
+        <p id="copy-message" class="text-sm font-bold text-green-400 text-center hidden">✅ ¡Código Copiado! Ve al paso 2.</p>
 
         <!-- Instrucción de Pago -->
-        <p class="text-lg font-bold text-white mb-3 text-center mt-6">
+        <p class="text-lg font-bold text-white mb-4 text-center mt-6">
             ➡️ 2. Escribe el ID como NOTA en KOFI:
         </p>
         
         <!-- Botón para ir a Kofi -->
         <a id="pay-button" href="https://ko-fi.com/c/8d720c6c86" target="_blank"
-            class="w-full bg-green-600 text-white font-extrabold py-3 rounded-lg block text-center hover:bg-green-700 transition duration-200 shadow-xl shadow-green-600/40"
+            class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
         >
             PAGAR AHORA EN KOFI
         </a>
     </div>
 
-    <!-- Instrucción para el RETORNO (Simple y directo) -->
+    <!-- Instrucción para el RETORNO -->
     <div class="bg-[#161b22] p-4 rounded-lg border border-[#30363d] text-center">
         <h2 class="text-xl font-bold text-white mb-2">
-            ¡Ya casi!
+            ¡Todo listo!
         </h2>
         <p class="text-gray-400 text-sm mb-3">
             Una vez pagues, **regresa a la App y ve a tu perfil** para <a href="estatus-servicio.html" class="text-yellow-400 underline hover:text-yellow-300">ver el estatus</a>.
@@ -117,20 +126,22 @@
     // *** TUS CREDENCIALES, NO MODIFICADAS ***
     const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
-    const REQUESTS_TABLE = 'clientes'; // Se usa 'clientes' según el esquema que enviaste
+    const REQUESTS_TABLE = 'clientes'; // Usando 'clientes' según tu esquema
 
-    // Inicialización de Supabase: Se asegura que se inicialice si el SDK está cargado
+    // Inicialización de Supabase
     let supabase = null;
     try {
         if (window.supabase && typeof window.supabase.createClient === 'function') {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+             console.error("🔴 Supabase SDK no cargado.");
         }
     } catch(e) {
         console.error("🔴 Error al inicializar Supabase:", e);
     }
     
-
-    const idDisplay = document.getElementById('id-display');
+    // Elementos del DOM
+    const solicitudIdDisplay = document.getElementById('solicitud-id-display');
     const payButton = document.getElementById('pay-button');
     const statusMessage = document.getElementById('status-message');
     const copyMessage = document.getElementById('copy-message');
@@ -138,37 +149,29 @@
     const urlParams = new URLSearchParams(window.location.search);
     
     // *** CORRECCIÓN CRÍTICA DE LECTURA DE ID ***
-    // 1. Intentamos leer el parámetro 'id' (el más probable para un BIGINT)
-    let id = urlParams.get('id');
+    // 1. EXTRAEMOS DIRECTAMENTE EL PARÁMETRO 'solicitud' que confirmaste que aparece en la URL
+    const solicitudId = urlParams.get('solicitud'); 
     
-    // 2. Si es nulo, intentamos leer el parámetro 'solicitud' (un posible nombre alternativo)
-    if (!id) {
-        id = urlParams.get('solicitud'); 
-    }
-    
-    // Mensaje de diagnóstico para la consola.
-    console.log("URL de la página:", window.location.href);
-    console.log("ID capturado de la URL:", id);
-    // *** FIN CORRECCIÓN CRÍTICA ***
-
-    if (!id) {
+    // 2. Comprobación y Renderizado
+    if (!solicitudId) {
         // Fallo: ID no se encontró en la URL.
-        idDisplay.textContent = 'ID FALTANTE (Error de Redirección)';
-        idDisplay.classList.add('error-state');
-        statusMessage.textContent = "🔴 ID FALTANTE. El problema es la redirección de la página anterior.";
+        solicitudIdDisplay.textContent = 'ID FALTANTE (Error de Redirección)';
+        solicitudIdDisplay.classList.add('error-state');
+        statusMessage.textContent = "🔴 ID FALTANTE. Verifica la redirección de la página anterior.";
         payButton.disabled = true;
         payButton.classList.remove('bg-green-600');
         payButton.classList.add('bg-red-600');
+        console.error("El ID de la solicitud no se encontró en la URL con el parámetro 'solicitud'.");
         return;
     }
 
     // Éxito: ID se encontró y se muestra.
-    idDisplay.textContent = id; 
+    solicitudIdDisplay.textContent = solicitudId; 
 
     // Lógica: Copiar el ID al hacer click
-    idDisplay.addEventListener('click', () => {
+    solicitudIdDisplay.addEventListener('click', () => {
         const tempInput = document.createElement('textarea');
-        tempInput.value = id;
+        tempInput.value = solicitudId; 
         document.body.appendChild(tempInput);
         tempInput.select();
         try {
@@ -184,44 +187,47 @@
     // Lógica: Auditoría en Supabase al clickear Pagar
     if (supabase) {
         payButton.addEventListener('click', async (event) => {
-            event.preventDefault(); // Evitamos la redirección inmediata
+            event.preventDefault(); 
             
             payButton.disabled = true;
             payButton.textContent = "AUDITANDO EN SUPABASE...";
             statusMessage.textContent = "Guardando auditoría de inicio de pago...";
 
             try {
-                // Se usa 'clientes' y se asegura el uso de .eq('id', id)
+                // Actualizar el estado a 'Pago - Iniciado Diagnóstico'
                 const { error } = await supabase
                     .from(REQUESTS_TABLE)
-                    .update({ status: 'Pago - Iniciado Diagnóstico' }) // Estado más explícito
-                    .eq('id', id); // <--- CORRECCIÓN APLICADA AQUÍ
+                    .update({ status: 'Pago - Iniciado Diagnóstico' }) 
+                    .eq('id', solicitudId); // Usamos solicitudId
 
-                if (error) throw new Error(error.message || "Error desconocido de Supabase.");
+                if (error) {
+                    throw new Error(error.message || "Error desconocido de Supabase.");
+                }
 
-                statusMessage.textContent = "✅ ¡Auditoría OK! Redirigiendo a Kofi.";
-                statusMessage.classList.add('text-green-400');
-                
-                // Abrir Kofi en una nueva pestaña 
+                // ÉXITO: Abrir la URL de pago en una nueva pestaña
+                statusMessage.textContent = "✅ Proceso de pago iniciado. No cierres esta pestaña.";
                 window.open(payButton.href, '_blank'); 
 
+                // Reestablecer el botón
                 setTimeout(() => {
-                    payButton.textContent = "PAGO INICIADO (Revisa Ko-fi)";
                     payButton.disabled = false;
+                    payButton.textContent = "PAGAR AHORA EN KOFI";
                 }, 1500);
 
+
             } catch (error) {
-                console.error("Fallo en la auditoría Supabase:", error);
+                console.error("Fallo en la actualización:", error);
                 statusMessage.classList.add('text-red-500');
-                statusMessage.textContent = "🔴 ERROR DE AUDITORÍA: Intenta de nuevo o contacta a soporte.";
+                statusMessage.textContent = "🔴 ERROR: Fallo al auditar. Intenta de nuevo.";
                 payButton.disabled = false;
                 payButton.textContent = "PAGAR AHORA EN KOFI";
             }
         });
+
     } else {
-        // Si Supabase es null, el botón funciona como un link normal, pero sin auditoría
-        statusMessage.textContent = "⚠️ ADVERTENCIA: Auditoría inactiva. Proceso manual (solo el pago).";
+        solicitudIdDisplay.textContent = `${solicitudId} (Sin auditoría)`;
         statusMessage.classList.add('text-yellow-400');
+        statusMessage.textContent = "⚠️ ADVERTENCIA: Auditoría inactiva. El ID se muestra, pero el pago es manual.";
     }
 </script>
 </body>
