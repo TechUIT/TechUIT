@@ -27,7 +27,8 @@
             color: var(--color-text-light);
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            /* Alineamos al centro verticalmente para una mejor vista en el editor */
+            align-items: center; 
             min-height: 100vh;
         }
         
@@ -146,22 +147,29 @@
     const statusMessage = document.getElementById('status-message');
     const copyMessage = document.getElementById('copy-message');
 
+    // Inicialización de la clase de utilidades de URL
     const urlParams = new URLSearchParams(window.location.search);
     
-    // *** CORRECCIÓN CRÍTICA DE LECTURA DE ID ***
-    // 1. EXTRAEMOS DIRECTAMENTE EL PARÁMETRO 'solicitud' que confirmaste que aparece en la URL
-    const solicitudId = urlParams.get('solicitud'); 
+    // *** SOLUCIÓN DEFINITIVA DE LECTURA DE ID ***
+    // Lee directamente el parámetro 'solicitud' y asegúrate de que sea un número.
+    // Usamos Number() para descartar strings vacíos y forzar un valor numérico/cero.
+    const rawSolicitudId = urlParams.get('solicitud');
+    const solicitudId = rawSolicitudId ? Number(rawSolicitudId) : null;
     
-    // 2. Comprobación y Renderizado
-    if (!solicitudId) {
-        // Fallo: ID no se encontró en la URL.
+    // Diagnóstico en consola (es lo que nos ayuda a debuggear)
+    console.log("URL completa:", window.location.href);
+    console.log("Parámetro 'solicitud' leído (raw):", rawSolicitudId);
+    console.log("ID de Solicitud procesado (number/null):", solicitudId);
+    // *** FIN SOLUCIÓN DEFINITIVA ***
+
+    if (!solicitudId || isNaN(solicitudId)) {
+        // Fallo: ID no se encontró en la URL o no es un número válido.
         solicitudIdDisplay.textContent = 'ID FALTANTE (Error de Redirección)';
         solicitudIdDisplay.classList.add('error-state');
         statusMessage.textContent = "🔴 ID FALTANTE. Verifica la redirección de la página anterior.";
         payButton.disabled = true;
         payButton.classList.remove('bg-green-600');
-        payButton.classList.add('bg-red-600');
-        console.error("El ID de la solicitud no se encontró en la URL con el parámetro 'solicitud'.");
+        payButton.classList.add('bg-gray-600', 'cursor-not-allowed');
         return;
     }
 
@@ -171,7 +179,8 @@
     // Lógica: Copiar el ID al hacer click
     solicitudIdDisplay.addEventListener('click', () => {
         const tempInput = document.createElement('textarea');
-        tempInput.value = solicitudId; 
+        // Aseguramos que solo se copie el número.
+        tempInput.value = String(solicitudId); 
         document.body.appendChild(tempInput);
         tempInput.select();
         try {
@@ -198,7 +207,7 @@
                 const { error } = await supabase
                     .from(REQUESTS_TABLE)
                     .update({ status: 'Pago - Iniciado Diagnóstico' }) 
-                    .eq('id', solicitudId); // Usamos solicitudId
+                    .eq('id', solicitudId); // Usamos el ID NUMÉRICO
 
                 if (error) {
                     throw new Error(error.message || "Error desconocido de Supabase.");
@@ -225,6 +234,7 @@
         });
 
     } else {
+        // En caso de que Supabase no inicialice
         solicitudIdDisplay.textContent = `${solicitudId} (Sin auditoría)`;
         statusMessage.classList.add('text-yellow-400');
         statusMessage.textContent = "⚠️ ADVERTENCIA: Auditoría inactiva. El ID se muestra, pero el pago es manual.";
