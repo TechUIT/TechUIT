@@ -27,7 +27,6 @@
             color: var(--color-text-light);
             display: flex;
             justify-content: center;
-            /* Alineamos al centro verticalmente para una mejor vista en el editor */
             align-items: center; 
             min-height: 100vh;
         }
@@ -62,7 +61,7 @@
             color: #ff4d4d;
             border-color: #ff4d4d;
             box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
-            font-size: 1.2rem;
+            font-size: 1.1rem; /* Más pequeño para que quepa el mensaje de error */
             letter-spacing: normal;
         }
         
@@ -127,7 +126,7 @@
     // *** TUS CREDENCIALES, NO MODIFICADAS ***
     const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
-    const REQUESTS_TABLE = 'clientes'; // Usando 'clientes' según tu esquema
+    const REQUESTS_TABLE = 'clientes'; 
 
     // Inicialización de Supabase
     let supabase = null;
@@ -147,26 +146,29 @@
     const statusMessage = document.getElementById('status-message');
     const copyMessage = document.getElementById('copy-message');
 
-    // Inicialización de la clase de utilidades de URL
-    const urlParams = new URLSearchParams(window.location.search);
+    // 1. Obtener la cadena de búsqueda de la URL
+    const searchString = window.location.search;
+    const urlParams = new URLSearchParams(searchString);
     
-    // *** SOLUCIÓN DEFINITIVA DE LECTURA DE ID ***
-    // Lee directamente el parámetro 'solicitud' y asegúrate de que sea un número.
-    // Usamos Number() para descartar strings vacíos y forzar un valor numérico/cero.
+    // 2. Extraer el valor del parámetro 'solicitud'
     const rawSolicitudId = urlParams.get('solicitud');
+    
+    // Convertir a número (si existe)
     const solicitudId = rawSolicitudId ? Number(rawSolicitudId) : null;
     
-    // Diagnóstico en consola (es lo que nos ayuda a debuggear)
-    console.log("URL completa:", window.location.href);
-    console.log("Parámetro 'solicitud' leído (raw):", rawSolicitudId);
-    console.log("ID de Solicitud procesado (number/null):", solicitudId);
-    // *** FIN SOLUCIÓN DEFINITIVA ***
+    // *** FUNCIÓN DE DIAGNÓSTICO PARA DEBUGGING ***
+    console.log("--- DIAGNÓSTICO DE ID ---");
+    console.log("URL de búsqueda (window.location.search):", searchString || "VACÍA");
+    console.log("Valor crudo de 'solicitud' leído:", rawSolicitudId);
+    console.log("ID Final Procesado:", solicitudId);
+    console.log("-------------------------");
+    // *** FIN DIAGNÓSTICO ***
 
     if (!solicitudId || isNaN(solicitudId)) {
-        // Fallo: ID no se encontró en la URL o no es un número válido.
-        solicitudIdDisplay.textContent = 'ID FALTANTE (Error de Redirección)';
+        // Fallo: Mostrar un mensaje de error y deshabilitar el pago
+        solicitudIdDisplay.textContent = `ID NO ENCONTRADO. Parámetro: ${rawSolicitudId || 'NULL'}`;
         solicitudIdDisplay.classList.add('error-state');
-        statusMessage.textContent = "🔴 ID FALTANTE. Verifica la redirección de la página anterior.";
+        statusMessage.textContent = `🔴 ERROR. El navegador ve la URL como: ${searchString}. ID no válido.`;
         payButton.disabled = true;
         payButton.classList.remove('bg-green-600');
         payButton.classList.add('bg-gray-600', 'cursor-not-allowed');
@@ -175,22 +177,31 @@
 
     // Éxito: ID se encontró y se muestra.
     solicitudIdDisplay.textContent = solicitudId; 
+    statusMessage.textContent = `Solicitud número ${solicitudId} cargada correctamente.`;
 
     // Lógica: Copiar el ID al hacer click
     solicitudIdDisplay.addEventListener('click', () => {
-        const tempInput = document.createElement('textarea');
-        // Aseguramos que solo se copie el número.
-        tempInput.value = String(solicitudId); 
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        try {
+        // Usamos el portapapeles moderno (si está disponible) o el antiguo.
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(String(solicitudId)).then(() => {
+                copyMessage.classList.remove('hidden');
+                setTimeout(() => copyMessage.classList.add('hidden'), 2000);
+            }).catch(err => {
+                console.error('Error al usar el API de Clipboard:', err);
+                // Fallback al antiguo método
+                document.execCommand('copy');
+            });
+        } else {
+            // Método antiguo (compatible con iFrames)
+            const tempInput = document.createElement('textarea');
+            tempInput.value = String(solicitudId); 
+            document.body.appendChild(tempInput);
+            tempInput.select();
             document.execCommand('copy');
+            document.body.removeChild(tempInput);
             copyMessage.classList.remove('hidden');
             setTimeout(() => copyMessage.classList.add('hidden'), 2000);
-        } catch (err) {
-            console.error('Fallo al intentar copiar texto:', err);
         }
-        document.body.removeChild(tempInput);
     });
 
     // Lógica: Auditoría en Supabase al clickear Pagar
@@ -203,21 +214,18 @@
             statusMessage.textContent = "Guardando auditoría de inicio de pago...";
 
             try {
-                // Actualizar el estado a 'Pago - Iniciado Diagnóstico'
                 const { error } = await supabase
                     .from(REQUESTS_TABLE)
                     .update({ status: 'Pago - Iniciado Diagnóstico' }) 
-                    .eq('id', solicitudId); // Usamos el ID NUMÉRICO
+                    .eq('id', solicitudId); 
 
                 if (error) {
                     throw new Error(error.message || "Error desconocido de Supabase.");
                 }
 
-                // ÉXITO: Abrir la URL de pago en una nueva pestaña
                 statusMessage.textContent = "✅ Proceso de pago iniciado. No cierres esta pestaña.";
                 window.open(payButton.href, '_blank'); 
 
-                // Reestablecer el botón
                 setTimeout(() => {
                     payButton.disabled = false;
                     payButton.textContent = "PAGAR AHORA EN KOFI";
@@ -235,7 +243,6 @@
 
     } else {
         // En caso de que Supabase no inicialice
-        solicitudIdDisplay.textContent = `${solicitudId} (Sin auditoría)`;
         statusMessage.classList.add('text-yellow-400');
         statusMessage.textContent = "⚠️ ADVERTENCIA: Auditoría inactiva. El ID se muestra, pero el pago es manual.";
     }
