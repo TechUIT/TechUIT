@@ -166,9 +166,10 @@
 
     if (!solicitudId || isNaN(solicitudId)) {
         // Fallo: Mostrar un mensaje de error y deshabilitar el pago
-        solicitudIdDisplay.textContent = `ID NO ENCONTRADO. Parámetro: ${rawSolicitudId || 'NULL'}`;
+        solicitudIdDisplay.textContent = `ID NO ENCONTRADO: ${rawSolicitudId || 'NULL'}`;
         solicitudIdDisplay.classList.add('error-state');
-        statusMessage.textContent = `🔴 ERROR. El navegador ve la URL como: ${searchString}. ID no válido.`;
+        // Mensaje de error mejorado para indicar la URL que vio el navegador
+        statusMessage.textContent = `🔴 ERROR. El navegador intentó leer: "${searchString}". ID no válido.`; 
         payButton.disabled = true;
         payButton.classList.remove('bg-green-600');
         payButton.classList.add('bg-gray-600', 'cursor-not-allowed');
