@@ -123,146 +123,141 @@
 </div>
 
 <script type="module">
-    // *** TUS CREDENCIALES, NO MODIFICADAS ***
-    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; 
-    const REQUESTS_TABLE = 'clientes'; 
+   // *** TUS CREDENCIALES, NO MODIFICADAS ***
+const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
+const REQUESTS_TABLE = 'clientes';
 
-    // Inicialización de Supabase
-    let supabase = null;
-    try {
-        if (window.supabase && typeof window.supabase.createClient === 'function') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-             console.error("🔴 Supabase SDK no cargado.");
-        }
-    } catch(e) {
-        console.error("🔴 Error al inicializar Supabase:", e);
+// Inicialización de Supabase
+let supabase = null;
+try {
+    // Asume que el SDK de Supabase ya está cargado en el <head>
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+        console.error("🔴 Supabase SDK no cargado.");
     }
-    
-    // Elementos del DOM
-    const solicitudIdDisplay = document.getElementById('solicitud-id-display');
-    const payButton = document.getElementById('pay-button');
-    const statusMessage = document.getElementById('status-message');
-    const copyMessage = document.getElementById('copy-message');
+} catch(e) {
+    console.error("🔴 Error al inicializar Supabase:", e);
+}
 
-    // 1. Obtener la cadena de búsqueda de la URL
-    const searchString = window.location.search;
-    const urlParams = new URLSearchParams(searchString);
-    
-    // 2. Extraer el valor del parámetro 'solicitud' desde la URL
-    let rawSolicitudId = urlParams.get('solicitud');
-    let source = 'URL_PARAM';
-    
-    // Leemos localStorage antes de modificarlo para fines de diagnóstico
-    const localStorageId = localStorage.getItem('tempSolicitudId'); 
+// Elementos del DOM
+const solicitudIdDisplay = document.getElementById('solicitud-id-display');
+const payButton = document.getElementById('pay-button');
+const statusMessage = document.getElementById('status-message');
+const copyMessage = document.getElementById('copy-message');
 
-    // 3. *** LÓGICA DE FALLBACK CRÍTICA ***
-    // Si la URL no dio un ID válido, intenta leer de localStorage
-    if (!rawSolicitudId || isNaN(Number(rawSolicitudId))) {
-        if (localStorageId && !isNaN(Number(localStorageId))) {
-            rawSolicitudId = localStorageId;
-            source = 'LOCALSTORAGE (FALLBACK)';
-            // ¡IMPORTANTE! Borrar inmediatamente el ID de localStorage para evitar reuso
-            localStorage.removeItem('tempSolicitudId'); 
-        }
+// --- LÓGICA DE EXTRACCIÓN DE ID REFORZADA ---
+
+// 1. Obtener los parámetros de la URL
+const urlParams = new URLSearchParams(window.location.search);
+
+// 2. Intentar extraer el ID de la URL
+let rawSolicitudId = urlParams.get('solicitud');
+let source = 'URL_PARAM';
+
+// 3. Fallback a localStorage (solo si la URL falla o el ID no es numérico)
+if (!rawSolicitudId || isNaN(Number(rawSolicitudId))) {
+    const localStorageId = localStorage.getItem('tempSolicitudId');
+
+    // Verificamos si localStorage tiene una ID numérica válida
+    if (localStorageId && !isNaN(Number(localStorageId))) {
+        rawSolicitudId = localStorageId;
+        source = 'LOCALSTORAGE (FALLBACK)';
+
+        // ¡IMPORTANTE! Borrar inmediatamente el ID de localStorage para evitar reuso
+        localStorage.removeItem('tempSolicitudId');
+    } else {
+         rawSolicitudId = null;
+         source = 'NINGUNA FUENTE VÁLIDA';
     }
-    // 4. Convertir a número
-    const solicitudId = rawSolicitudId ? Number(rawSolicitudId) : null;
-    
-    // 5. *** CONSOLA DE DIAGNÓSTICO AVANZADA ***
-    console.groupCollapsed("--- DIAGNÓSTICO DE ID (Haz click para expandir) ---");
-    console.log("A) URL Completa (window.location.href):", window.location.href);
-    console.log("B) Parámetro 'solicitud' de URL:", urlParams.get('solicitud'));
-    console.log("C) ID encontrado en localStorage (antes de la limpieza):", localStorageId);
-    console.log("D) Fuente del ID (Final):", source);
-    console.log("E) ID Final Procesado (solicitudId):", solicitudId);
-    console.groupEnd();
-    // *** FIN DIAGNÓSTICO ***
+}
 
-    if (!solicitudId || isNaN(solicitudId)) {
-        // Fallo: Mostrar un mensaje de error y deshabilitar el pago
-        solicitudIdDisplay.textContent = `ID NO ENCONTRADO.`;
-        solicitudIdDisplay.classList.add('error-state');
-        // Mensaje de error mejorado para indicar la URL que vio el navegador
-        statusMessage.textContent = `🔴 ERROR. ID Faltante. Origen: ${source}. Revisa la Consola (F12) para el diagnóstico.`; 
+// 4. Convertir a número (Será 'null' si la extracción final falló)
+const solicitudId = rawSolicitudId ? Number(rawSolicitudId) : null;
+
+// --- CONSOLA DE DIAGNÓSTICO AVANZADA ---
+console.groupCollapsed("--- DIAGNÓSTICO DE ID (Haz click para expandir) ---");
+console.log("A) URL Completa (window.location.href):", window.location.href);
+console.log("B) Parámetro 'solicitud' de URL:", urlParams.get('solicitud'));
+console.log("C) ID Final Procesado (solicitudId):", solicitudId);
+console.log("D) Fuente del ID (Final):", source);
+console.groupEnd();
+// ---------------------------------------------------------------------------------
+
+if (!solicitudId || isNaN(solicitudId)) {
+    // Fallo: Mostrar un mensaje de error y deshabilitar el pago
+    solicitudIdDisplay.textContent = `ID NO ENCONTRADO`;
+    solicitudIdDisplay.classList.add('error-state');
+    statusMessage.textContent = `🔴 ERROR. ID de Solicitud Faltante. Fuente: ${source}. Revisa la Consola (F12) para el diagnóstico.`;
+    payButton.disabled = true;
+    payButton.classList.remove('bg-green-600');
+    payButton.classList.add('bg-gray-600', 'cursor-not-allowed');
+    return;
+}
+
+// Éxito: ID se encontró y se muestra.
+solicitudIdDisplay.textContent = solicitudId;
+statusMessage.textContent = `Solicitud número ${solicitudId} cargada correctamente. Fuente: ${source}.`;
+payButton.classList.add('bg-green-600'); 
+payButton.disabled = false; 
+
+// Lógica: Copiar el ID al hacer click
+solicitudIdDisplay.addEventListener('click', () => {
+    // Método antiguo (compatible con iFrames)
+    const tempInput = document.createElement('textarea');
+    tempInput.value = String(solicitudId);
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    copyMessage.classList.remove('hidden');
+    setTimeout(() => copyMessage.classList.add('hidden'), 2000);
+});
+
+// Lógica: Auditoría en Supabase al clickear Pagar
+if (supabase) {
+    payButton.addEventListener('click', async (event) => {
+        event.preventDefault();
+
         payButton.disabled = true;
-        payButton.classList.remove('bg-green-600');
-        payButton.classList.add('bg-gray-600', 'cursor-not-allowed');
-        return;
-    }
+        payButton.textContent = "AUDITANDO EN SUPABASE...";
+        statusMessage.textContent = "Guardando auditoría de inicio de pago...";
 
-    // Éxito: ID se encontró y se muestra.
-    solicitudIdDisplay.textContent = solicitudId; 
-    statusMessage.textContent = `Solicitud número ${solicitudId} cargada correctamente. Fuente: ${source}.`;
+        try {
+            const { error } = await supabase
+                .from(REQUESTS_TABLE)
+                .update({ status: 'Pago - Iniciado Diagnóstico' })
+                .eq('id', solicitudId);
 
-    // Lógica: Copiar el ID al hacer click
-    solicitudIdDisplay.addEventListener('click', () => {
-        // Usamos el portapapeles moderno (si está disponible) o el antiguo.
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(String(solicitudId)).then(() => {
-                copyMessage.classList.remove('hidden');
-                setTimeout(() => copyMessage.classList.add('hidden'), 2000);
-            }).catch(err => {
-                console.error('Error al usar el API de Clipboard:', err);
-                // Fallback al antiguo método
-                document.execCommand('copy');
-            });
-        } else {
-            // Método antiguo (compatible con iFrames)
-            const tempInput = document.createElement('textarea');
-            tempInput.value = String(solicitudId); 
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            copyMessage.classList.remove('hidden');
-            setTimeout(() => copyMessage.classList.add('hidden'), 2000);
+            if (error) {
+                throw new Error(error.message || "Error desconocido de Supabase.");
+            }
+
+            statusMessage.textContent = "✅ Proceso de pago iniciado. No cierres esta pestaña.";
+            window.open(payButton.href, '_blank');
+
+            setTimeout(() => {
+                payButton.disabled = false;
+                payButton.textContent = "PAGAR AHORA EN KOFI";
+            }, 1500);
+
+
+        } catch (error) {
+            console.error("Fallo en la actualización:", error);
+            statusMessage.classList.add('text-red-500');
+            statusMessage.textContent = "🔴 ERROR: Fallo al auditar. Intenta de nuevo.";
+            payButton.disabled = false;
+            payButton.textContent = "PAGAR AHORA EN KOFI";
         }
     });
 
-    // Lógica: Auditoría en Supabase al clickear Pagar
-    if (supabase) {
-        payButton.addEventListener('click', async (event) => {
-            event.preventDefault(); 
-            
-            payButton.disabled = true;
-            payButton.textContent = "AUDITANDO EN SUPABASE...";
-            statusMessage.textContent = "Guardando auditoría de inicio de pago...";
+} else {
+    // En caso de que Supabase no inicialice
+    statusMessage.classList.add('text-yellow-400');
+    statusMessage.textContent = "⚠️ ADVERTENCIA: Auditoría inactiva. El ID se muestra, pero el pago es manual.";
+}
 
-            try {
-                const { error } = await supabase
-                    .from(REQUESTS_TABLE)
-                    .update({ status: 'Pago - Iniciado Diagnóstico' }) 
-                    .eq('id', solicitudId); 
-
-                if (error) {
-                    throw new Error(error.message || "Error desconocido de Supabase.");
-                }
-
-                statusMessage.textContent = "✅ Proceso de pago iniciado. No cierres esta pestaña.";
-                window.open(payButton.href, '_blank'); 
-
-                setTimeout(() => {
-                    payButton.disabled = false;
-                    payButton.textContent = "PAGAR AHORA EN KOFI";
-                }, 1500);
-
-
-            } catch (error) {
-                console.error("Fallo en la actualización:", error);
-                statusMessage.classList.add('text-red-500');
-                statusMessage.textContent = "🔴 ERROR: Fallo al auditar. Intenta de nuevo.";
-                payButton.disabled = false;
-                payButton.textContent = "PAGAR AHORA EN KOFI";
-            }
-        });
-
-    } else {
-        // En caso de que Supabase no inicialice
-        statusMessage.classList.add('text-yellow-400');
-        statusMessage.textContent = "⚠️ ADVERTENCIA: Auditoría inactiva. El ID se muestra, pero el pago es manual.";
-    }
 </script>
 </body>
 </html>
