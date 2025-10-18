@@ -133,10 +133,16 @@
     // Inicialización del cliente Supabase
     let supabaseClient;
     try {
-        // Aseguramos que el cliente se crea a partir de la variable global 'supabase'
-        if (typeof supabase !== 'undefined') {
+        // Aseguramos que el cliente se crea a partir de la variable global 'supabase' (si es que se carga desde el CDN)
+        // Nota: Si usas <script type="module"> esto es diferente, pero mantendré la estructura que enviaste.
+        if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
+             // Si el SDK se carga globalmente, lo usamos así:
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.log("Supabase inicializado correctamente.");
+        } else if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+            // Intento alternativo en window
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Supabase inicializado correctamente (vía window.supabase).");
         } else {
             console.error("El SDK de Supabase no se cargó. Verifica la etiqueta <script>.");
             showMessage("🔴 ERROR: El SDK de Supabase no se ha cargado correctamente.", 'error');
@@ -179,23 +185,21 @@
             submitButton.textContent = "Enviando Solicitud...";
 
             try {
-                // 1. OBTENER VALORES DEL FORMULARIO USANDO LOS NOMBRES EXACTOS DE LAS COLUMNAS EN TU TABLA
-                const dataToInsert = { // Renombramos la variable para evitar confusión con el resultado de Supabase
+                // 1. OBTENER VALORES DEL FORMULARIO
+                const dataToInsert = { 
                     nombre: document.getElementById('nombre').value,
                     telefono: document.getElementById('telefono').value,
                     direccion: document.getElementById('direccion').value,
                     tipo_servicio: document.getElementById('tipo_servicio').value,
                     problema: document.getElementById('problema').value,
-                    // 'fecha_solicitud' y 'status' tienen valores por defecto en la tabla, no se envían
                 };
 
                 // 2. INSERCIÓN DE DATOS en la tabla 'clientes'
-                // *** CAMBIO CRÍTICO: Usamos .select('id') y .single() ***
                 const { error, data: insertedRow } = await supabaseClient
                     .from(TABLE_NAME)
                     .insert([dataToInsert])
                     .select('id') // <-- OBLIGAMOS A SUPABASE A DEVOLVER SOLO EL ID GENERADO
-                    .single();    // <-- OBLIGAMOS A QUE LA RESPUESTA SEA UN SOLO OBJETO (NO UN ARRAY)
+                    .single();  // <-- OBLIGAMOS A QUE LA RESPUESTA SEA UN SOLO OBJETO (NO UN ARRAY)
 
                 if (error) {
                     let errorMessage = `🔴 FALLO: Código Supabase: ${error.code}.`;
@@ -213,16 +217,15 @@
 
                 } else {
                     // ÉXITO
-                    // *** CAMBIO CRÍTICO DE EXTRACCIÓN DEL ID ***
-                    // Como usamos .single(), el ID está directamente en insertedRow.id
                     const id = insertedRow ? insertedRow.id : null; 
                     
                     if (id) {
                         showMessage(`✅ ¡Solicitud #${id} registrada! Redirigiendo a pago...`, 'success');
-                        // Redirección con el ID del registro
-                        // La URL de redirección en tu código ya estaba correcta: confirmacion-pago.html?solicitud=...
+                        
+                        // *** CORRECCIÓN CRÍTICA DE LOCALSTORAGE ***
                         setTimeout(() => {
-                            localStorage.setItem('tempSolicitudId', newRequest.id);
+                            // CORRECCIÓN: Guardamos el ID en localStorage usando la variable 'id'
+                            localStorage.setItem('tempSolicitudId', id);
                             window.location.href = 'confirmacion-pago.html?solicitud=' + id;
                         }, 1000);
                     } else {
@@ -244,5 +247,6 @@
     }
 
 </script>
+
 </body>
 </html>
