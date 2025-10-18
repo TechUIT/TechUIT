@@ -152,14 +152,16 @@
     
     // 2. Extraer el valor del parámetro 'solicitud' desde la URL
     let rawSolicitudId = urlParams.get('solicitud');
-    let source = 'URL';
+    let source = 'URL_PARAM';
+    
+    // Leemos localStorage antes de modificarlo para fines de diagnóstico
+    const localStorageId = localStorage.getItem('tempSolicitudId'); 
 
     // 3. *** LÓGICA DE FALLBACK CRÍTICA ***
     // Si la URL no dio un ID válido, intenta leer de localStorage
     if (!rawSolicitudId || isNaN(Number(rawSolicitudId))) {
-        const fallbackId = localStorage.getItem('tempSolicitudId');
-        if (fallbackId && !isNaN(Number(fallbackId))) {
-            rawSolicitudId = fallbackId;
+        if (localStorageId && !isNaN(Number(localStorageId))) {
+            rawSolicitudId = localStorageId;
             source = 'LOCALSTORAGE (FALLBACK)';
             // ¡IMPORTANTE! Borrar inmediatamente el ID de localStorage para evitar reuso
             localStorage.removeItem('tempSolicitudId'); 
@@ -168,20 +170,22 @@
     // 4. Convertir a número
     const solicitudId = rawSolicitudId ? Number(rawSolicitudId) : null;
     
-    // *** FUNCIÓN DE DIAGNÓSTICO PARA DEBUGGING ***
-    console.log("--- DIAGNÓSTICO DE ID (ORIGEN: " + source + ") ---");
-    console.log("URL de búsqueda (window.location.search):", searchString || "VACÍA");
-    console.log("Valor crudo de 'solicitud' leído:", rawSolicitudId);
-    console.log("ID Final Procesado:", solicitudId);
-    console.log("-------------------------");
+    // 5. *** CONSOLA DE DIAGNÓSTICO AVANZADA ***
+    console.groupCollapsed("--- DIAGNÓSTICO DE ID (Haz click para expandir) ---");
+    console.log("A) URL Completa (window.location.href):", window.location.href);
+    console.log("B) Parámetro 'solicitud' de URL:", urlParams.get('solicitud'));
+    console.log("C) ID encontrado en localStorage (antes de la limpieza):", localStorageId);
+    console.log("D) Fuente del ID (Final):", source);
+    console.log("E) ID Final Procesado (solicitudId):", solicitudId);
+    console.groupEnd();
     // *** FIN DIAGNÓSTICO ***
 
     if (!solicitudId || isNaN(solicitudId)) {
         // Fallo: Mostrar un mensaje de error y deshabilitar el pago
-        solicitudIdDisplay.textContent = `ID NO ENCONTRADO: ${rawSolicitudId || 'NULL'}`;
+        solicitudIdDisplay.textContent = `ID NO ENCONTRADO.`;
         solicitudIdDisplay.classList.add('error-state');
         // Mensaje de error mejorado para indicar la URL que vio el navegador
-        statusMessage.textContent = `🔴 ERROR. ID Faltante. Origen: ${source}. Asegúrate de que la página anterior guardó el ID.`; 
+        statusMessage.textContent = `🔴 ERROR. ID Faltante. Origen: ${source}. Revisa la Consola (F12) para el diagnóstico.`; 
         payButton.disabled = true;
         payButton.classList.remove('bg-green-600');
         payButton.classList.add('bg-gray-600', 'cursor-not-allowed');
