@@ -150,14 +150,26 @@
     const searchString = window.location.search;
     const urlParams = new URLSearchParams(searchString);
     
-    // 2. Extraer el valor del parámetro 'solicitud'
-    const rawSolicitudId = urlParams.get('solicitud');
-    
-    // Convertir a número (si existe)
+    // 2. Extraer el valor del parámetro 'solicitud' desde la URL
+    let rawSolicitudId = urlParams.get('solicitud');
+    let source = 'URL';
+
+    // 3. *** LÓGICA DE FALLBACK CRÍTICA ***
+    // Si la URL no dio un ID válido, intenta leer de localStorage
+    if (!rawSolicitudId || isNaN(Number(rawSolicitudId))) {
+        const fallbackId = localStorage.getItem('tempSolicitudId');
+        if (fallbackId && !isNaN(Number(fallbackId))) {
+            rawSolicitudId = fallbackId;
+            source = 'LOCALSTORAGE (FALLBACK)';
+            // ¡IMPORTANTE! Borrar inmediatamente el ID de localStorage para evitar reuso
+            localStorage.removeItem('tempSolicitudId'); 
+        }
+    }
+    // 4. Convertir a número
     const solicitudId = rawSolicitudId ? Number(rawSolicitudId) : null;
     
     // *** FUNCIÓN DE DIAGNÓSTICO PARA DEBUGGING ***
-    console.log("--- DIAGNÓSTICO DE ID ---");
+    console.log("--- DIAGNÓSTICO DE ID (ORIGEN: " + source + ") ---");
     console.log("URL de búsqueda (window.location.search):", searchString || "VACÍA");
     console.log("Valor crudo de 'solicitud' leído:", rawSolicitudId);
     console.log("ID Final Procesado:", solicitudId);
@@ -169,7 +181,7 @@
         solicitudIdDisplay.textContent = `ID NO ENCONTRADO: ${rawSolicitudId || 'NULL'}`;
         solicitudIdDisplay.classList.add('error-state');
         // Mensaje de error mejorado para indicar la URL que vio el navegador
-        statusMessage.textContent = `🔴 ERROR. El navegador intentó leer: "${searchString}". ID no válido.`; 
+        statusMessage.textContent = `🔴 ERROR. ID Faltante. Origen: ${source}. Asegúrate de que la página anterior guardó el ID.`; 
         payButton.disabled = true;
         payButton.classList.remove('bg-green-600');
         payButton.classList.add('bg-gray-600', 'cursor-not-allowed');
@@ -178,7 +190,7 @@
 
     // Éxito: ID se encontró y se muestra.
     solicitudIdDisplay.textContent = solicitudId; 
-    statusMessage.textContent = `Solicitud número ${solicitudId} cargada correctamente.`;
+    statusMessage.textContent = `Solicitud número ${solicitudId} cargada correctamente. Fuente: ${source}.`;
 
     // Lógica: Copiar el ID al hacer click
     solicitudIdDisplay.addEventListener('click', () => {

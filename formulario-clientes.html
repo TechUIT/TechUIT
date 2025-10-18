@@ -222,6 +222,7 @@
                         // Redirección con el ID del registro
                         // La URL de redirección en tu código ya estaba correcta: confirmacion-pago.html?solicitud=...
                         setTimeout(() => {
+                            localStorage.setItem('tempSolicitudId', newRequest.id);
                             window.location.href = 'confirmacion-pago.html?solicitud=' + id;
                         }, 1000);
                     } else {
