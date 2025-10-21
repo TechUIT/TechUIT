@@ -122,103 +122,27 @@
     <p id="status-message" class="text-center mt-4 font-semibold text-gray-400"></p>
 </div>
 
-<script type="module">
-        // Importación directa del cliente de Supabase
-        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const solicitudIdDisplay = document.getElementById('solicitud-id-display');
+            const statusMessage = document.getElementById('status-message');
+            
+            // 1. LECTURA DE URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const solicitudId = urlParams.get('solicitud');
 
-        // ------------------------------------------------------------------
-        //  CONFIGURACIÓN DE SUPABASE (VERIFICAR ESTAS TRES LÍNEAS)
-        // ------------------------------------------------------------------
-        const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe4996uhLman9Nb3aqhJc"; 
-        const TABLE_NAME = 'clientes';
-        
-        let supabase = null;
-
-        try {
-            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log("✅ F1: Cliente Supabase inicializado correctamente.");
-        } catch (e) {
-            console.error("🔴 F1: Error al crear cliente Supabase:", e);
-        }
-
-        // ------------------------------------------------------------------
-        //  LÓGICA DEL FORMULARIO
-        // ------------------------------------------------------------------
-        const form = document.getElementById('clientForm');
-        const submitButton = document.getElementById('submitButton');
-        const messageBox = document.getElementById('message'); 
-
-        function showMessage(msg, type) {
-            if (messageBox) {
-                messageBox.textContent = msg;
-                messageBox.className = `message-box p-3 mt-4 text-center rounded-lg font-semibold ${type === 'error' ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'}`;
-                messageBox.style.display = 'block';
-                setTimeout(() => {
-                    messageBox.style.display = 'none';
-                }, 5000);
+            console.log(`--- PRUEBA DE ID INICIADA ---`);
+            console.log(`✅ ID de Solicitud extraído de la URL: ${solicitudId}`);
+            
+            if (solicitudId && solicitudIdDisplay) {
+                // 2. MOSTRAR ID
+                solicitudIdDisplay.textContent = solicitudId;
+                if(statusMessage) statusMessage.textContent = `ID #${solicitudId} leído correctamente de la URL. Tu archivo HTML está funcionando.`;
             } else {
-                 console.log(`[Mensaje ${type.toUpperCase()}]: ${msg}`);
+                solicitudIdDisplay.textContent = 'ERROR NO ID';
+                if(statusMessage) statusMessage.textContent = `ERROR: No se encontró el ID en la URL.`;
             }
-        }
-
-        if (form && supabase) {
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                submitButton.disabled = true;
-                submitButton.textContent = "Enviando Solicitud...";
-
-                try {
-                    const dataToInsert = {
-                        nombre: document.getElementById('nombre').value,
-                        telefono: document.getElementById('telefono').value,
-                        direccion: document.getElementById('direccion').value,
-                        tipo_servicio: document.getElementById('tipo_servicio').value,
-                        problema: document.getElementById('problema').value,
-                        status: 'Pendiente - Formulario Enviado' 
-                    };
-
-                    // INSERCIÓN DE DATOS Y PEDIDO DEL ID GENERADO
-                    const { error, data: insertedRow } = await supabase
-                        .from(TABLE_NAME)
-                        .insert([dataToInsert])
-                        .select('id'); 
-
-                    if (error) {
-                        let errorMessage = `🔴 F1: FALLO DE INSERCIÓN: Error de Supabase: ${error.message}.`;
-                        showMessage(errorMessage, 'error');
-                        console.error("F1: Supabase Error Completo:", error);
-                    } else {
-                        const id = insertedRow && insertedRow.length > 0 ? insertedRow[0].id : null; 
-
-                        if (id) {
-                            // **ESTA ES LA LÍNEA QUE MUESTRA EL ID EN CHICO**
-                            showMessage(`✅ F1: ¡Solicitud #${id} registrada! Redirigiendo...`, 'success');
-                            
-                            // Redirección con el ID como parámetro
-                            setTimeout(() => {
-                                window.location.href = 'confirmacion-pago.html?solicitud=' + String(id);
-                            }, 1000);
-
-                        } else {
-                            showMessage("✅ F1: Solicitud registrada, pero ID no devuelto. Revise la tabla.", 'success');
-                            form.reset();
-                        }
-                    }
-
-                } catch (error) {
-                    showMessage("🔴 F1: ERROR DE CONEXIÓN: Fallo de red o error de Supabase no capturado.", 'error');
-                    console.error("F1: Error Desconocido:", error);
-                } finally {
-                    submitButton.disabled = false;
-                    submitButton.textContent = "Solicitar Técnico Ahora";
-                }
-            });
-        } else if (form) {
-             showMessage("🔴 F1: ERROR DE INICIALIZACIÓN: La conexión a Supabase falló. Revisa la consola.", 'error');
-             if(submitButton) submitButton.disabled = true;
-        }
+        });
     </script>
 </body>
 </html>
