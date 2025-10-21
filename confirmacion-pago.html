@@ -122,121 +122,103 @@
     <p id="status-message" class="text-center mt-4 font-semibold text-gray-400"></p>
 </div>
 
-<script>
-       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-    // Configuración de Supabase (TUS CREDENCIALES)
+<script type="module">
+        // Importación directa del cliente de Supabase
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+        // ------------------------------------------------------------------
+        //  CONFIGURACIÓN DE SUPABASE (VERIFICAR ESTAS TRES LÍNEAS)
+        // ------------------------------------------------------------------
         const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe4996uhLman9Nb3aqhJc"; 
         const TABLE_NAME = 'clientes';
+        
+        let supabase = null;
 
-    // Inicialización de Supabase
-    let supabase = null;
-    try {
-        if (window.supabase && typeof window.supabase.createClient === 'function') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-            console.error("🔴 Supabase SDK no cargado.");
+        try {
+            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("✅ F1: Cliente Supabase inicializado correctamente.");
+        } catch (e) {
+            console.error("🔴 F1: Error al crear cliente Supabase:", e);
         }
-    } catch(e) {
-        console.error("🔴 Error al inicializar Supabase:", e);
-    }
 
-    // Elementos del DOM
-    const solicitudIdDisplay = document.getElementById('solicitud-id-display');
-    const payButton = document.getElementById('pay-button');
-    const statusMessage = document.getElementById('status-message');
-    const copyMessage = document.getElementById('copy-message');
+        // ------------------------------------------------------------------
+        //  LÓGICA DEL FORMULARIO
+        // ------------------------------------------------------------------
+        const form = document.getElementById('clientForm');
+        const submitButton = document.getElementById('submitButton');
+        const messageBox = document.getElementById('message'); 
 
-    // --- LÓGICA DE EXTRACCIÓN DE ID SIMPLE (SOLO URL) ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const solicitudId = urlParams.get('solicitud');
-
-    // ---------------------------------------------------
-
-    if (!solicitudId) {
-        // Fallo: Mostrar un mensaje de error y deshabilitar el pago
-        solicitudIdDisplay.textContent = `ID INVÁLIDO`;
-        solicitudIdDisplay.classList.add('error-state');
-        statusMessage.textContent = `🔴 ERROR: ID de Solicitud Faltante en la URL. Contacte a soporte.`;
-        payButton.disabled = true;
-        payButton.classList.remove('bg-green-600');
-        payButton.classList.add('bg-gray-600', 'cursor-not-allowed');
-        return;
-    }
-
-    // Éxito: ID se encontró y se muestra.
-    solicitudIdDisplay.textContent = solicitudId;
-    statusMessage.textContent = `Solicitud número ${solicitudId} lista para ser clasificada como URGENTE.`;
-    
-    // Habilitar botón y darle estilo de acción
-    payButton.classList.remove('bg-gray-600', 'cursor-not-allowed');
-    payButton.classList.add('bg-green-600', 'hover:bg-green-700', 'shadow-green-600/40');
-    payButton.disabled = false; 
-
-    // Lógica: Copiar el ID al hacer click
-    solicitudIdDisplay.addEventListener('click', () => {
-        // Método de copiado compatible con iFrames
-        const tempInput = document.createElement('textarea');
-        tempInput.value = String(solicitudId);
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        copyMessage.classList.remove('hidden');
-        setTimeout(() => copyMessage.classList.add('hidden'), 2000);
-    });
-
-    // Lógica: Auditoría en Supabase al clickear Pagar
-    if (supabase) {
-        payButton.addEventListener('click', async (event) => {
-            event.preventDefault();
-
-            payButton.disabled = true;
-            payButton.textContent = "AUDITANDO EN SUPABASE...";
-            statusMessage.textContent = "Guardando auditoría de inicio de pago...";
-
-            try {
-                // *** CORRECCIÓN CRÍTICA: Asegurar que el filtro EQ reciba un número ***
-                const numericId = Number(solicitudId); 
-                
-                if (isNaN(numericId)) {
-                     throw new Error("El ID de Solicitud no es un número válido.");
-                }
-
-                const { error } = await supabase
-                    .from(REQUESTS_TABLE)
-                    .update({ status: 'Pago - Iniciado Diagnóstico' })
-                    .eq('id', numericId); // USAMOS EL VALOR NUMÉRICO AQUÍ
-
-                if (error) {
-                    throw new Error(error.message || "Error desconocido de Supabase.");
-                }
-
-                statusMessage.textContent = "✅ Proceso de pago iniciado. No cierres esta pestaña.";
-                // Abrir el enlace de Kofi (que ya está puesto en el href del botón)
-                window.open(payButton.href, '_blank');
-
+        function showMessage(msg, type) {
+            if (messageBox) {
+                messageBox.textContent = msg;
+                messageBox.className = `message-box p-3 mt-4 text-center rounded-lg font-semibold ${type === 'error' ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'}`;
+                messageBox.style.display = 'block';
                 setTimeout(() => {
-                    payButton.disabled = false;
-                    payButton.textContent = "PAGAR AHORA EN KOFI";
-                }, 1500);
-
-
-            } catch (error) {
-                console.error("Fallo en la actualización:", error);
-                statusMessage.classList.add('error-state');
-                statusMessage.textContent = `🔴 ERROR: Fallo al auditar el estado. Mensaje: ${error.message}`;
-                payButton.disabled = false;
-                payButton.textContent = "PAGAR AHORA EN KOFI";
+                    messageBox.style.display = 'none';
+                }, 5000);
+            } else {
+                 console.log(`[Mensaje ${type.toUpperCase()}]: ${msg}`);
             }
-        });
+        }
 
-    } else {
-        // En caso de que Supabase no inicialice
-        statusMessage.classList.add('text-yellow-400');
-        statusMessage.textContent = "⚠️ ADVERTENCIA: Auditoría inactiva. El ID se muestra, pero el pago es manual.";
-    }
-</script>
+        if (form && supabase) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                submitButton.disabled = true;
+                submitButton.textContent = "Enviando Solicitud...";
 
+                try {
+                    const dataToInsert = {
+                        nombre: document.getElementById('nombre').value,
+                        telefono: document.getElementById('telefono').value,
+                        direccion: document.getElementById('direccion').value,
+                        tipo_servicio: document.getElementById('tipo_servicio').value,
+                        problema: document.getElementById('problema').value,
+                        status: 'Pendiente - Formulario Enviado' 
+                    };
+
+                    // INSERCIÓN DE DATOS Y PEDIDO DEL ID GENERADO
+                    const { error, data: insertedRow } = await supabase
+                        .from(TABLE_NAME)
+                        .insert([dataToInsert])
+                        .select('id'); 
+
+                    if (error) {
+                        let errorMessage = `🔴 F1: FALLO DE INSERCIÓN: Error de Supabase: ${error.message}.`;
+                        showMessage(errorMessage, 'error');
+                        console.error("F1: Supabase Error Completo:", error);
+                    } else {
+                        const id = insertedRow && insertedRow.length > 0 ? insertedRow[0].id : null; 
+
+                        if (id) {
+                            // **ESTA ES LA LÍNEA QUE MUESTRA EL ID EN CHICO**
+                            showMessage(`✅ F1: ¡Solicitud #${id} registrada! Redirigiendo...`, 'success');
+                            
+                            // Redirección con el ID como parámetro
+                            setTimeout(() => {
+                                window.location.href = 'confirmacion-pago.html?solicitud=' + String(id);
+                            }, 1000);
+
+                        } else {
+                            showMessage("✅ F1: Solicitud registrada, pero ID no devuelto. Revise la tabla.", 'success');
+                            form.reset();
+                        }
+                    }
+
+                } catch (error) {
+                    showMessage("🔴 F1: ERROR DE CONEXIÓN: Fallo de red o error de Supabase no capturado.", 'error');
+                    console.error("F1: Error Desconocido:", error);
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = "Solicitar Técnico Ahora";
+                }
+            });
+        } else if (form) {
+             showMessage("🔴 F1: ERROR DE INICIALIZACIÓN: La conexión a Supabase falló. Revisa la consola.", 'error');
+             if(submitButton) submitButton.disabled = true;
+        }
+    </script>
 </body>
 </html>
