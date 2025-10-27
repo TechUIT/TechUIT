@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreador de Técnico | TechUIT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+     <style>
+        /* --- ESQUEMA VISUAL UNIFICADO --- */
+        :root {
+            --color-primary: #007bff; /* Azul de énfasis */
+            --color-dark-bg: #0d1117; /* Fondo oscuro principal (similar a tu fondo negro) */
+            --color-card-bg: #161b22; /* Fondo de contenedor (similar a tu gris oscuro) */
+            --color-text-light: #f3f4f6;
+            --color-border: #30363d; /* Borde sutil */
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px; 
+            background-color: var(--color-dark-bg); 
+            color: var(--color-text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+        }
+
+        .main-card {
+            /* Estilo de la tarjeta principal (App feel) */
+            max-width: 440px;
+            width: 100%;
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            padding: 3rem 1.5rem; /* Espaciado interno */
+            border-radius: 1.5rem; /* Bordes muy redondeados */
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15); /* Sombra elegante */
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-card">
+    <header class="text-center mb-8">
+        
+        <h1 class="text-2xl font-extrabold text-white">
+            RASTREO DE TÉCNICO  EN TIEMPO REAL
+        </h1>
+        <p class="text-sm text-gray-400 mt-1">
+            Tu ubicación es clave para asignar servicios cercanos (como Uber).
+        </p>
+    </header>
+
+    <div class="space-y-4">
+        <div class="data-display">
+            <p class="text-xs font-semibold text-blue-300">TU ID DE TÉCNICO</p>
+            <p id="tecnicoId" class="text-lg font-bold truncate">Cargando...</p>
+        </div>
+
+        <div class="data-display">
+            <p class="text-xs font-semibold text-blue-300">LATITUD</p>
+            <p id="latitud" class="text-xl font-bold text-green-400">0.000000</p>
+        </div>
+
+        <div class="data-display">
+            <p class="text-xs font-semibold text-blue-300">LONGITUD</p>
+            <p id="longitud" class="text-xl font-bold text-red-400">0.000000</p>
+        </div>
+
+        <div class="data-display bg-gray-900 border-l-4 border-yellow-500 flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-yellow-300">ESTADO DE RASTREO</p>
+                <p id="lastUpdate" class="text-sm text-gray-400">Inicializando...</p>
+            </div>
+            <!-- Icono de Spinner para indicar actividad -->
+            <svg id="trackingSpinner" class="h-6 w-6 text-yellow-500 hidden spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Se elimina el 'disabled' ya que el rastreo inicia automáticamente -->
+    <button id="toggleTracking" 
+        class="w-full mt-6 py-3 rounded-lg bg-red-600 text-white font-bold text-lg hover:bg-red-700 transition duration-200 shadow-xl shadow-red-500/40"
+        onclick="toggleTracking()">
+        DETENER RASTREO
+    </button>
+</div>
+
+<!-- FIREBASE MODULES -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // setLogLevel('debug'); // Descomentar para ver logs detallados
+
+    // VARIABLES GLOBALES (MANDATORIO USAR)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    let db, auth;
+    let userId = 'Anonimo'; 
+    let trackingInterval = null; 
+    let isTracking = false; // Nuevo estado
+    const UPDATE_FREQUENCY_MS = 10000; // 10 segundos
+
+    const $tecnicoId = document.getElementById('tecnicoId');
+    const $latitud = document.getElementById('latitud');
+    const $longitud = document.getElementById('longitud');
+    const $lastUpdate = document.getElementById('lastUpdate');
+    const $toggleButton = document.getElementById('toggleTracking');
+    const $spinner = document.getElementById('trackingSpinner');
+
+
+    /**      * Muestra u oculta el spinner de actividad.
+     */
+    function setLoading(isLoading) {
+        $spinner.classList.toggle('hidden', !isLoading);
+        $lastUpdate.classList.toggle('opacity-50', isLoading);
+    }
+
+    /**      * Función que obtiene la ubicación actual del técnico y la envía a Firestore.
+     */
+    function updateLocation() {
+        if (!navigator.geolocation) {
+            $lastUpdate.textContent = '❌ Error: Geolocalización no soportada.';
+            return;
+        }
+
+        setLoading(true); // Inicia el spinner
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            setLoading(false); // Detiene el spinner al tener posición
+
+            const { latitude, longitude } = position.coords;
+            const now = new Date();
+
+            $latitud.textContent = latitude.toFixed(6);
+            $longitud.textContent = longitude.toFixed(6);
+            $lastUpdate.textContent = `Actualizado: ${now.toLocaleTimeString()}`;
+
+            // Colección pública de ubicaciones
+            const docRef = doc(db, `artifacts/${appId}/public/data/tecnicos_ubicaciones`, userId);
+            
+            try {
+                // setDoc (reemplaza o crea) el documento de ubicación
+                await setDoc(docRef, {
+                    tecnicoId: userId,
+                    lat: latitude,
+                    lon: longitude,
+                    timestamp: now.toISOString(), 
+                    isTracking: true, // Indica que el técnico está activo
+                });
+                $lastUpdate.parentElement.classList.replace('border-red-500', 'border-yellow-500');
+                console.log("✅ Ubicación enviada a Firestore.");
+            } catch (error) {
+                console.error("🔴 Error al enviar ubicación a Firestore:", error);
+                $lastUpdate.textContent = `🔴 Error DB: ${error.message}.`;
+                setLoading(false);
+            }
+
+        }, (error) => {
+            // Manejo de errores de GPS
+            setLoading(false); // Detiene el spinner en caso de error
+            console.error("🔴 Error de Geolocalización:", error);
+            $lastUpdate.textContent = `🔴 Error GPS (${error.code}): ${error.message}.`;
+            $lastUpdate.parentElement.classList.replace('border-yellow-500', 'border-red-500');
+        }, {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        });
+    }
+
+    /**      * Inicia o detiene el rastreo periódico.
+     */
+    window.toggleTracking = async function() {
+        if (isTracking) {
+            // Detener
+            clearInterval(trackingInterval);
+            trackingInterval = null;
+            isTracking = false;
+
+            // Actualiza Firestore para indicar que el técnico no está rastreando
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/tecnicos_ubicaciones`, userId);
+                await setDoc(docRef, { isTracking: false, lat: 0, lon: 0, timestamp: new Date().toISOString() }, { merge: true });
+            } catch (error) {
+                console.error("🔴 Error al detener el rastreo en Firestore:", error);
+            }
+
+            setLoading(false);
+            $toggleButton.textContent = '▶️ INICIAR RASTREO';
+            $toggleButton.classList.remove('bg-red-600', 'shadow-red-500/40');
+            $toggleButton.classList.add('bg-green-600', 'shadow-green-500/40');
+            $lastUpdate.textContent = `Rastreo DETENIDO. Click para iniciar.`;
+            $lastUpdate.parentElement.classList.replace('border-yellow-500', 'border-gray-500');
+            $latitud.textContent = '0.000000';
+            $longitud.textContent = '0.000000';
+
+        } else {
+            // Iniciar
+            isTracking = true;
+            $toggleButton.textContent = '⏹️ DETENER RASTREO';
+            $toggleButton.classList.remove('bg-green-600', 'shadow-green-500/40', 'bg-gray-400');
+            $toggleButton.classList.add('bg-red-600', 'shadow-red-500/40');
+            
+            // Forzar una actualización inmediata
+            updateLocation(); 
+            // Iniciar el intervalo periódico
+            trackingInterval = setInterval(updateLocation, UPDATE_FREQUENCY_MS);
+        }
+    }
+
+
+    /**
+     * Inicializa Firebase, autentica y comienza el rastreo.
+     */
+    async function initializeFirebase() {
+        $toggleButton.disabled = true;
+        $toggleButton.textContent = 'Cargando Firebase...';
+        $toggleButton.classList.add('bg-gray-400', 'shadow-none');
+
+        try {
+            if (Object.keys(firebaseConfig).length === 0) {
+                $lastUpdate.textContent = "🔴 Error: Configuración de Firebase no disponible.";
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Autenticación: Priorizamos el token si existe, sino anónimo.
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            userId = auth.currentUser?.uid || 'TECNICO_ANONIMO';
+            $tecnicoId.textContent = userId;
+            $toggleButton.disabled = false;
+            
+            console.log("✅ Firebase inicializado. ID Técnico:", userId);
+            
+            // Inicia el rastreo automáticamente
+            // La función toggleTracking se encargará de configurar el botón correctamente.
+            toggleTracking();
+
+        } catch (error) {
+            console.error("🔴 Error al inicializar Firebase o autenticar:", error);
+            $lastUpdate.textContent = `🔴 Error de conexión: ${error.message}.`;
+            $toggleButton.textContent = '❌ ERROR AL CONECTAR';
+            $toggleButton.classList.replace('bg-gray-400', 'bg-red-800');
+        }
+    }
+
+    initializeFirebase();
+</script>
+</body>
+</html>

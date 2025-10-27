@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Orden Cliente</title>
+    <!-- Carga de Tailwind CSS para estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- ESQUEMA VISUAL UNIFICADO (DARK MODE) --- */
+        :root {
+            --color-primary: #007bff; /* Azul de énfasis */
+            --color-dark-bg: #0d1117; /* Fondo oscuro principal */
+            --color-card-bg: #161b22; /* Fondo de contenedor */
+            --color-text-light: #f3f4f6;
+            --color-text-secondary: #a8b3cf; /* Texto secundario gris claro */
+            --color-border: #30363d; /* Borde sutil */
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem; /* Espacio para centrar la tarjeta */
+            background-color: var(--color-dark-bg);
+            color: var(--color-text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Alineación arriba para dejar espacio */
+        }
+
+        .main-card {
+            max-width: 900px; /* Ampliado para que el mapa se vea mejor en desktop */
+            width: 100%;
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
+            margin-top: 2rem;
+        }
+
+        /* Estilos para el campo de entrada (input) */
+        .input-dark {
+            background-color: #21262d; /* Color de fondo del input */
+            border-color: var(--color-border);
+            color: var(--color-text-light);
+        }
+        .input-dark::placeholder {
+            color: var(--color-text-secondary);
+        }
+
+        /* Estilos específicos para Leaflet Map */
+        #map {
+            height: 400px; /* Altura fija para el mapa */
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            /* Cambiamos el fondo del contenedor del mapa a oscuro */
+            background-color: #333; 
+        }
+
+        /* Responsive adjustments for mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+                align-items: flex-start;
+            }
+            .main-card {
+                padding: 1.5rem 1rem;
+                margin-top: 0;
+            }
+            #map {
+                 height: 300px;
+            }
+        }
+    </style>
+    <!-- Carga de Leaflet CSS y JS para el mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20n6aR4S+N/6E1G4v/D8rWnB+iWc5h0p+V5kF8e/o="
+        crossorigin=""></script>
+
+    <!-- Íconos de Lucide (opcional, pero útil) -->
+    <script type="module">
+        import { createIcons, MapPin, Truck, CheckCircle } from 'https://unpkg.com/lucide@latest';
+        createIcons({ icons: { MapPin, Truck, CheckCircle } });
+    </script>
+</head>
+<body>
+
+    <div class="main-card">
+        <h1 class="text-3xl font-extrabold text-white mb-6 border-b pb-3 border-gray-700">
+            Seguimiento de Servicio en Tiempo Real
+        </h1>
+
+        <!-- Contenedor de Ingreso de Orden -->
+        <div id="order-input-container" class="space-y-4 mb-8 p-4 bg-gray-800 border border-gray-700 rounded-lg">
+            <label for="order-id" class="block text-lg font-medium text-gray-200">
+                Ingrese el ID de su Orden
+            </label>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="order-id" placeholder="Ej: SUPA-1001"
+                    class="flex-1 p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out uppercase text-sm input-dark"
+                    value="SUPA-1001">
+                <button id="track-button"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out disabled:opacity-50">
+                    <span id="button-text">Rastrear Orden</span>
+                    <span id="loading-spinner" class="hidden h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                </button>
+            </div>
+            <p id="message-area" class="text-sm text-red-400"></p>
+        </div>
+
+        <!-- Contenedor del Tracker (Oculto inicialmente) -->
+        <div id="tracker-container" class="hidden space-y-8">
+            
+            <!-- Panel de Estado y Datos -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                <!-- Tarjeta de Estado -->
+                <div class="p-5 rounded-xl shadow-md bg-gray-800 border-l-4 border-yellow-500 transition-all duration-300">
+                    <p class="text-sm font-medium text-gray-400">Estado Actual</p>
+                    <div class="mt-1 flex items-center">
+                        <!-- El icono se actualiza en JS -->
+                        <span id="status-icon" class="w-6 h-6 mr-2"></span> 
+                        <p id="order-status" class="text-xl font-bold text-white">PENDIENTE</p>
+                    </div>
+                </div>
+
+                <!-- Tarjeta de Técnico Asignado -->
+                <div class="p-5 rounded-xl shadow-md bg-gray-800 border-l-4 border-gray-500">
+                    <p class="text-sm font-medium text-gray-400">Técnico Asignado</p>
+                    <p id="technician-id" class="mt-1 text-xl font-bold text-white truncate">Esperando...</p>
+                </div>
+
+                <!-- Tarjeta de Distancia Estimada -->
+                <div class="p-5 rounded-xl shadow-md bg-gray-800 border-l-4 border-green-500">
+                    <p class="text-sm font-medium text-gray-400">Distancia al Cliente</p>
+                    <div class="mt-1 flex items-center">
+                         <i data-lucide="map-pin" class="w-6 h-6 text-green-500 mr-2"></i>
+                        <p id="distance" class="text-xl font-bold text-white">-- km</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Contenedor del Mapa -->
+            <div id="map" class="shadow-xl"></div>
+
+            <p class="text-xs text-gray-500 text-center pt-4">
+                Los datos se actualizan en tiempo real. La ubicación del cliente es un punto fijo.
+            </p>
+        </div>
+    </div>
+
+    <!-- Script de Firebase y Lógica de la Aplicación -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Importar iconos de Lucide (necesario para el re-renderizado)
+        import { createIcons, MapPin, Truck, CheckCircle } from 'https://unpkg.com/lucide@latest';
+
+        // =================================================================
+        // CONFIGURACIÓN INICIAL DE FIREBASE
+        // =================================================================
+
+        // Variables globales (proporcionadas por el entorno de Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+        let map, clienteMarker, tecnicoMarker;
+        let unsubscribeTracker = null;
+        let unsubscribeTechnician = null;
+
+        // Marcadores de color para el mapa
+        const customerIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const technicianIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // Configuración predeterminada para el mapa (ubicación de fallback si no hay datos)
+        const DEFAULT_CENTER = [14.08, -87.20]; // Tegucigalpa, Honduras (Ejemplo)
+        const DEFAULT_ZOOM = 13;
+
+        async function initFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    console.error("La configuración de Firebase está vacía. Usando valores predeterminados.");
+                }
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Autenticar: usar token personalizado si está disponible, sino anónimo
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                console.log("Firebase inicializado y usuario autenticado.");
+            } catch (error) {
+                console.error("Error al inicializar Firebase o autenticar:", error);
+                document.getElementById('message-area').textContent = "Error de conexión: Verifica la configuración de Firebase.";
+            }
+        }
+
+        // =================================================================
+        // LÓGICA DEL MAPA
+        // =================================================================
+
+        function initMap() {
+            if (map) map.remove(); // Limpia el mapa si ya existe
+            
+            map = L.map('map').setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+
+            // Capa de mapa de OpenStreetMap (estilo predeterminado)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19,
+            }).addTo(map);
+
+            // Marcadores de Cliente y Técnico iniciales
+            clienteMarker = L.marker(DEFAULT_CENTER, { icon: customerIcon }).addTo(map)
+                .bindPopup("Ubicación del Cliente");
+            
+            tecnicoMarker = L.marker(DEFAULT_CENTER, { icon: technicianIcon }).addTo(map)
+                .bindPopup("Ubicación del Técnico");
+            
+            // Ocultar marcador del técnico al inicio
+            tecnicoMarker.setOpacity(0);
+        }
+
+        /**
+         * Actualiza el mapa y los marcadores con las nuevas coordenadas.
+         * @param {number} clienteLat - Latitud del cliente.
+         * @param {number} clienteLng - Longitud del cliente.
+         * @param {number | null} tecnicoLat - Latitud del técnico.
+         * @param {number | null} tecnicoLng - Longitud del técnico.
+         * @param {string} status - Estado actual de la orden.
+         */
+        function updateMapAndMarkers(clienteLat, clienteLng, tecnicoLat, tecnicoLng, status) {
+            let bounds = [];
+
+            // 1. Actualizar Cliente
+            const clientCoords = [clienteLat, clienteLng];
+            clienteMarker.setLatLng(clientCoords).setOpacity(1);
+            clienteMarker.getPopup().setContent(`Orden: ${document.getElementById('order-id').value.toUpperCase()} <br/> Estado: ${status}`);
+            bounds.push(clientCoords);
+
+            // 2. Determinar si se rastrea al técnico
+            const isTracking = ['EN CAMINO', 'EN SITIO'].includes(status);
+            
+            if (tecnicoLat && tecnicoLng && isTracking) {
+                const tecnicoCoords = [tecnicoLat, tecnicoLng];
+                tecnicoMarker.setLatLng(tecnicoCoords).setOpacity(1);
+                tecnicoMarker.getPopup().setContent("Técnico Asignado (Live)");
+                bounds.push(tecnicoCoords);
+
+                // Calcular distancia
+                const distanceInMeters = clienteMarker.getLatLng().distanceTo(tecnicoMarker.getLatLng());
+                const distanceInKm = (distanceInMeters / 1000).toFixed(2);
+                document.getElementById('distance').textContent = `${distanceInKm} km`;
+            } else {
+                tecnicoMarker.setOpacity(0);
+                document.getElementById('distance').textContent = "-- km";
+            }
+
+            // 3. Ajustar la vista del mapa para ver los marcadores
+            if (bounds.length > 0) {
+                if (bounds.length === 1) {
+                    map.setView(bounds[0], DEFAULT_ZOOM);
+                } else {
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            }
+        }
+
+        // =================================================================
+        // LÓGICA DE FIRESTORE: RASTREO
+        // =================================================================
+
+        function startTracking() {
+            if (!db) {
+                document.getElementById('message-area').textContent = "Error: Firebase no está inicializado.";
+                return;
+            }
+
+            const orderIdInput = document.getElementById('order-id');
+            const orderId = orderIdInput.value.trim().toUpperCase();
+
+            if (!orderId) {
+                document.getElementById('message-area').textContent = "Por favor, ingrese un ID de Orden válido.";
+                return;
+            }
+
+            // 1. Mostrar spinner y ocultar mensajes
+            document.getElementById('message-area').textContent = "";
+            document.getElementById('button-text').classList.add('hidden');
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            document.getElementById('track-button').disabled = true;
+
+            // 2. Limpiar listeners previos (si existen)
+            if (unsubscribeTracker) unsubscribeTracker();
+            if (unsubscribeTechnician) unsubscribeTechnician();
+
+            // 3. Subscripción al documento del Tracker de la Orden
+            // Path: /artifacts/{appId}/public/data/orders_tracker/{orderId}
+            const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders_tracker', orderId);
+
+            unsubscribeTracker = onSnapshot(orderRef, (docSnapshot) => {
+                
+                // Deshabilitar spinner
+                document.getElementById('button-text').classList.remove('hidden');
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('track-button').disabled = false;
+
+
+                if (!docSnapshot.exists()) {
+                    document.getElementById('message-area').textContent = `Orden ${orderId} no encontrada. Verifique el ID.`;
+                    showOrderInputView(); // Vuelve a la vista de input
+                    return;
+                }
+
+                const data = docSnapshot.data();
+                const { 
+                    status = 'PENDIENTE', 
+                    clienteLat = DEFAULT_CENTER[0], 
+                    clienteLng = DEFAULT_CENTER[1], 
+                    tecnicoId = null 
+                } = data;
+
+                // 4. Actualizar UI de estado y cliente
+                updateOrderStatusUI(status, tecnicoId);
+
+                const isTrackingNeeded = ['EN CAMINO', 'EN SITIO'].includes(status);
+
+                if (tecnicoId && isTrackingNeeded) {
+                    document.getElementById('technician-id').textContent = tecnicoId;
+                    startTechnicianTracking(tecnicoId, clienteLat, clienteLng, status);
+                } else {
+                    // Si no hay técnico asignado o la orden finalizó/pendiente
+                    document.getElementById('technician-id').textContent = (tecnicoId && !isTrackingNeeded) ? tecnicoId : 'Esperando Asignación...';
+                    if (unsubscribeTechnician) {
+                        unsubscribeTechnician();
+                        unsubscribeTechnician = null;
+                    }
+                    // Mostrar solo el marcador del cliente
+                    updateMapAndMarkers(clienteLat, clienteLng, null, null, status);
+                }
+
+                // 5. Pasar a la vista de seguimiento (si no está ya allí)
+                document.getElementById('order-input-container').classList.add('hidden');
+                document.getElementById('tracker-container').classList.remove('hidden');
+                setTimeout(() => {
+                    if (map) map.invalidateSize();
+                }, 100);
+
+            }, (error) => {
+                console.error("Error al escuchar el tracker de la orden:", error);
+                document.getElementById('message-area').textContent = "Error al conectar con el seguimiento de la orden.";
+                showOrderInputView();
+            });
+        }
+
+        function startTechnicianTracking(tecnicoId, clienteLat, clienteLng, orderStatus) {
+            // Limpiar listener de técnico previo si es diferente
+            if (unsubscribeTechnician) unsubscribeTechnician();
+            
+            // Path: /artifacts/{appId}/public/data/tecnicos_ubicaciones/{tecnicoId}
+            const technicianRef = doc(db, 'artifacts', appId, 'public', 'data', 'tecnicos_ubicaciones', tecnicoId);
+
+            unsubscribeTechnician = onSnapshot(technicianRef, (docSnapshot) => {
+                if (!docSnapshot.exists()) {
+                    // Si el técnico no está transmitiendo
+                    console.warn(`Ubicación del Técnico ${tecnicoId} no disponible.`);
+                    updateMapAndMarkers(clienteLat, clienteLng, null, null, orderStatus);
+                    return;
+                }
+
+                const data = docSnapshot.data();
+                const tecnicoLat = data.lat;
+                const tecnicoLng = data.lng;
+
+                if (tecnicoLat && tecnicoLng) {
+                    updateMapAndMarkers(clienteLat, clienteLng, tecnicoLat, tecnicoLng, orderStatus);
+                } else {
+                    console.warn(`Coordenadas del Técnico ${tecnicoId} inválidas.`);
+                    updateMapAndMarkers(clienteLat, clienteLng, null, null, orderStatus);
+                }
+            }, (error) => {
+                console.error("Error al escuchar la ubicación del técnico:", error);
+            });
+        }
+
+        // =================================================================
+        // LÓGICA DE UI
+        // =================================================================
+
+        /**
+         * Actualiza los elementos visuales de la tarjeta de estado.
+         * @param {string} status - Estado de la orden.
+         * @param {string | null} tecnicoId - ID del técnico.
+         */
+        function updateOrderStatusUI(status, tecnicoId) {
+            const statusText = document.getElementById('order-status');
+            const statusIconContainer = document.getElementById('status-icon');
+            const statusCard = statusText.closest('.border-l-4');
+            let iconName, color, cardColorClass, iconColorClass;
+
+            // Limpiamos las clases de color de la tarjeta para aplicar la nueva
+            statusCard.classList.remove('border-gray-500', 'border-yellow-500', 'border-blue-500', 'border-green-500');
+
+            switch (status) {
+                case 'PENDIENTE':
+                    iconName = 'CheckCircle';
+                    color = 'gray';
+                    cardColorClass = 'border-gray-500';
+                    iconColorClass = 'text-gray-500';
+                    statusText.textContent = 'PENDIENTE';
+                    break;
+                case 'EN CAMINO':
+                    iconName = 'Truck';
+                    color = 'yellow';
+                    cardColorClass = 'border-yellow-500';
+                    iconColorClass = 'text-yellow-500';
+                    statusText.textContent = 'Técnico en Camino';
+                    break;
+                case 'EN SITIO':
+                    iconName = 'MapPin';
+                    color = 'blue';
+                    cardColorClass = 'border-blue-500';
+                    iconColorClass = 'text-blue-500';
+                    statusText.textContent = 'Técnico en el Sitio';
+                    break;
+                case 'FINALIZADA':
+                    iconName = 'CheckCircle';
+                    color = 'green';
+                    cardColorClass = 'border-green-500';
+                    iconColorClass = 'text-green-500';
+                    statusText.textContent = 'Servicio Finalizado';
+                    break;
+                default:
+                    iconName = 'MapPin';
+                    color = 'gray';
+                    cardColorClass = 'border-gray-500';
+                    iconColorClass = 'text-gray-500';
+                    statusText.textContent = 'Estado Desconocido';
+            }
+
+            // Aplicar la clase de color de borde a la tarjeta
+            statusCard.classList.add(cardColorClass);
+            
+            // Renderizar el ícono de Lucide con el color correcto
+            statusIconContainer.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6 ${iconColorClass} mr-2"></i>`;
+            createIcons({ icons: { MapPin, Truck, CheckCircle } });
+        }
+
+        function showOrderInputView() {
+            document.getElementById('button-text').classList.remove('hidden');
+            document.getElementById('loading-spinner').classList.add('hidden');
+            document.getElementById('track-button').disabled = false;
+            document.getElementById('order-input-container').classList.remove('hidden');
+            document.getElementById('tracker-container').classList.add('hidden');
+            
+            // Limpiar listeners al volver a la vista de input
+            if (unsubscribeTracker) unsubscribeTracker();
+            if (unsubscribeTechnician) unsubscribeTechnician();
+            unsubscribeTracker = null;
+            unsubscribeTechnician = null;
+
+            // Reiniciar UI
+            document.getElementById('order-status').textContent = 'PENDIENTE';
+            document.getElementById('technician-id').textContent = 'Esperando...';
+            document.getElementById('distance').textContent = '-- km';
+            
+            // Inicializar o resetear el mapa
+            initMap();
+        }
+
+        // =================================================================
+        // INICIO DE LA APLICACIÓN
+        // =================================================================
+
+        window.onload = async () => {
+            initMap();
+            await initFirebase();
+
+            const trackButton = document.getElementById('track-button');
+            const orderInput = document.getElementById('order-id');
+
+            trackButton.addEventListener('click', startTracking);
+            orderInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    startTracking();
+                }
+            });
+            
+            // Iniciar con la vista de ingreso de orden
+            showOrderInputView();
+
+            // Re-renderizado inicial de íconos de Lucide
+            createIcons({ icons: { MapPin, Truck, CheckCircle } });
+        };
+    </script>
+</body>
+</html>

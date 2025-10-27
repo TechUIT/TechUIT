@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Despacho | ADMIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESQUEMA VISUAL UNIFICADO (El estilo que te gusta) --- */
+        :root {
+            --color-primary: #007bff; /* Azul de énfasis */
+            --color-dark-bg: #0d1117; /* Fondo oscuro principal */
+            --color-card-bg: #161b22; /* Fondo de contenedor */
+            --color-text-light: #f3f4f6;
+            --color-border: #30363d; /* Borde sutil */
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-dark-bg);
+            color: var(--color-text-light);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: var(--color-card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border: 1px solid var(--color-border); /* Usando el nuevo borde sutil */
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+        }
+        /* Estilos para el scrollbar en navegadores basados en WebKit (Chrome, Safari) */
+        #ordersList::-webkit-scrollbar {
+            width: 8px;
+        }
+        #ordersList::-webkit-scrollbar-thumb {
+            background-color: var(--color-border);
+            border-radius: 4px;
+        }
+        #ordersList::-webkit-scrollbar-track {
+            background-color: var(--color-card-bg);
+        }
+    </style>
+    <!-- Incluye Leaflet.js para el mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20n6a9k6sW4s2zT8+wFz0W7I/cWjY4rRzQpD5s3lB1I="
+        crossorigin=""></script>
+</head>
+<body>
+
+<div class="container">
+    <!-- Ajuste de colores en Header para usar el nuevo Primary Color y mantener contraste -->
+    <header class="text-center py-6 mb-8 border-b border-[var(--color-border)]">
+        <h1 class="text-3xl font-extrabold text-[var(--color-primary)]">
+            PANEL DE DESPACHO (ADMIN)
+        </h1>
+        <p class="text-lg text-gray-400">Gestión de Órdenes y Asignación de Técnicos</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Columna 1: Órdenes Pendientes (Simulación Supabase) -->
+        <div class="lg:col-span-1 card h-full">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2 border-[var(--color-border)]">
+                Órdenes Pendientes <span id="orderCount" class="badge bg-yellow-500 text-black ml-2">3</span>
+            </h2>
+            <div id="ordersList" class="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
+                <!-- Las órdenes se inyectarán aquí -->
+                <p class="text-center text-gray-500 py-10">Cargando órdenes...</p>
+            </div>
+        </div>
+        
+        <!-- Columna 2: Detalle de la Orden y Mapa -->
+        <div class="lg:col-span-2 card">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2 border-[var(--color-border)]">
+                Detalle de la Orden y Rastreo en Vivo
+            </h2>
+            
+            <!-- Ajuste de color de fondo del detalle para un look más oscuro -->
+            <div id="orderDetails" class="bg-[var(--color-dark-bg)] p-4 rounded-lg mb-4 border border-[var(--color-border)]">
+                <p class="text-gray-400 text-sm">Selecciona una orden de la izquierda para ver el detalle y los técnicos cercanos.</p>
+            </div>
+
+            <div id="map" class="w-full h-[500px] rounded-lg shadow-inner border border-[var(--color-border)]"></div>
+
+            <div id="techniciansList" class="mt-6">
+                <h3 class="text-lg font-bold mb-3 text-[var(--color-primary)]">Técnicos Cercanos (<span id="nearbyCount">0</span>)</h3>
+                <!-- Los técnicos cercanos se inyectarán aquí -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FIREBASE MODULES -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    setLogLevel('debug');
+    
+    // VARIABLES GLOBALES (MANDATORIO USAR)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    let db, auth, map, currentClientMarker, technicianMarkers = {};
+    let allTechniciansLocation = [];
+    let currentSelectedOrder = null;
+    let userId = '';
+
+    const $ordersList = document.getElementById('ordersList');
+    const $orderDetails = document.getElementById('orderDetails');
+    const $techniciansList = document.getElementById('techniciansList');
+    const $nearbyCount = document.getElementById('nearbyCount');
+
+    // --- SIMULACIÓN DE DATOS DE SUPABASE (ÓRDENES) ---
+    // En una implementación real, esto sería una consulta a Supabase.
+    // Usaremos coordenadas de Tegucigalpa, Honduras como punto de referencia.
+    const mockSupabaseOrders = [
+        { id: 'SUPA-1001', name: 'Cliente A (TGU)', status: 'Pagado', lat: 14.075, lon: -87.192, service: 'Reparación de PC', assignedTo: null }, 
+        { id: 'SUPA-1002', name: 'Cliente B (TGU)', status: 'Pagado', lat: 14.150, lon: -87.165, service: 'Instalación de Red', assignedTo: 'TECNICO-9340-XYZ' },
+        { id: 'SUPA-1003', name: 'Cliente C (TGU)', status: 'Pendiente', lat: 14.000, lon: -87.250, service: 'Mantenimiento Preventivo', assignedTo: null },
+    ];
+    // ----------------------------------------------------
+
+
+    // --- FUNCIONES DE LEAFLET (MAPA) ---
+
+    /** Inicializa el mapa */
+    function initMap() {
+        if (!map) {
+            map = L.map('map').setView([14.1, -87.2], 12); // Centro inicial en Tegucigalpa
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+    }
+
+    /** Muestra la ubicación del cliente en el mapa */
+    function updateClientLocation(order) {
+        if (currentClientMarker) {
+            map.removeLayer(currentClientMarker);
+        }
+        if (order) {
+            currentClientMarker = L.marker([order.lat, order.lon], { 
+                icon: L.icon({
+                    // Icono estándar (rojo) para el cliente
+                    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    shadowSize: [41, 41]
+                }),
+                title: `Cliente: ${order.name}`
+            }).addTo(map).bindPopup(`<b>Cliente: ${order.name}</b><br>${order.service}`).openPopup();
+            map.setView([order.lat, order.lon], 14); // Centrar en el cliente
+        }
+    }
+
+    /** Muestra las ubicaciones de los técnicos en el mapa */
+    function updateTechniciansOnMap(technicians) {
+        // 1. Limpiar marcadores antiguos
+        Object.values(technicianMarkers).forEach(marker => map.removeLayer(marker));
+        technicianMarkers = {};
+
+        // Icono personalizado para el técnico (azul)
+        const blueIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // 2. Añadir nuevos marcadores
+        technicians.forEach(tech => {
+            const marker = L.marker([tech.lat, tech.lon], { 
+                icon: blueIcon,
+                title: `Técnico: ${tech.tecnicoId}`
+            }).addTo(map).bindPopup(`<b>Técnico:</b> ${tech.tecnicoId}<br>Última actualización: ${new Date(tech.timestamp).toLocaleTimeString()}`);
+            technicianMarkers[tech.tecnicoId] = marker;
+        });
+    }
+
+
+    // --- LÓGICA DE NEGOCIO (DESPACHO) ---
+
+    /** Calcula la distancia en kilómetros entre dos puntos (haversine) */
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radio de la Tierra en km
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLon = (lon2 - lon1) * (Math.PI / 180);
+        const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distancia en km
+    }
+
+    /** Renderiza los técnicos cercanos para la orden seleccionada */
+    function renderTechnicians() {
+        if (!currentSelectedOrder) return;
+
+        const clientLat = currentSelectedOrder.lat;
+        const clientLon = currentSelectedOrder.lon;
+        const MAX_DISTANCE_KM = 50; // Radio de búsqueda (50 km para ejemplo)
+
+        // Filtrar técnicos cercanos
+        const nearbyTechnicians = allTechniciansLocation
+            .map(tech => ({
+                ...tech,
+                distance: calculateDistance(clientLat, clientLon, tech.lat, tech.lon)
+            }))
+            .filter(tech => tech.distance <= MAX_DISTANCE_KM)
+            .sort((a, b) => a.distance - b.distance); // Ordenar por distancia
+
+        $nearbyCount.textContent = nearbyTechnicians.length;
+
+        // Actualizar mapa y lista
+        updateTechniciansOnMap(nearbyTechnicians);
+        
+        $techniciansList.innerHTML = nearbyTechnicians.length === 0 
+            ? '<p class="text-gray-500">No hay técnicos reportando cerca de esta ubicación (distancia máxima de 50 km).</p>'
+            : nearbyTechnicians.map(tech => `
+                <div class="flex justify-between items-center p-3 bg-[var(--color-dark-bg)] rounded-lg mb-2 border border-[var(--color-border)]">
+                    <div>
+                        <p class="font-bold text-sm text-[var(--color-primary)] truncate">${tech.tecnicoId}</p>
+                        <p class="text-xs text-gray-400">Distancia: ${tech.distance.toFixed(2)} km</p>
+                    </div>
+                    ${currentSelectedOrder.assignedTo === tech.tecnicoId 
+                        ? `<span class="badge bg-green-500 text-black">ASIGNADO</span>`
+                        : `<button onclick="assignTechnician('${currentSelectedOrder.id}', '${tech.tecnicoId}')"
+                            class="py-1 px-3 bg-[var(--color-primary)] hover:opacity-90 text-white text-xs font-semibold rounded-full transition duration-150 shadow-md disabled:bg-gray-500">
+                            Asignar
+                        </button>`
+                    }
+                </div>
+            `).join('');
+    }
+
+    /** Maneja la selección de una orden */
+    window.selectOrder = function(orderId) {
+        currentSelectedOrder = mockSupabaseOrders.find(o => o.id === orderId);
+        
+        if (currentSelectedOrder) {
+            // 1. Resaltar la orden en la lista
+            document.querySelectorAll('.order-item').forEach(el => {
+                el.classList.remove('border-blue-500', 'bg-[var(--color-dark-bg)]');
+                el.classList.add('bg-[var(--color-card-bg)]'); // Restablecer fondo de tarjeta
+            });
+            const selectedElement = document.getElementById(`order-${orderId}`);
+            selectedElement.classList.add('border-blue-500', 'bg-[var(--color-dark-bg)]'); // Resaltar el ítem
+            selectedElement.classList.remove('bg-[var(--color-card-bg)]');
+
+            // 2. Renderizar detalles
+            $orderDetails.innerHTML = `
+                <div class="flex justify-between mb-2">
+                    <p class="text-lg font-extrabold text-white">${currentSelectedOrder.name} - ID: <span class="text-[var(--color-primary)]">${currentSelectedOrder.id}</span></p>
+                    <span class="badge ${currentSelectedOrder.status.includes('Pagado') ? 'bg-green-500' : (currentSelectedOrder.status.includes('Asignado') ? 'bg-[var(--color-primary)] text-white' : 'bg-yellow-500 text-black')}">${currentSelectedOrder.status}</span>
+                </div>
+                <p class="text-sm">Servicio: <span class="font-semibold">${currentSelectedOrder.service}</span></p>
+                <p class="text-sm">Ubicación Cliente: ${currentSelectedOrder.lat.toFixed(4)}, ${currentSelectedOrder.lon.toFixed(4)}</p>
+                <p class="text-sm mt-2 font-bold ${currentSelectedOrder.assignedTo ? 'text-green-400' : 'text-yellow-400'}">
+                    Asignado a: ${currentSelectedOrder.assignedTo || 'Nadie'}
+                </p>
+            `;
+
+            // 3. Actualizar mapa
+            updateClientLocation(currentSelectedOrder);
+            
+            // 4. Renderizar técnicos cercanos
+            renderTechnicians();
+        }
+    }
+
+    /** Simula la asignación de un técnico */
+    window.assignTechnician = async function(orderId, tecnicoId) {
+        
+        const order = mockSupabaseOrders.find(o => o.id === orderId);
+        if (order) {
+            // Actualizar la simulación local de la orden
+            order.assignedTo = tecnicoId;
+            order.status = 'Asignado';
+
+            console.log(`✅ SIMULACIÓN: Orden ${orderId} asignada al técnico ${tecnicoId} en Supabase.`);
+
+            // 2. Actualizar/Crear documento en Firestore orders_tracker (Colección Pública para el Cliente)
+            // Path: artifacts/{appId}/public/data/orders_tracker/{orderId}
+            const trackerRef = doc(db, `artifacts/${appId}/public/data/orders_tracker`, orderId);
+            try {
+                // Obtenemos la última ubicación conocida del técnico para el inicio del rastreo.
+                const assignedTechnician = allTechniciansLocation.find(t => t.tecnicoId === tecnicoId);
+
+                await setDoc(trackerRef, {
+                    orderId: orderId,
+                    tecnicoId: tecnicoId,
+                    status: 'EN CAMINO', // El estado que verá el cliente
+                    clientLat: order.lat,
+                    clientLon: order.lon,
+                    techLat: assignedTechnician ? assignedTechnician.lat : null, // Ubicación inicial del técnico
+                    techLon: assignedTechnician ? assignedTechnician.lon : null,
+                    timestamp: new Date().toISOString()
+                }, { merge: true });
+
+                console.log(`✅ Firestore actualizado para el cliente con el tecnico asignado: ${tecnicoId} en orders_tracker.`);
+            } catch (error) {
+                console.error("🔴 Error al asignar el técnico en Firestore:", error);
+            }
+
+            // Volver a renderizar para actualizar el estado visual
+            renderOrdersList();
+            window.selectOrder(orderId);
+        }
+    }
+
+    /** Renderiza la lista completa de órdenes (simulando datos de Supabase) */
+    function renderOrdersList() {
+        $ordersList.innerHTML = mockSupabaseOrders.map(order => `
+            <!-- Se agregó el onclick para que sea seleccionable -->
+            <div id="order-${order.id}" onclick="selectOrder('${order.id}')" class="order-item card cursor-pointer hover:bg-[var(--color-border)] transition duration-150 border-l-4 border-transparent bg-[var(--color-card-bg)]">
+                <div class="flex justify-between items-start">
+                    <p class="font-bold text-lg text-white truncate">${order.name}</p>
+                    <span class="badge ${order.status.includes('Pagado') ? 'bg-green-500' : (order.status.includes('Asignado') ? 'bg-[var(--color-primary)] text-white' : 'bg-yellow-500 text-black')}">${order.status}</span>
+                </div>
+                <p class="text-sm text-gray-400 mt-1">${order.service}</p>
+                <p class="text-xs ${order.assignedTo ? 'text-green-300' : 'text-red-300'}">Asignado: ${order.assignedTo || 'Nadie'}</p>
+            </div>
+        `).join('');
+        
+        document.getElementById('orderCount').textContent = mockSupabaseOrders.filter(o => o.status === 'Pagado' || o.status === 'Pendiente').length; // Solo órdenes activas/pendientes
+    }
+
+
+    // --- FIREBASE INICIALIZACIÓN Y RASTREO DE TÉCNICOS ---
+
+    /** Inicializa Firebase y establece el listener de ubicación de técnicos */
+    async function initializeFirebase() {
+        try {
+            if (Object.keys(firebaseConfig).length === 0) {
+                $ordersList.innerHTML = '<p class="text-center text-red-400 py-10">🔴 Error: Configuración de Firebase no disponible.</p>';
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            userId = auth.currentUser?.uid || 'ADMIN_DESPACHO';
+            console.log("✅ Firebase inicializado. ID Admin:", userId);
+            
+            initMap();
+            renderOrdersList();
+            
+            // Seleccionar la primera orden para inicializar el mapa y los detalles
+            if (mockSupabaseOrders.length > 0) {
+                window.selectOrder(mockSupabaseOrders[0].id);
+            }
+
+            // 1. Establecer listener para la ubicación de TODOS los técnicos (Firestore)
+            // Colección pública: artifacts/{appId}/public/data/tecnicos_ubicaciones
+            const tecnicosColRef = collection(db, `artifacts/${appId}/public/data/tecnicos_ubicaciones`);
+
+            onSnapshot(tecnicosColRef, (snapshot) => {
+                allTechniciansLocation = [];
+                snapshot.forEach((doc) => {
+                    // El ID del documento es el ID del técnico 
+                    allTechniciansLocation.push({ tecnicoId: doc.id, ...doc.data() });
+                });
+
+                console.log(`🔥 Datos de ${allTechniciansLocation.length} técnicos recibidos en tiempo real.`);
+                
+                // 2. Si hay una orden seleccionada, recalcular y renderizar técnicos cercanos
+                if (currentSelectedOrder) {
+                    renderTechnicians();
+                } else {
+                    // Si no hay orden seleccionada, solo actualiza el mapa con todos los técnicos disponibles
+                    updateTechniciansOnMap(allTechniciansLocation);
+                }
+            }, (error) => {
+                console.error("🔴 Error al escuchar ubicaciones de técnicos:", error);
+                $techniciansList.innerHTML = `<p class="text-red-400">Error al cargar técnicos: ${error.message}</p>`;
+            });
+
+        } catch (error) {
+            console.error("🔴 Error fatal de inicialización:", error);
+            $ordersList.innerHTML = `<p class="text-center text-red-400 py-10">🔴 Error fatal: ${error.message}.</p>`;
+        }
+    }
+
+    // Asegurarse de que la función global exista antes de la carga
+    window.onload = initializeFirebase;
+</script>
+</body>
+</html>
