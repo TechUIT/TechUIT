@@ -75,15 +75,6 @@
             background-color: #0069d9;
         }
 
-        .btn-verify {
-            background-color: var(--color-success);
-            color: white;
-        }
-
-        .btn-verify:hover {
-            background-color: #218838;
-        }
-
         .status-badge {
             padding: 4px 8px;
             border-radius: 4px;
@@ -126,9 +117,9 @@
 </div>
 
 <script>
-    // Configuración de Supabase
-    const supabaseUrl = 'https://tu-proyecto.supabase.co';
-    const supabaseKey = 'tu-clave-anonima-de-supabase';
+    // Configuración de Supabase con tus credenciales
+    const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -139,12 +130,12 @@
         const ordersContainer = document.getElementById('orders-container');
         
         try {
-            // Obtener todas las solicitudes con estado 'pendiente_pago'
+            // CORRECCIÓN: Usamos '.eq('status', ...)' y el valor exacto de la BD.
             const { data: orders, error } = await supabase
                 .from('solicitudes')
                 .select('*')
-                .eq('estado', 'pendiente_pago')
-                .order('created_at', { ascending: false });
+                .eq('status', 'Pendiente - Pago Diagnóstico')
+                .order('fecha_solicitud', { ascending: false });
             
             if (error) throw error;
             
@@ -153,14 +144,13 @@
                 return;
             }
             
-            // Renderizar las órdenes
             ordersContainer.innerHTML = orders.map(order => `
                 <div class="order-item" id="order-${order.id}">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
-                            <p class="text-sm text-gray-400">Cliente: ${order.nombre_cliente}</p>
-                            <p class="text-sm text-gray-400">Servicio: ${order.servicio}</p>
+                            <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
+                            <p class="text-sm text-gray-400">Servicio: ${order.tipo_servicio}</p>
                             <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
                         </div>
                         <span class="status-badge status-pending">Pendiente</span>
@@ -185,18 +175,17 @@
         const buttonsContainer = orderElement.querySelector('.flex.justify-end');
         
         try {
-            // Actualizar el estado en Supabase
+            // CORRECCIÓN: Usamos '.update({ status: ... })'
             const { error } = await supabase
                 .from('solicitudes')
                 .update({ 
-                    estado: 'pagado_verificado',
+                    status: 'pagado_verificado',
                     fecha_verificacion: new Date().toISOString()
                 })
                 .eq('id', orderId);
             
             if (error) throw error;
             
-            // Actualizar la UI
             statusBadge.textContent = 'Verificado';
             statusBadge.classList.remove('status-pending');
             statusBadge.classList.add('status-verified');

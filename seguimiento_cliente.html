@@ -43,7 +43,6 @@
             overflow: hidden;
         }
 
-        /* Efecto de reflejo azul */
         .main-card::before {
             content: '';
             position: absolute;
@@ -123,14 +122,11 @@
             </p>
         </header>
 
-        <!-- Contenedor Principal del Estado -->
         <div id="status-container">
-            <!-- El contenido se inyectará aquí con JavaScript -->
             <div class="loader"></div>
             <p class="text-center text-gray-400">Cargando estado...</p>
         </div>
 
-        <!-- Placeholder para el mapa del técnico -->
         <div id="map-container" class="placeholder-map" style="display: none;">
             <p>📍 Mapa del técnico en camino</p>
         </div>
@@ -147,7 +143,6 @@
         const solicitudIdDisplay = document.getElementById('solicitud-id');
         const statusContainer = document.getElementById('status-container');
         
-        // 1. Obtener el ID de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const solicitudId = urlParams.get('solicitud');
 
@@ -159,7 +154,7 @@
         solicitudIdDisplay.textContent = solicitudId;
 
         try {
-            // 2. Buscar la solicitud en Supabase
+            // CORRECCIÓN: Usamos '.select('*')' y la columna 'status'
             const { data: solicitud, error } = await supabase
                 .from('solicitudes')
                 .select('*')
@@ -167,11 +162,9 @@
                 .single();
 
             if (error) {
-                // Si hay un error (ej. no se encontró la solicitud)
                 throw error;
             }
 
-            // 3. Mostrar el estado según el resultado
             renderStatus(solicitud);
 
         } catch (error) {
@@ -185,8 +178,9 @@
         const mapContainer = document.getElementById('map-container');
         let statusHTML = '';
 
-        switch (solicitud.estado) {
-            case 'pendiente_pago':
+        // CORRECCIÓN: Usamos 'solicitud.status' y el valor exacto de la BD.
+        switch (solicitud.status) {
+            case 'Pendiente - Pago Diagnóstico':
                 statusHTML = `
                     <div class="text-center">
                         <div class="status-badge status-waiting mb-4">
@@ -208,21 +202,11 @@
                         <p class="text-sm text-gray-400 mt-2">Te asignaremos un técnico en breve.</p>
                     </div>
                 `;
-                // Aquí es donde más adelante conectaremos el mapa en tiempo real
                 mapContainer.style.display = 'flex'; 
                 break;
 
-            // Futuros estados que implementaremos
-            case 'tecnico_asignado':
-                statusHTML = `<div class="status-badge status-searching mb-4">👨‍🔧 Técnico Asignado: ${solicitud.tecnico_nombre || 'Juan Pérez'}</div>`;
-                break;
-            
-            case 'en_camino':
-                statusHTML = `<div class="status-badge status-searching mb-4">🚗 Técnico en Camino</div>`;
-                break;
-
             default:
-                statusHTML = `<p class="text-center text-gray-400">Estado desconocido.</p>`;
+                statusHTML = `<p class="text-center text-gray-400">Estado: ${solicitud.status || 'Desconocido'}</p>`;
                 break;
         }
 
