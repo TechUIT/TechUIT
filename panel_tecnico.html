@@ -284,26 +284,30 @@
     });
 
     // --- LÓGICA DEL DASHBOARD ---
+      // --- LÓGICA DEL DASHBOARD ---
     async function loadAvailableOrders() {
         const container = document.getElementById('orders-container');
         try {
+            // ¡SOLUCIÓN! Cambiamos .is() por .filter() para buscar valores nulos
             const { data: orders, error } = await supabaseClient
                 .from('clientes')
                 .select('*')
                 .eq('status', 'pagado_verificado')
-                .is('tecnico_asignado_id', 'null');
+                .filter('tecnico_asignado_id', 'is', null); // <-- ¡LÍNEA CLAVE CAMBIADA!
 
             if (error) throw error;
 
             if (orders.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 py-4">No hay órdenes nuevas por ahora.</p>';
+                container.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes nuevas por ahora.</p>';
                 return;
             }
 
             container.innerHTML = orders.map(order => `
                 <div class="order-item">
-                    <h3>ID: ${order.id} - ${order.nombre}</h3>
-                    <p class="text-sm text-gray-400">${order.direccion}</p>
+                    <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
+                    <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
+                    <p class="text-sm text-gray-400">Dirección: ${order.direccion}</p>
+                    <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
                     <button class="btn-success mt-3" onclick="acceptOrder(${order.id})">
                         Aceptar Orden
                     </button>
@@ -312,7 +316,7 @@
 
         } catch (error) {
             console.error('Error al cargar órdenes:', error);
-            container.innerHTML = '<p class="text-center text-red-400">Error al cargar órdenes.</p>';
+            container.innerHTML = '<p class="text-center text-red-400">Error al cargar las órdenes.</p>';
         }
     }
 
@@ -331,14 +335,13 @@
             if (error) throw error;
 
             alert('¡Orden aceptada! Ahora puedes iniciar el rastreo GPS.');
-            loadAvailableOrders();
+            loadAvailableOrders(); // Recargar la lista de órdenes
 
         } catch (error) {
             console.error('Error al aceptar orden:', error);
             alert('Error al aceptar la orden.');
         }
     }
-
     // --- LÓGICA DE GPS Y MAPA ---
     function initMap() {
         map = L.map('map').setView([14.0723, -87.1921], 13);
