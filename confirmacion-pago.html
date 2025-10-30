@@ -8,47 +8,68 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- ESTILOS CONSISTENTES (Luxury / Dark Mode App Feel) --- */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
+        /* --- ESQUEMA VISUAL UNIFICADO --- */
         :root {
-            --color-dark-bg: #000;      
-            --color-card-bg: #1a1a1a;   
+            --color-primary: #007bff; /* Azul de énfasis */
+            --color-dark-bg: #0d1117; /* Fondo oscuro principal */
+            --color-card-bg: #161b22; /* Fondo de contenedor */
             --color-text-light: #f3f4f6;
+            --color-border: #30363d; /* Borde sutil */
             --color-accent: #ffc107; /* Amarillo para el ID */
-            --color-success-btn: #25D366; /* Verde Ko-fi */
+            --color-success: #25D366; /* Verde Ko-fi */
         }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 16px; /* Reducido para móvil */
             background-color: var(--color-dark-bg);
             color: var(--color-text-light);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center; 
-            min-height: 100vh;
+            align-items: center;
         }
         
         .main-card {
-            max-width: 440px; /* Ancho compacto de móvil */
+            max-width: 440px;
             width: 100%;
-            padding: 24px;
             background-color: var(--color-card-bg);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            border: 1px solid #30363d;
+            border: 1px solid var(--color-border);
+            padding: 2rem 1.5rem; /* Reducido para móvil */
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efecto de reflejo azul */
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0) 70%);
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
         }
 
         .code-display {
             background-color: #0d1117;
-            border: 3px solid var(--color-accent); 
+            border: 3px solid var(--color-accent);
             padding: 18px;
             border-radius: 10px;
             font-size: 2rem;
             font-weight: 900;
-            color: var(--color-accent); 
+            color: var(--color-accent);
             text-align: center;
             letter-spacing: 3px;
             cursor: pointer;
@@ -61,88 +82,172 @@
             color: #ff4d4d;
             border-color: #ff4d4d;
             box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
-            font-size: 1.1rem; /* Más pequeño para que quepa el mensaje de error */
+            font-size: 1.1rem;
             letter-spacing: normal;
         }
         
-        /* Botón Ko-fi con sombra más agresiva */
+        .btn-primary {
+            background-color: var(--color-primary);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
         #pay-button {
-            background-color: var(--color-success-btn);
+            background-color: var(--color-success);
             box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+        }
+
+        .warning-box {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 2px solid var(--color-accent);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background-color: var(--color-primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .main-card {
+                padding: 3rem 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="main-card">
-    <header class="text-center mb-8">
-        <h1 class="text-3xl font-extrabold text-white mb-2">
-            ✅ Solicitud Aprobada
-        </h1>
-        <p class="text-sm text-gray-400">
-            Último paso: Pago para clasificar tu servicio como URGENTE.
-        </p>
-    </header>
+    <div class="content-wrapper">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-white mb-2">
+                ✅ Solicitud Aprobada
+            </h1>
+            <p class="text-sm text-gray-400">
+                Paga para clasificar tu servicio como URGENTE
+            </p>
+        </header>
 
-    <div class="bg-[#0d1117] p-6 rounded-xl border border-[#30363d] mb-6">
-        <!-- Instrucción de Copia del ID -->
-        <p class="text-lg font-bold text-red-400 mb-4 text-center">
-            ➡️ 1. COPIA este Código Único (ID):
-        </p>
-        
-        <!-- Código Único del Cliente -->
-        <div id="solicitud-id-display" class="code-display mb-4" title="Clic para Copiar">
-            Cargando ID...
+        <!-- Alerta de advertencia sobre el ID -->
+        <div class="warning-box">
+            <h3 class="text-lg font-bold text-yellow-400 mb-2">
+                ⚠️ ¡IMPORTANTE!
+            </h3>
+            <p class="text-white text-sm">
+                <strong>DEBES</strong> poner tu código ID en la descripción de Ko-fi. Sin esto, no podemos verificar tu pago.
+            </p>
         </div>
-        <p id="copy-message" class="text-sm font-bold text-green-400 text-center hidden">✅ ¡Código Copiado! Ve al paso 2.</p>
 
-        <!-- Instrucción de Pago -->
-        <p class="text-lg font-bold text-white mb-4 text-center mt-6">
-            ➡️ 2. Escribe el ID como NOTA en KOFI:
-        </p>
-        
-        <!-- Botón para ir a Kofi -->
-        <a id="pay-button" href="https://ko-fi.com/c/8d720c6c86" target="_blank"
-            class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
-        >
-            PAGAR AHORA EN KOFI
-        </a>
+        <div class="bg-[#0d1117] p-6 rounded-xl border border-[#30363d] mb-6">
+            <!-- Paso 1 -->
+            <div class="mb-6">
+                <p class="text-lg font-bold text-white mb-3">
+                    <span class="step-number">1</span> Copia tu código:
+                </p>
+                
+                <div id="solicitud-id-display" class="code-display mb-2" title="Clic para Copiar">
+                    Cargando ID...
+                </div>
+                <p id="copy-message" class="text-sm font-bold text-green-400 text-center hidden">✅ ¡Código copiado!</p>
+            </div>
+
+            <!-- Paso 2 -->
+            <div>
+                <p class="text-lg font-bold text-white mb-3">
+                    <span class="step-number">2</span> Pega el ID en Ko-fi y paga:
+                </p>
+                
+                <a id="pay-button" href="https://ko-fi.com/c/8d720c6c86" target="_blank"
+                    class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
+                >
+                    PAGAR EN KOFI
+                </a>
+            </div>
+        </div>
+
+        <!-- Instrucción para el RETORNO -->
+        <div class="bg-[#161b22] p-4 rounded-lg border border-[#30363d] text-center">
+            <h2 class="text-xl font-bold text-white mb-2">
+                ¿Listo?
+            </h2>
+            <p class="text-gray-400 text-sm mb-3">
+                Después de pagar, presiona el botón para ver tu estado
+            </p>
+            
+            <a id="seguimiento-btn" href="seguimiento_cliente.html" 
+                class="btn-primary w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
+            >
+                VER ESTADO DE MI SERVICIO
+            </a>
+        </div>
+
+        <p id="status-message" class="text-center mt-4 font-semibold text-gray-400"></p>
     </div>
-
-    <!-- Instrucción para el RETORNO -->
-    <div class="bg-[#161b22] p-4 rounded-lg border border-[#30363d] text-center">
-        <h2 class="text-xl font-bold text-white mb-2">
-            ¡Todo listo!
-        </h2>
-        <p class="text-gray-400 text-sm mb-3">
-            Una vez pagues, **regresa a la App y ve a tu perfil** para <a href="estatus-servicio.html" class="text-yellow-400 underline hover:text-yellow-300">ver el estatus</a>.
-        </p>
-    </div>
-
-    <p id="status-message" class="text-center mt-4 font-semibold text-gray-400"></p>
 </div>
 
 <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const solicitudIdDisplay = document.getElementById('solicitud-id-display');
-            const statusMessage = document.getElementById('status-message');
-            
-            // 1. LECTURA DE URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const solicitudId = urlParams.get('solicitud');
+    document.addEventListener('DOMContentLoaded', () => {
+        const solicitudIdDisplay = document.getElementById('solicitud-id-display');
+        const statusMessage = document.getElementById('status-message');
+        
+        // 1. LECTURA DE URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const solicitudId = urlParams.get('solicitud');
 
-            console.log(`--- PRUEBA DE ID INICIADA ---`);
-            console.log(`✅ ID de Solicitud extraído de la URL: ${solicitudId}`);
-            
-            if (solicitudId && solicitudIdDisplay) {
-                // 2. MOSTRAR ID
-                solicitudIdDisplay.textContent = solicitudId;
-                if(statusMessage) statusMessage.textContent = `ID #${solicitudId} leído correctamente.`;
-            } else {
-                solicitudIdDisplay.textContent = 'ERROR NO ID';
-                if(statusMessage) statusMessage.textContent = `ERROR: No se encontró el ID.`;
-            }
+        console.log(`--- PRUEBA DE ID INICIADA ---`);
+        console.log(`✅ ID de Solicitud extraído de la URL: ${solicitudId}`);
+        
+        if (solicitudId && solicitudIdDisplay) {
+            // 2. MOSTRAR ID
+            solicitudIdDisplay.textContent = solicitudId;
+            if(statusMessage) statusMessage.textContent = `ID #${solicitudId} leído correctamente.`;
+        } else {
+            solicitudIdDisplay.textContent = 'ERROR NO ID';
+            if(statusMessage) statusMessage.textContent = `ERROR: No se encontró el ID.`;
+        }
+    });
+
+    // Función para copiar el ID al portapapeles
+    document.getElementById('solicitud-id-display').addEventListener('click', function() {
+        const textToCopy = this.textContent;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            document.getElementById('copy-message').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('copy-message').classList.add('hidden');
+            }, 3000);
         });
-    </script>
+    });
+</script>
 </body>
 </html>
