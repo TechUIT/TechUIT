@@ -284,16 +284,14 @@
     });
 
     // --- LÓGICA DEL DASHBOARD ---
-      // --- LÓGICA DEL DASHBOARD ---
     async function loadAvailableOrders() {
         const container = document.getElementById('orders-container');
         try {
-            // ¡SOLUCIÓN! Cambiamos .is() por .filter() para buscar valores nulos
             const { data: orders, error } = await supabaseClient
                 .from('clientes')
                 .select('*')
                 .eq('status', 'pagado_verificado')
-                .filter('tecnico_asignado_id', 'is', null); // <-- ¡LÍNEA CLAVE CAMBIADA!
+                .is('tecnico_asignado_id', null);
 
             if (error) throw error;
 
@@ -335,13 +333,14 @@
             if (error) throw error;
 
             alert('¡Orden aceptada! Ahora puedes iniciar el rastreo GPS.');
-            loadAvailableOrders(); // Recargar la lista de órdenes
+            loadAvailableOrders();
 
         } catch (error) {
             console.error('Error al aceptar orden:', error);
             alert('Error al aceptar la orden.');
         }
     }
+
     // --- LÓGICA DE GPS Y MAPA ---
     function initMap() {
         map = L.map('map').setView([14.0723, -87.1921], 13);
