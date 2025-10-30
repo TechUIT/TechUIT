@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de mi Servicio | TechUIT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- ESQUEMA VISUAL UNIFICADO (OBLIGATORIO) --- */
+        :root {
+            --color-primary: #007bff; /* Azul de énfasis */
+            --color-dark-bg: #0d1117; /* Fondo oscuro principal */
+            --color-card-bg: #161b22; /* Fondo de contenedor */
+            --color-text-light: #f3f4f6;
+            --color-border: #30363d; /* Borde sutil */
+            --color-warning: #ffc107; /* Amarillo para alertas */
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: var(--color-dark-bg);
+            color: var(--color-text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-card {
+            max-width: 440px;
+            width: 100%;
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            padding: 2rem 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efecto de reflejo azul */
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0) 70%);
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .status-waiting {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: var(--color-warning);
+            border: 1px solid var(--color-warning);
+        }
+
+        .status-searching {
+            background-color: rgba(0, 123, 255, 0.2);
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+        }
+
+        .placeholder-map {
+            background-color: #1e242a;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--color-primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-card">
+    <div class="content-wrapper">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-white mb-2">
+                Estado de tu Servicio
+            </h1>
+            <p class="text-sm text-gray-400">
+                ID de Solicitud: <span id="solicitud-id" class="font-bold text-yellow-400">Cargando...</span>
+            </p>
+        </header>
+
+        <!-- Contenedor Principal del Estado -->
+        <div id="status-container">
+            <!-- El contenido se inyectará aquí con JavaScript -->
+            <div class="loader"></div>
+            <p class="text-center text-gray-400">Cargando estado...</p>
+        </div>
+
+        <!-- Placeholder para el mapa del técnico -->
+        <div id="map-container" class="placeholder-map" style="display: none;">
+            <p>📍 Mapa del técnico en camino</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuración de Supabase con tus credenciales
+    const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const solicitudIdDisplay = document.getElementById('solicitud-id');
+        const statusContainer = document.getElementById('status-container');
+        
+        // 1. Obtener el ID de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const solicitudId = urlParams.get('solicitud');
+
+        if (!solicitudId) {
+            statusContainer.innerHTML = '<p class="text-center text-red-400">❌ Error: No se encontró el ID de la solicitud.</p>';
+            return;
+        }
+
+        solicitudIdDisplay.textContent = solicitudId;
+
+        try {
+            // 2. Buscar la solicitud en Supabase
+            const { data: solicitud, error } = await supabase
+                .from('solicitudes')
+                .select('*')
+                .eq('id', solicitudId)
+                .single();
+
+            if (error) {
+                // Si hay un error (ej. no se encontró la solicitud)
+                throw error;
+            }
+
+            // 3. Mostrar el estado según el resultado
+            renderStatus(solicitud);
+
+        } catch (error) {
+            console.error('Error al cargar la solicitud:', error);
+            statusContainer.innerHTML = '<p class="text-center text-red-400">❌ No pudimos encontrar tu solicitud. Verifica el ID.</p>';
+        }
+    });
+
+    function renderStatus(solicitud) {
+        const statusContainer = document.getElementById('status-container');
+        const mapContainer = document.getElementById('map-container');
+        let statusHTML = '';
+
+        switch (solicitud.estado) {
+            case 'pendiente_pago':
+                statusHTML = `
+                    <div class="text-center">
+                        <div class="status-badge status-waiting mb-4">
+                            ⏳ Esperando Verificación de Pago
+                        </div>
+                        <p class="text-gray-300">Tu pago está siendo verificado. Esto puede tardar unos minutos.</p>
+                        <p class="text-sm text-gray-400 mt-2">¿Ya pagaste? Asegúrate de haber puesto tu ID (${solicitud.id}) en la descripción de Ko-fi.</p>
+                    </div>
+                `;
+                break;
+
+            case 'pagado_verificado':
+                statusHTML = `
+                    <div class="text-center">
+                        <div class="status-badge status-searching mb-4">
+                            🔍 Buscando Técnico Disponible
+                        </div>
+                        <p class="text-gray-300">Ya verificamos tu pago. Estamos buscando al técnico más cercano para ti.</p>
+                        <p class="text-sm text-gray-400 mt-2">Te asignaremos un técnico en breve.</p>
+                    </div>
+                `;
+                // Aquí es donde más adelante conectaremos el mapa en tiempo real
+                mapContainer.style.display = 'flex'; 
+                break;
+
+            // Futuros estados que implementaremos
+            case 'tecnico_asignado':
+                statusHTML = `<div class="status-badge status-searching mb-4">👨‍🔧 Técnico Asignado: ${solicitud.tecnico_nombre || 'Juan Pérez'}</div>`;
+                break;
+            
+            case 'en_camino':
+                statusHTML = `<div class="status-badge status-searching mb-4">🚗 Técnico en Camino</div>`;
+                break;
+
+            default:
+                statusHTML = `<p class="text-center text-gray-400">Estado desconocido.</p>`;
+                break;
+        }
+
+        statusContainer.innerHTML = statusHTML;
+    }
+</script>
+
+</body>
+</html>
