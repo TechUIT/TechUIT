@@ -129,8 +129,9 @@
         const ordersContainer = document.getElementById('orders-container');
         
         try {
+            // ¡CAMBIO CLAVE! Ahora busca en la tabla 'clientes'
             const { data: orders, error } = await supabase
-                .from('solicitudes')
+                .from('clientes') // <-- CAMBIADO DE 'solicitudes' a 'clientes'
                 .select('*')
                 .eq('status', 'Pendiente - Pago Diagnóstico')
                 .order('fecha_solicitud', { ascending: false });
@@ -176,11 +177,12 @@
         const buttonsContainer = orderElement.querySelector('.flex.justify-end');
         
         try {
+            // ¡CAMBIO CLAVE! Ahora actualiza en la tabla 'clientes'
             const { error } = await supabase
-                .from('solicitudes')
+                .from('clientes') // <-- CAMBIADO DE 'solicitudes' a 'clientes'
                 .update({ 
                     status: 'pagado_verificado',
-                    fecha_verificacion: new Date().toISOString()
+                    fecha_verificacion: new Date().toISOString() // Esta columna la añadiremos luego si se necesita
                 })
                 .eq('id', orderId);
             

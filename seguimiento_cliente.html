@@ -7,14 +7,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- ESQUEMA VISUAL UNIFICADO (OBLIGATORIO) --- */
         :root {
-            --color-primary: #007bff; /* Azul de énfasis */
-            --color-dark-bg: #0d1117; /* Fondo oscuro principal */
-            --color-card-bg: #161b22; /* Fondo de contenedor */
+            --color-primary: #007bff;
+            --color-dark-bg: #0d1117;
+            --color-card-bg: #161b22;
             --color-text-light: #f3f4f6;
-            --color-border: #30363d; /* Borde sutil */
-            --color-warning: #ffc107; /* Amarillo para alertas */
+            --color-border: #30363d;
+            --color-warning: #ffc107;
         }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -134,7 +133,6 @@
 </div>
 
 <script>
-    // Configuración de Supabase con tus credenciales
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -154,9 +152,9 @@
         solicitudIdDisplay.textContent = solicitudId;
 
         try {
-            // CORRECCIÓN: Usamos '.select('*')' y la columna 'status'
+            // ¡CAMBIO CLAVE! Ahora busca en la tabla 'clientes'
             const { data: solicitud, error } = await supabase
-                .from('solicitudes')
+                .from('clientes') // <-- CAMBIADO DE 'solicitudes' a 'clientes'
                 .select('*')
                 .eq('id', solicitudId)
                 .single();
@@ -178,7 +176,6 @@
         const mapContainer = document.getElementById('map-container');
         let statusHTML = '';
 
-        // CORRECCIÓN: Usamos 'solicitud.status' y el valor exacto de la BD.
         switch (solicitud.status) {
             case 'Pendiente - Pago Diagnóstico':
                 statusHTML = `
