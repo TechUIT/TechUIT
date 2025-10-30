@@ -137,10 +137,10 @@
             if (solicitudId && solicitudIdDisplay) {
                 // 2. MOSTRAR ID
                 solicitudIdDisplay.textContent = solicitudId;
-                if(statusMessage) statusMessage.textContent = `ID #${solicitudId} leído correctamente de la URL. Tu archivo HTML está funcionando.`;
+                if(statusMessage) statusMessage.textContent = `ID #${solicitudId} leído correctamente.`;
             } else {
                 solicitudIdDisplay.textContent = 'ERROR NO ID';
-                if(statusMessage) statusMessage.textContent = `ERROR: No se encontró el ID en la URL.`;
+                if(statusMessage) statusMessage.textContent = `ERROR: No se encontró el ID.`;
             }
         });
     </script>
