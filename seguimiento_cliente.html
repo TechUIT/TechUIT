@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estado de mi Servicio | TechUIT</title>
-    <!-- ¡CAMBIO CLAVE! Usamos type="module" y defer -->
-    <script type="module" defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- ¡SOLUCIÓN! Ponemos 'defer' en el script de la librería -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -133,13 +133,12 @@
     </div>
 </div>
 
-<!-- ¡CAMBIO CLAVE! El script principal ahora también es type="module" -->
-<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-
+<!-- ¡SOLUCIÓN! Ponemos 'defer' en nuestro script también -->
+<script defer>
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { createClient } = supabase;
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
     document.addEventListener('DOMContentLoaded', async () => {
         const solicitudIdDisplay = document.getElementById('solicitud-id');
@@ -156,7 +155,7 @@
         solicitudIdDisplay.textContent = solicitudId;
 
         try {
-            const { data: solicitud, error } = await supabase
+            const { data: solicitud, error } = await supabaseClient
                 .from('clientes')
                 .select('*')
                 .eq('id', solicitudId)
