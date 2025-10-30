@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Verificación de Pagos | TechUIT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        
+        :root {
+            --color-dark-bg: #0d1117;
+            --color-card-bg: #161b22;
+            --color-text-light: #f3f4f6;
+            --color-accent: #ffc107;
+            --color-primary: #007bff;
+            --color-success: #28a745;
+            --color-warning: #ffc107;
+            --color-danger: #dc3545;
+            --color-border: #30363d;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-dark-bg);
+            color: var(--color-text-light);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .order-item {
+            background-color: #1e242a;
+            border-left: 4px solid var(--color-warning);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+
+        .order-item.verified {
+            border-left-color: var(--color-success);
+            opacity: 0.7;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-simulate {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .btn-simulate:hover {
+            background-color: #0069d9;
+        }
+
+        .btn-verify {
+            background-color: var(--color-success);
+            color: white;
+        }
+
+        .btn-verify:hover {
+            background-color: #218838;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-pending {
+            background-color: var(--color-warning);
+            color: #000;
+        }
+
+        .status-verified {
+            background-color: var(--color-success);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="text-center py-6 mb-8 border-b border-[var(--color-border)]">
+        <h1 class="text-3xl font-extrabold text-[var(--color-accent)]">
+            PANEL DE VERIFICACIÓN DE PAGOS
+        </h1>
+        <p class="text-lg text-gray-400">
+            Aquí puedes verificar los pagos de Ko-fi y simular verificaciones para pruebas.
+        </p>
+    </header>
+
+    <div class="card">
+        <h2 class="text-xl font-bold mb-4">Órdenes Pendientes de Verificación</h2>
+        <p class="text-sm text-gray-400 mb-4">
+            Estas son las solicitudes que han completado el formulario y están esperando la verificación del pago en Ko-fi.
+        </p>
+        <div id="orders-container">
+            <p class="text-center text-gray-500 py-10">Cargando órdenes...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuración de Supabase
+    const supabaseUrl = 'https://tu-proyecto.supabase.co';
+    const supabaseKey = 'tu-clave-anonima-de-supabase';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPendingOrders();
+    });
+
+    async function loadPendingOrders() {
+        const ordersContainer = document.getElementById('orders-container');
+        
+        try {
+            // Obtener todas las solicitudes con estado 'pendiente_pago'
+            const { data: orders, error } = await supabase
+                .from('solicitudes')
+                .select('*')
+                .eq('estado', 'pendiente_pago')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            if (orders.length === 0) {
+                ordersContainer.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes pendientes de verificación.</p>';
+                return;
+            }
+            
+            // Renderizar las órdenes
+            ordersContainer.innerHTML = orders.map(order => `
+                <div class="order-item" id="order-${order.id}">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
+                            <p class="text-sm text-gray-400">Cliente: ${order.nombre_cliente}</p>
+                            <p class="text-sm text-gray-400">Servicio: ${order.servicio}</p>
+                            <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
+                        </div>
+                        <span class="status-badge status-pending">Pendiente</span>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button class="btn btn-simulate" onclick="simulateVerification('${order.id}')">
+                            Simular Verificación
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error al cargar órdenes:', error);
+            ordersContainer.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar las órdenes: ${error.message}</p>`;
+        }
+    }
+
+    async function simulateVerification(orderId) {
+        const orderElement = document.getElementById(`order-${orderId}`);
+        const statusBadge = orderElement.querySelector('.status-badge');
+        const buttonsContainer = orderElement.querySelector('.flex.justify-end');
+        
+        try {
+            // Actualizar el estado en Supabase
+            const { error } = await supabase
+                .from('solicitudes')
+                .update({ 
+                    estado: 'pagado_verificado',
+                    fecha_verificacion: new Date().toISOString()
+                })
+                .eq('id', orderId);
+            
+            if (error) throw error;
+            
+            // Actualizar la UI
+            statusBadge.textContent = 'Verificado';
+            statusBadge.classList.remove('status-pending');
+            statusBadge.classList.add('status-verified');
+            
+            orderElement.classList.add('verified');
+            
+            buttonsContainer.innerHTML = '<span class="text-green-400 text-sm font-bold">✅ Verificado</span>';
+            
+            console.log(`Orden ${orderId} verificada exitosamente.`);
+            
+        } catch (error) {
+            console.error('Error al verificar la orden:', error);
+            alert('Error al verificar la orden. Por favor, intenta de nuevo.');
+        }
+    }
+</script>
+
+</body>
+</html>
