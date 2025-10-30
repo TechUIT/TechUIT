@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estado de mi Servicio | TechUIT</title>
-    <!-- ¡SOLUCIÓN! Ponemos 'defer' en el script de la librería -->
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- ¡SOLUCIÓN! Cargamos la librería SIN defer -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -133,11 +133,13 @@
     </div>
 </div>
 
-<!-- ¡SOLUCIÓN! Ponemos 'defer' en nuestro script también -->
+<!-- ¡SOLUCIÓN! Movemos nuestro script al final del body y usamos defer -->
 <script defer>
+    console.log("Script principal cargado. Objeto window.supabase:", window.supabase);
+
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
-    const { createClient } = supabase;
+    const { createClient } = window.supabase;
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
     document.addEventListener('DOMContentLoaded', async () => {
