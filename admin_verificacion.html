@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Verificación de Pagos | TechUIT</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Panel de Verificación de Pagos | TechUIT>
+    <!-- ¡CAMBIO CLAVE! Añadimos 'defer' para que espere a cargar todo -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
@@ -117,16 +118,12 @@
 </div>
 
 <script>
-    // ¡SOLUCIÓN CLAVE! Declaramos 'supabase' como una variable global aquí fuera.
     let supabase;
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Ahora que el documento está listo, inicializamos la variable global.
         const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
         supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-        // Y llamamos a la función principal.
         loadPendingOrders();
     });
 
@@ -176,7 +173,6 @@
     }
 
     async function simulateVerification(orderId) {
-        // Como 'supabase' es global, podemos usarla aquí sin problemas.
         const orderElement = document.getElementById(`order-${orderId}`);
         const statusBadge = orderElement.querySelector('.status-badge');
         const buttonsContainer = orderElement.querySelector('.flex.justify-end');
