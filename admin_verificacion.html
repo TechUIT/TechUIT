@@ -117,7 +117,6 @@
 </div>
 
 <script>
-    // Configuración de Supabase con tus credenciales
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -130,14 +129,16 @@
         const ordersContainer = document.getElementById('orders-container');
         
         try {
-            // CORRECCIÓN: Usamos '.eq('status', ...)' y el valor exacto de la BD.
             const { data: orders, error } = await supabase
                 .from('solicitudes')
                 .select('*')
                 .eq('status', 'Pendiente - Pago Diagnóstico')
                 .order('fecha_solicitud', { ascending: false });
             
-            if (error) throw error;
+            if (error) {
+                console.error('Error from Supabase:', error);
+                throw error;
+            }
             
             if (orders.length === 0) {
                 ordersContainer.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes pendientes de verificación.</p>';
@@ -165,7 +166,7 @@
             
         } catch (error) {
             console.error('Error al cargar órdenes:', error);
-            ordersContainer.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar las órdenes: ${error.message}</p>`;
+            ordersContainer.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar las órdenes: ${error.message}. Revisa las políticas RLS en Supabase.</p>`;
         }
     }
 
@@ -175,7 +176,6 @@
         const buttonsContainer = orderElement.querySelector('.flex.justify-end');
         
         try {
-            // CORRECCIÓN: Usamos '.update({ status: ... })'
             const { error } = await supabase
                 .from('solicitudes')
                 .update({ 
@@ -198,7 +198,7 @@
             
         } catch (error) {
             console.error('Error al verificar la orden:', error);
-            alert('Error al verificar la orden. Por favor, intenta de nuevo.');
+            alert('Error al verificar la orden. Revisa la consola para más detalles.');
         }
     }
 </script>
