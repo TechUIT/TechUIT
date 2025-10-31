@@ -188,30 +188,34 @@
         }).addTo(map);
     }
 
-    // ¡LA FUNCIÓN QUE FALTABA Y QUE AHORA ESTÁ INCLUIDA!
     function listenForTechnicianLocation(tecnicoId) {
         if (!tecnicoId) return;
+
+        console.log(`Escuchando ubicaciones para el técnico ID: ${tecnicoId}`);
 
         // Suscribirse a cambios en la ubicación del técnico asignado
         const subscription = supabaseClient
             .channel(`public:tecnico_ubicacion:tecnico_id=eq.${tecnicoId}`)
             .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tecnico_ubicacion', filter: `tecnico_id=eq.${tecnicoId}` }, (payload) => {
                 const newLocation = payload.new;
-                console.log('Nueva ubicación recibida:', newLocation);
+                console.log('¡Nueva ubicación recibida en tiempo real!', newLocation);
                 updateTechnicianMarker(newLocation.lat, newLocation.lng);
                 updateStatusToOnRoute();
             })
             .subscribe();
 
-        // También obtener la última ubicación conocida al suscribirse
+        // Obtener la última ubicación conocida, pero MANEJANDO el error si no existe
         supabaseClient
             .from('tecnico_ubicacion')
             .select('lat, lng')
             .eq('tecnico_id', tecnicoId)
             .single()
             .then(({ data, error }) => {
-                if (data && !error) {
+                if (data) {
+                    console.log('Última ubicación conocida encontrada:', data);
                     updateTechnicianMarker(data.lat, data.lng);
+                } else if (error) {
+                    console.log('El técnico aún no ha activado su GPS. Esperando...');
                 }
             });
     }
