@@ -443,7 +443,43 @@
             
             if (error) throw error;
             
-            showNotification('¡Orden aceptada! Ahora puedes iniciar el rastreo GPS.', 'success');
+            showNotification('¡Orden aceptada! Revisa el mapa para ver la dirección del cliente.', 'success');
+            
+            // Cargar la orden aceptada para obtener la dirección
+            const { data: order, error: orderError } = await supabaseClient
+                .from('clientes')
+                .select('direccion')
+                .eq('id', orderId)
+                .single();
+
+            if (!orderError && order && order.direccion) {
+                // IMPORTANTE: Aquí deberías usar un servicio de geocodificación para convertir la dirección a coordenadas.
+                // Por ahora, usaremos una coordenada de ejemplo para simular la ubicación del cliente.
+                const customerCoords = [14.0645, -87.1723]; // Coordenada de ejemplo en Tegucigalpa
+                
+                if (customerMarker) {
+                    map.removeLayer(customerMarker);
+                }
+
+                customerMarker = L.marker(customerCoords, {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map).bindPopup(`Dirección del cliente: ${order.direccion}`).openPopup();
+
+                // Ajustar la vista del mapa para mostrar ambos marcadores si el técnico ya tiene uno
+                if (technicianMarker) {
+                    const group = new L.featureGroup([technicianMarker, customerMarker]);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                } else {
+                    map.setView(customerCoords, 13);
+                }
+            }
             
             loadAvailableOrders();
             loadAcceptedOrders();
@@ -469,34 +505,10 @@
             
             loadAcceptedOrders();
             
-            const { data: order, error: orderError } = await supabaseClient
-                .from('clientes')
-                .select('direccion')
-                .eq('id', orderId)
-                .single();
-                
-            if (!orderError && order && order.direccion) {
-                const customerCoords = [14.0723, -87.1921];
-                
-                if (customerMarker) {
-                    customerMarker.setLatLng(customerCoords);
-                } else {
-                    customerMarker = L.marker(customerCoords, {
-                        icon: L.icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
-                    }).addTo(map).bindPopup('Ubicación del cliente').openPopup();
-                }
-                
-                if (technicianMarker) {
-                    const group = new L.featureGroup([technicianMarker, customerMarker]);
-                    map.fitBounds(group.getBounds().pad(0.1));
-                }
+            // Ajustar la vista del mapa para mostrar ambos marcadores
+            if (technicianMarker && customerMarker) {
+                const group = new L.featureGroup([technicianMarker, customerMarker]);
+                map.fitBounds(group.getBounds().pad(0.1));
             }
         } catch (error) {
             console.error('Error al iniciar navegación:', error);
@@ -634,6 +646,7 @@
             }).addTo(map);
         }
         
+        // Ajustar la vista del mapa para mostrar ambos marcadores si existen
         if (customerMarker) {
             const group = new L.featureGroup([technicianMarker, customerMarker]);
             map.fitBounds(group.getBounds().pad(0.1));
