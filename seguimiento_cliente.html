@@ -170,7 +170,7 @@
                 statusHTML = `<div class="text-center"><div class="status-badge status-assigned mb-4">👨‍🔧 Técnico Asignado</div><p class="text-gray-300">El técnico está en camino. Espera a que active su GPS para ver su ubicación.</p></div>`;
                 mapContainer.classList.remove('hidden');
                 initMap();
-                listenForTechnicoLocation(solicitud.tecnico_asignado_id);
+                listenForTechnicianLocation(solicitud.tecnico_asignado_id);
                 break;
 
             default:
@@ -188,6 +188,7 @@
         }).addTo(map);
     }
 
+    // ¡LA FUNCIÓN QUE FALTABA Y QUE AHORA ESTÁ INCLUIDA!
     function listenForTechnicianLocation(tecnicoId) {
         if (!tecnicoId) return;
 
