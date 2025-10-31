@@ -9,17 +9,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* --- ESTILO VISUAL UNIFICADO (EL QUE TE GUSTA) --- */
         :root {
-            --color-primary: #007bff; /* Azul de énfasis */
-            --color-dark-bg: #0d1117; /* Fondo oscuro principal */
-            --color-card-bg: #161b22; /* Fondo de contenedor */
+            --color-primary: #007bff;
+            --color-dark-bg: #0d1117;
+            --color-card-bg: #161b22;
             --color-text-light: #f3f4f6;
-            --color-border: #30363d; /* Borde sutil */
+            --color-border: #30363d;
         }
-
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -31,20 +28,17 @@
             justify-content: center;
             align-items: center;
         }
-
         .main-card {
-            max-width: 440px; /* Ancho compacto de móvil */
+            max-width: 440px;
             width: 100%;
             background-color: var(--color-card-bg);
             border: 1px solid var(--color-border);
-            padding: 3rem 1.5rem; /* Espaciado interno */
-            border-radius: 1.5rem; /* Bordes muy redondeados */
-            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15); /* Sombra elegante */
+            padding: 3rem 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
             position: relative;
             overflow: hidden;
         }
-
-        /* Efecto de reflejo azul */
         .main-card::before {
             content: '';
             position: absolute;
@@ -55,12 +49,10 @@
             background: radial-gradient(circle, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0) 70%);
             z-index: 0;
         }
-
         .content-wrapper {
             position: relative;
             z-index: 1;
         }
-
         .form-input {
             width: 100%;
             padding: 0.75rem;
@@ -71,13 +63,11 @@
             font-size: 1rem;
             transition: border-color 0.2s;
         }
-
         .form-input:focus {
             outline: none;
             border-color: var(--color-primary);
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
         }
-
         .btn-primary {
             background-color: var(--color-primary);
             color: var(--color-text-light);
@@ -89,25 +79,20 @@
             cursor: pointer;
             width: 100%;
         }
-
         .btn-primary:hover {
             background-color: #0069d9;
         }
-
         .btn-primary:active {
             transform: scale(0.98);
         }
-
         .btn-success {
             background-color: #28a745;
             color: white;
         }
-
         .btn-danger {
             background-color: #dc3545;
             color: white;
         }
-
         .status-container {
             display: flex;
             align-items: center;
@@ -117,19 +102,16 @@
             font-weight: 700;
             transition: all 0.3s;
         }
-
         .status-active {
             background-color: rgba(40, 167, 69, 0.2);
             color: #28a745;
             border: 1px solid #28a745;
         }
-
         .status-inactive {
             background-color: rgba(220, 53, 69, 0.2);
             color: #dc3545;
             border: 1px solid #dc3545;
         }
-
         .status-indicator {
             width: 0.75rem;
             height: 0.75rem;
@@ -137,17 +119,14 @@
             background-color: white;
             margin-right: 0.5rem;
         }
-
         .status-active .status-indicator {
             animation: pulse 2s infinite;
         }
-
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
             100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
         }
-
         #map {
             height: 250px;
             width: 100%;
@@ -155,7 +134,6 @@
             margin-top: 1.5rem;
             border: 1px solid var(--color-border);
         }
-
         .order-item {
             background-color: #1e242a;
             border-left: 4px solid var(--color-primary);
@@ -163,7 +141,6 @@
             border-radius: 0.5rem;
             margin-bottom: 1rem;
         }
-
         .order-item h3 {
             font-size: 1.1rem;
             font-weight: 700;
@@ -172,71 +149,46 @@
     </style>
 </head>
 <body>
-
 <div class="main-card">
     <div class="content-wrapper">
-        <!-- Vista de Login -->
         <div id="login-view">
             <header class="text-center mb-8">
-                <h1 class="text-3xl font-extrabold text-white mb-2">
-                    Panel del Técnico
-                </h1>
-                <p class="text-sm text-gray-400">
-                    Ingresa con tu correo para ver tus órdenes
-                </p>
+                <h1 class="text-3xl font-extrabold text-white mb-2">Panel del Técnico</h1>
+                <p class="text-sm text-gray-400">Ingresa con tu correo para ver tus órdenes</p>
             </header>
             <form id="login-form">
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Correo Electrónico</label>
                     <input type="email" id="email" name="email" required class="form-input">
                 </div>
-                <button type="submit" class="btn-primary">
-                    Iniciar Sesión
-                </button>
+                <button type="submit" class="btn-primary">Iniciar Sesión</button>
             </form>
             <p id="login-error" class="text-center text-red-400 mt-4 hidden">Correo no encontrado.</p>
         </div>
-
-        <!-- Vista del Dashboard (oculta al principio) -->
         <div id="dashboard-view" class="hidden">
             <header class="text-center mb-8">
-                <h1 class="text-2xl font-extrabold text-white mb-2">
-                    ¡Hola, <span id="tecnico-nombre">Técnico</span>!
-                </h1>
-                <p class="text-sm text-gray-400">
-                    Aquí están tus órdenes disponibles.
-                </p>
+                <h1 class="text-2xl font-extrabold text-white mb-2">¡Hola, <span id="tecnico-nombre">Técnico</span>!</h1>
+                <p class="text-sm text-gray-400">Aquí están tus órdenes disponibles.</p>
             </header>
-
-            <!-- ID del Técnico y Estado de Rastreo -->
             <div class="space-y-4 mb-6">
                 <div class="p-3 rounded-lg border" style="border-color: var(--color-border); background-color: #1e242a;">
                     <p class="text-sm text-gray-400 mb-1">ID de Técnico:</p>
                     <p id="technicianIdDisplay" class="font-bold text-white break-all">Cargando...</p>
                 </div>
-
                 <div id="statusMessageContainer" class="status-container status-inactive">
                     <div class="status-indicator"></div>
                     <span id="trackingStatusText" class="font-bold text-white">Rastreo Desactivado</span>
                 </div>
             </div>
-
-            <!-- Lista de Órdenes -->
             <div class="mb-6">
                 <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles</h2>
                 <div id="orders-container">
                     <p class="text-center text-gray-500 py-4">Cargando órdenes...</p>
                 </div>
             </div>
-
-            <!-- Control y Mapa -->
             <div class="space-y-4">
-                <button id="gps-toggle-btn" class="btn-primary" disabled>
-                    Inicializando...
-                </button>
-
+                <button id="gps-toggle-btn" class="btn-primary" disabled>Inicializando...</button>
                 <div id="map"></div>
-
                 <div class="p-4 rounded-xl border" style="border-color: var(--color-border); background-color: #1e242a;">
                     <p class="font-medium text-gray-400 mb-1 text-sm">Última Ubicación:</p>
                     <p id="currentCoords" class="text-white font-mono break-all text-sm">Esperando inicio de rastreo...</p>
@@ -245,78 +197,50 @@
         </div>
     </div>
 </div>
-
 <script>
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const { createClient } = window.supabase;
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
-
     let currentTechnician = null;
     let map, technicianMarker;
     let watchId = null;
-
-    // --- LÓGICA DE LOGIN ---
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const errorEl = document.getElementById('login-error');
-
-        console.log("Intentando iniciar sesión con:", email);
-
-        const { data: tecnico, error } = await supabaseClient
-            .from('tecnicos')
-            .select('*')
-            .eq('email', email)
-            .single();
-
+        const { data: tecnico, error } = await supabaseClient.from('tecnicos').select('*').eq('email', email).single();
         if (error || !tecnico) {
-            console.error("Error de login:", error);
             errorEl.classList.remove('hidden');
             return;
         }
-
-        console.log("Login exitoso para el técnico:", tecnico);
         currentTechnician = tecnico;
         document.getElementById('tecnico-nombre').textContent = tecnico.nombre;
         document.getElementById('technicianIdDisplay').textContent = tecnico.id;
         document.getElementById('login-view').classList.add('hidden');
         document.getElementById('dashboard-view').classList.remove('hidden');
-        
         try {
             initMap();
-            console.log("Mapa inicializado.");
             loadAvailableOrders();
         } catch (mapError) {
             console.error("Error al inicializar el mapa:", mapError);
         }
-
-        // ¡SOLUCIÓN CLAVE! Desbloquear el botón después de inicializar todo.
         const gpsBtn = document.getElementById('gps-toggle-btn');
         gpsBtn.disabled = false;
         gpsBtn.classList.remove('cursor-not-allowed', 'opacity-50');
         gpsBtn.textContent = 'Iniciar Rastreo GPS';
         console.log("Botón de GPS habilitado.");
     });
-
-    // --- LÓGICA DEL DASHBOARD ---
     async function loadAvailableOrders() {
         console.log("Cargando órdenes disponibles...");
         const container = document.getElementById('orders-container');
         try {
-            const { data: orders, error } = await supabaseClient
-                .from('clientes')
-                .select('*')
-                .eq('status', 'pagado_verificado')
-                .is('tecnico_asignado_id', null);
-
+            const { data: orders, error } = await supabaseClient.from('clientes').select('*').eq('status', 'pagado_verificado').is('tecnico_asignado_id', 'null');
             if (error) throw error;
-
             if (orders.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes nuevas por ahora.</p>';
                 return;
             }
-
             console.log("Órdenes encontradas:", orders);
             container.innerHTML = orders.map(order => `
                 <div class="order-item">
@@ -324,43 +248,30 @@
                     <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
                     <p class="text-sm text-gray-400">Dirección: ${order.direccion}</p>
                     <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
-                    <button class="btn-success mt-3" onclick="acceptOrder(${order.id})">
-                        Aceptar Orden
-                    </button>
+                    <button class="btn-success mt-3" onclick="acceptOrder(${order.id})">Aceptar Orden</button>
                 </div>
             `).join('');
-
         } catch (error) {
             console.error('Error al cargar órdenes:', error);
             container.innerHTML = '<p class="text-center text-red-400">Error al cargar las órdenes.</p>';
         }
     }
-
     async function acceptOrder(orderId) {
         if (!currentTechnician) return;
-        
         console.log(`Aceptando orden ${orderId}`);
         try {
-            const { error } = await supabaseClient
-                .from('clientes')
-                .update({ 
-                    tecnico_asignado_id: currentTechnician.id,
-                    status: 'tecnico_asignado'
-                })
-                .eq('id', orderId);
-
+            const { error } = await supabaseClient.from('clientes').update({ 
+                tecnico_asignado_id: currentTechnician.id,
+                status: 'tecnico_asignado'
+            }).eq('id', orderId);
             if (error) throw error;
-
             alert('¡Orden aceptada! Ahora puedes iniciar el rastreo GPS.');
             loadAvailableOrders();
-
         } catch (error) {
             console.error('Error al aceptar orden:', error);
             alert('Error al aceptar la orden.');
         }
     }
-
-    // --- LÓGICA DE GPS Y MAPA ---
     function initMap() {
         console.log("Inicializando mapa de Leaflet...");
         map = L.map('map').setView([14.0723, -87.1921], 13);
@@ -369,7 +280,6 @@
         }).addTo(map);
         console.log("Mapa de Leaflet inicializado correctamente.");
     }
-
     document.getElementById('gps-toggle-btn').addEventListener('click', () => {
         if (watchId) {
             stopTracking();
@@ -377,7 +287,6 @@
             startTracking();
         }
     });
-
     function startTracking() {
         if (!navigator.geolocation) {
             alert('Tu navegador no soporta geolocalización.');
@@ -387,12 +296,10 @@
             alert('El sistema aún no te ha autenticado.');
             return;
         }
-
         console.log("Iniciando rastreo GPS...");
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Deteniendo Rastreo...';
         btn.disabled = true;
-
         watchId = navigator.geolocation.watchPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
@@ -406,17 +313,13 @@
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
-
     async function updateLocation(lat, lng) {
         if (!currentTechnician) return;
-
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Detener Rastreo GPS';
         btn.classList.remove('btn-primary');
         btn.classList.add('btn-danger');
         btn.disabled = false;
-
-        // Actualizar mapa
         const newPos = [lat, lng];
         if (technicianMarker) {
             technicianMarker.setLatLng(newPos);
@@ -424,31 +327,22 @@
             technicianMarker = L.marker(newPos).addTo(map);
         }
         map.setView(newPos);
-
-        // Actualizar display de coordenadas
         document.getElementById('currentCoords').textContent = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-
-        // Actualizar UI de estado
         const statusContainer = document.getElementById('statusMessageContainer');
         statusContainer.classList.remove('status-inactive');
         statusContainer.classList.add('status-active');
         document.getElementById('trackingStatusText').textContent = 'Rastreo Activo';
-
-        // Guardar en Supabase
         try {
-            await supabaseClient
-                .from('tecnico_ubicacion')
-                .upsert({
-                    tecnico_id: currentTechnician.id,
-                    lat: lat,
-                    lng: lng,
-                    timestamp: new Date()
-                }, { onConflict: 'tecnico_id' });
+            await supabaseClient.from('tecnico_ubicacion').upsert({
+                tecnico_id: currentTechnician.id,
+                lat: lat,
+                lng: lng,
+                timestamp: new Date()
+            }, { onConflict: 'tecnico_id' });
         } catch (error) {
             console.error('Error al guardar ubicación:', error);
         }
     }
-
     function stopTracking() {
         if (watchId) {
             navigator.geolocation.clearWatch(watchId);
@@ -460,14 +354,11 @@
         btn.classList.add('btn-primary');
         btn.disabled = false;
         document.getElementById('currentCoords').textContent = 'Rastreo detenido.';
-        
-        // Actualizar UI de estado
         const statusContainer = document.getElementById('statusMessageContainer');
         statusContainer.classList.remove('status-active');
         statusContainer.classList.add('status-inactive');
         document.getElementById('trackingStatusText').textContent = 'Rastreo Desactivado';
     }
 </script>
-
 </body>
 </html>
