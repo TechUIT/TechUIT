@@ -133,7 +133,7 @@
                 statusHTML = `<div class="text-center"><div class="status-badge status-searching mb-4">🔍 Buscando Técnico Disponible</div><p class="text-gray-300">Ya verificamos tu pago. Estamos buscando al técnico más cercano.</p></div>`;
                 break;
             case 'tecnico_asignado':
-                statusHTML = `<div class="text-center"><div class="status-badge status-assigned mb-4">👨‍🔧 Técnico Asignado</div><p class="text-gray-300">El técnico está en camino. Espera a que active su GPS para ver su ubicación.</p></div>`;
+                statusHTML = `<div class="text-center"><div class="status-badge status-assigned mb-4">👨‍🔧� Técnico Asignado</div><p class="text-gray-300">El técnico está en camino. Espera a que active su GPS para ver su ubicación.</p></div>`;
                 mapContainer.classList.remove('hidden');
                 initMap();
                 listenForTechnicianLocation(solicitud.tecnico_asignado_id);
