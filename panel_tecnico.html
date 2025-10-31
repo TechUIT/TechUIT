@@ -331,20 +331,15 @@
     });
 
     function switchTab(tabName) {
-        // Ocultar todos los contenidos de las pestañas
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
         });
         
-        // Desactivar todos los botones de las pestañas
         document.querySelectorAll('.tab-button').forEach(button => {
             button.classList.remove('active');
         });
         
-        // Mostrar la pestaña seleccionada
         document.getElementById(`${tabName}-tab`).classList.add('active');
-        
-        // Activar el botón de la pestaña seleccionada
         event.target.classList.add('active');
     }
 
@@ -450,7 +445,6 @@
             
             showNotification('¡Orden aceptada! Ahora puedes iniciar el rastreo GPS.', 'success');
             
-            // Recargar las órdenes disponibles y las aceptadas
             loadAvailableOrders();
             loadAcceptedOrders();
         } catch (error) {
@@ -473,10 +467,8 @@
             
             showNotification('Navegación iniciada. El cliente puede ver tu ubicación.', 'success');
             
-            // Recargar las órdenes aceptadas
             loadAcceptedOrders();
             
-            // Obtener la dirección del cliente para mostrar en el mapa
             const { data: order, error: orderError } = await supabaseClient
                 .from('clientes')
                 .select('direccion')
@@ -484,8 +476,6 @@
                 .single();
                 
             if (!orderError && order && order.direccion) {
-                // Aquí podrías usar un servicio de geocodificación para convertir la dirección en coordenadas
-                // Por ahora, usaremos coordenadas de ejemplo
                 const customerCoords = [14.0723, -87.1921];
                 
                 if (customerMarker) {
@@ -503,7 +493,6 @@
                     }).addTo(map).bindPopup('Ubicación del cliente').openPopup();
                 }
                 
-                // Ajustar la vista del mapa para mostrar ambos marcadores si existen
                 if (technicianMarker) {
                     const group = new L.featureGroup([technicianMarker, customerMarker]);
                     map.fitBounds(group.getBounds().pad(0.1));
@@ -527,10 +516,8 @@
             
             showNotification('Has notificado tu llegada al cliente.', 'success');
             
-            // Recargar las órdenes aceptadas
             loadAcceptedOrders();
             
-            // Enviar notificación al administrador
             await supabaseClient.from('notificaciones').insert({
                 tipo: 'llegada_tecnico',
                 orden_id: orderId,
@@ -557,10 +544,8 @@
             
             showNotification('¡Servicio completado con éxito!', 'success');
             
-            // Recargar las órdenes aceptadas
             loadAcceptedOrders();
             
-            // Enviar notificación al administrador
             await supabaseClient.from('notificaciones').insert({
                 tipo: 'servicio_completado',
                 orden_id: orderId,
@@ -649,7 +634,6 @@
             }).addTo(map);
         }
         
-        // Ajustar la vista del mapa para mostrar ambos marcadores si existen
         if (customerMarker) {
             const group = new L.featureGroup([technicianMarker, customerMarker]);
             map.fitBounds(group.getBounds().pad(0.1));
@@ -665,16 +649,23 @@
         document.getElementById('trackingStatusText').textContent = 'Rastreo Activo';
         
         try {
-            await supabaseClient.from('tecnico_ubicacion').upsert({
+            const { error } = await supabaseClient.from('tecnico_ubicacion').upsert({
                 tecnico_id: currentTechnician.id,
                 lat: lat,
                 lng: lng,
                 timestamp: new Date()
             }, { onConflict: 'tecnico_id' });
+
+            if (error) {
+                throw error;
+            }
             
             console.log("Ubicación actualizada correctamente");
+            showNotification('Ubicación enviada.', 'success');
+
         } catch (error) {
             console.error('Error al guardar ubicación:', error);
+            showNotification('Error al guardar tu ubicación en la base de datos.', 'error');
         }
     }
 
