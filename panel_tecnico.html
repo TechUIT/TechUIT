@@ -262,6 +262,8 @@
         const email = document.getElementById('email').value;
         const errorEl = document.getElementById('login-error');
 
+        console.log("Intentando iniciar sesión con:", email);
+
         const { data: tecnico, error } = await supabaseClient
             .from('tecnicos')
             .select('*')
@@ -269,22 +271,37 @@
             .single();
 
         if (error || !tecnico) {
+            console.error("Error de login:", error);
             errorEl.classList.remove('hidden');
             return;
         }
 
+        console.log("Login exitoso para el técnico:", tecnico);
         currentTechnician = tecnico;
         document.getElementById('tecnico-nombre').textContent = tecnico.nombre;
         document.getElementById('technicianIdDisplay').textContent = tecnico.id;
         document.getElementById('login-view').classList.add('hidden');
         document.getElementById('dashboard-view').classList.remove('hidden');
         
-        initMap();
-        loadAvailableOrders();
+        try {
+            initMap();
+            console.log("Mapa inicializado.");
+            loadAvailableOrders();
+        } catch (mapError) {
+            console.error("Error al inicializar el mapa:", mapError);
+        }
+
+        // ¡SOLUCIÓN CLAVE! Desbloquear el botón después de inicializar todo.
+        const gpsBtn = document.getElementById('gps-toggle-btn');
+        gpsBtn.disabled = false;
+        gpsBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+        gpsBtn.textContent = 'Iniciar Rastreo GPS';
+        console.log("Botón de GPS habilitado.");
     });
 
     // --- LÓGICA DEL DASHBOARD ---
     async function loadAvailableOrders() {
+        console.log("Cargando órdenes disponibles...");
         const container = document.getElementById('orders-container');
         try {
             const { data: orders, error } = await supabaseClient
@@ -300,6 +317,7 @@
                 return;
             }
 
+            console.log("Órdenes encontradas:", orders);
             container.innerHTML = orders.map(order => `
                 <div class="order-item">
                     <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
@@ -321,6 +339,7 @@
     async function acceptOrder(orderId) {
         if (!currentTechnician) return;
         
+        console.log(`Aceptando orden ${orderId}`);
         try {
             const { error } = await supabaseClient
                 .from('clientes')
@@ -343,10 +362,12 @@
 
     // --- LÓGICA DE GPS Y MAPA ---
     function initMap() {
+        console.log("Inicializando mapa de Leaflet...");
         map = L.map('map').setView([14.0723, -87.1921], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
+        console.log("Mapa de Leaflet inicializado correctamente.");
     }
 
     document.getElementById('gps-toggle-btn').addEventListener('click', () => {
@@ -362,7 +383,12 @@
             alert('Tu navegador no soporta geolocalización.');
             return;
         }
+        if (!currentTechnician) {
+            alert('El sistema aún no te ha autenticado.');
+            return;
+        }
 
+        console.log("Iniciando rastreo GPS...");
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Deteniendo Rastreo...';
         btn.disabled = true;
