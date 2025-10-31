@@ -313,47 +313,52 @@
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
-   async function updateLocation(lat, lng) {
-    if (!currentTechnician) return;
-
-    const btn = document.getElementById('gps-toggle-btn');
-    btn.textContent = 'Detener Rastreo GPS';
-    btn.classList.remove('btn-primary');
-    btn.classList.add('¡Estoy aquí para que veas el cambio!
-    btn.disabled = false;
-
-    // Actualizar mapa
-    const newPos = [lat, ¡El técnico está guardando correctamente!
-    if (technicianMarker) {
-        technicianMarker.setLatLng(newPos);
-    } else {
-        technicianMarker = L.marker(newPos).addTo(map).bindPopup('Tu técnico está aquí').openPopup();
-    }
-    map.setView(newPos);
-
-    // Actualizar display de coordenadas
-    document.getElementById('currentCoords').textContent = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-
-    // Actualizar UI de estado
-    const statusContainer = document.getElementById('statusMessageContainer');
-    statusContainer.classList.remove('status-inactive');
-    statusContainer.classList.add('status-active');
-    document.getElementById('trackingStatusText').textContent = 'Rastreo Activo';
-
-    // ¡SOLUCIÓN CLAVE! Usar upsert con la clave primaria para evitar conflictos.
-    try {
-        await supabaseClient
-            .from('tecnico_ubicacion')
-            .upsert({
-                tecnico_id: currentTechnician.id, // <-- ¡LÍNEA CLAVE!
+    async function updateLocation(lat, lng) {
+        if (!currentTechnician) return;
+        const btn = document.getElementById('gps-toggle-btn');
+        btn.textContent = 'Detener Rastreo GPS';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-danger');
+        btn.disabled = false;
+        const newPos = [lat, lng];
+        if (technicianMarker) {
+            technicianMarker.setLatLng(newPos);
+        } else {
+            technicianMarker = L.marker(newPos).addTo(map);
+        }
+        map.setView(newPos);
+        document.getElementById('currentCoords').textContent = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+        const statusContainer = document.getElementById('statusMessageContainer');
+        statusContainer.classList.remove('status-inactive');
+        statusContainer.classList.add('status-active');
+        document.getElementById('trackingStatusText').textContent = 'Rastreo Activo';
+        try {
+            await supabaseClient.from('tecnico_ubicacion').upsert({
+                tecnico_id: currentTechnician.id,
                 lat: lat,
                 lng: lng,
                 timestamp: new Date()
-            }); // <-- ¡SE ELIMINÓ LA CLAVE `on_conflict`!
-    } catch (error) {
-        console.error('Error al guardar ubicación:', error);
+            }, { onConflict: 'tecnico_id' });
+        } catch (error) {
+            console.error('Error al guardar ubicación:', error);
+        }
     }
-}
+    function stopTracking() {
+        if (watchId) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+        const btn = document.getElementById('gps-toggle-btn');
+        btn.textContent = 'Iniciar Rastreo GPS';
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-primary');
+        btn.disabled = false;
+        document.getElementById('currentCoords').textContent = 'Rastreo detenido.';
+        const statusContainer = document.getElementById('statusMessageContainer');
+        statusContainer.classList.remove('status-active');
+        statusContainer.classList.add('status-inactive');
+        document.getElementById('trackingStatusText').textContent = 'Rastreo Desactivado';
+    }
 </script>
 </body>
 </html>
