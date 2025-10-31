@@ -146,6 +146,27 @@
             font-weight: 700;
             color: white;
         }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-out;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .notification.success {
+            background-color: #28a745;
+        }
+        .notification.error {
+            background-color: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -165,11 +186,13 @@
             </form>
             <p id="login-error" class="text-center text-red-400 mt-4 hidden">Correo no encontrado.</p>
         </div>
+        
         <div id="dashboard-view" class="hidden">
             <header class="text-center mb-8">
                 <h1 class="text-2xl font-extrabold text-white mb-2">¡Hola, <span id="tecnico-nombre">Técnico</span>!</h1>
                 <p class="text-sm text-gray-400">Aquí están tus órdenes disponibles.</p>
             </header>
+            
             <div class="space-y-4 mb-6">
                 <div class="p-3 rounded-lg border" style="border-color: var(--color-border); background-color: #1e242a;">
                     <p class="text-sm text-gray-400 mb-1">ID de Técnico:</p>
@@ -180,12 +203,14 @@
                     <span id="trackingStatusText" class="font-bold text-white">Rastreo Desactivado</span>
                 </div>
             </div>
+            
             <div class="mb-6">
                 <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles</h2>
                 <div id="orders-container">
                     <p class="text-center text-gray-500 py-4">Cargando órdenes...</p>
                 </div>
             </div>
+            
             <div class="space-y-4">
                 <button id="gps-toggle-btn" class="btn-primary" disabled>Inicializando...</button>
                 <div id="map"></div>
@@ -197,50 +222,73 @@
         </div>
     </div>
 </div>
+
+<div id="notification" class="notification"></div>
+
 <script>
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const { createClient } = window.supabase;
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    
     let currentTechnician = null;
     let map, technicianMarker;
     let watchId = null;
+    let acceptedOrders = [];
+
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const errorEl = document.getElementById('login-error');
-        const { data: tecnico, error } = await supabaseClient.from('tecnicos').select('*').eq('email', email).single();
-        if (error || !tecnico) {
-            errorEl.classList.remove('hidden');
-            return;
-        }
-        currentTechnician = tecnico;
-        document.getElementById('tecnico-nombre').textContent = tecnico.nombre;
-        document.getElementById('technicianIdDisplay').textContent = tecnico.id;
-        document.getElementById('login-view').classList.add('hidden');
-        document.getElementById('dashboard-view').classList.remove('hidden');
+        
         try {
-            initMap();
-            loadAvailableOrders();
-        } catch (mapError) {
-            console.error("Error al inicializar el mapa:", mapError);
+            const { data: tecnico, error } = await supabaseClient.from('tecnicos').select('*').eq('email', email).single();
+            
+            if (error || !tecnico) {
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            
+            currentTechnician = tecnico;
+            document.getElementById('tecnico-nombre').textContent = tecnico.nombre;
+            document.getElementById('technicianIdDisplay').textContent = tecnico.id;
+            
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            
+            try {
+                initMap();
+                loadAvailableOrders();
+                loadAcceptedOrders();
+            } catch (mapError) {
+                console.error("Error al inicializar el mapa:", mapError);
+            }
+            
+            const gpsBtn = document.getElementById('gps-toggle-btn');
+            gpsBtn.disabled = false;
+            gpsBtn.classList.remove('cursor-not-allowed', 'opacity-50');
+            gpsBtn.textContent = 'Iniciar Rastreo GPS';
+            console.log("Botón de GPS habilitado.");
+        } catch (error) {
+            console.error('Error al iniciar sesión:', error);
+            showNotification('Error al iniciar sesión. Inténtalo de nuevo.', 'error');
         }
-        const gpsBtn = document.getElementById('gps-toggle-btn');
-        gpsBtn.disabled = false;
-        gpsBtn.classList.remove('cursor-not-allowed', 'opacity-50');
-        gpsBtn.textContent = 'Iniciar Rastreo GPS';
-        console.log("Botón de GPS habilitado.");
     });
+
     async function loadAvailableOrders() {
         console.log("Cargando órdenes disponibles...");
         const container = document.getElementById('orders-container');
+        
         try {
-            const { data: orders, error } = await supabaseClient.from('clientes').select('*').eq('status', 'pagado_verificado').is('tecnico_asignado_id', 'null');
+            const { data: orders, error } = await supabaseClient.from('clientes').select('*').eq('status', 'pagado_verificado').is('tecnico_asignado_id', null);
+            
             if (error) throw error;
+            
             if (orders.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes nuevas por ahora.</p>';
                 return;
             }
+            
             console.log("Órdenes encontradas:", orders);
             container.innerHTML = orders.map(order => `
                 <div class="order-item">
@@ -256,22 +304,46 @@
             container.innerHTML = '<p class="text-center text-red-400">Error al cargar las órdenes.</p>';
         }
     }
+
+    async function loadAcceptedOrders() {
+        if (!currentTechnician) return;
+        
+        try {
+            const { data: orders, error } = await supabaseClient.from('clientes').select('*').eq('tecnico_asignado_id', currentTechnician.id);
+            
+            if (error) throw error;
+            
+            acceptedOrders = orders || [];
+            console.log("Órdenes aceptadas cargadas:", acceptedOrders);
+        } catch (error) {
+            console.error('Error al cargar órdenes aceptadas:', error);
+        }
+    }
+
     async function acceptOrder(orderId) {
         if (!currentTechnician) return;
+        
         console.log(`Aceptando orden ${orderId}`);
+        
         try {
             const { error } = await supabaseClient.from('clientes').update({ 
                 tecnico_asignado_id: currentTechnician.id,
                 status: 'tecnico_asignado'
             }).eq('id', orderId);
+            
             if (error) throw error;
-            alert('¡Orden aceptada! Ahora puedes iniciar el rastreo GPS.');
+            
+            showNotification('¡Orden aceptada! Ahora puedes iniciar el rastreo GPS.', 'success');
+            
+            // Recargar las órdenes disponibles y las aceptadas
             loadAvailableOrders();
+            loadAcceptedOrders();
         } catch (error) {
             console.error('Error al aceptar orden:', error);
-            alert('Error al aceptar la orden.');
+            showNotification('Error al aceptar la orden.', 'error');
         }
     }
+
     function initMap() {
         console.log("Inicializando mapa de Leaflet...");
         map = L.map('map').setView([14.0723, -87.1921], 13);
@@ -280,6 +352,7 @@
         }).addTo(map);
         console.log("Mapa de Leaflet inicializado correctamente.");
     }
+
     document.getElementById('gps-toggle-btn').addEventListener('click', () => {
         if (watchId) {
             stopTracking();
@@ -287,19 +360,24 @@
             startTracking();
         }
     });
+
     function startTracking() {
         if (!navigator.geolocation) {
-            alert('Tu navegador no soporta geolocalización.');
+            showNotification('Tu navegador no soporta geolocalización.', 'error');
             return;
         }
+        
         if (!currentTechnician) {
-            alert('El sistema aún no te ha autenticado.');
+            showNotification('El sistema aún no te ha autenticado.', 'error');
             return;
         }
+        
         console.log("Iniciando rastreo GPS...");
+        
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Deteniendo Rastreo...';
         btn.disabled = true;
+        
         watchId = navigator.geolocation.watchPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
@@ -307,31 +385,39 @@
             },
             (error) => {
                 console.error('Error de GPS:', error);
-                alert('No se pudo obtener tu ubicación.');
+                showNotification('No se pudo obtener tu ubicación.', 'error');
                 stopTracking();
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
+
     async function updateLocation(lat, lng) {
         if (!currentTechnician) return;
+        
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Detener Rastreo GPS';
         btn.classList.remove('btn-primary');
         btn.classList.add('btn-danger');
         btn.disabled = false;
+        
         const newPos = [lat, lng];
+        
         if (technicianMarker) {
             technicianMarker.setLatLng(newPos);
         } else {
             technicianMarker = L.marker(newPos).addTo(map);
         }
+        
         map.setView(newPos);
+        
         document.getElementById('currentCoords').textContent = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+        
         const statusContainer = document.getElementById('statusMessageContainer');
         statusContainer.classList.remove('status-inactive');
         statusContainer.classList.add('status-active');
         document.getElementById('trackingStatusText').textContent = 'Rastreo Activo';
+        
         try {
             await supabaseClient.from('tecnico_ubicacion').upsert({
                 tecnico_id: currentTechnician.id,
@@ -339,25 +425,42 @@
                 lng: lng,
                 timestamp: new Date()
             }, { onConflict: 'tecnico_id' });
+            
+            console.log("Ubicación actualizada correctamente");
         } catch (error) {
             console.error('Error al guardar ubicación:', error);
         }
     }
+
     function stopTracking() {
         if (watchId) {
             navigator.geolocation.clearWatch(watchId);
             watchId = null;
         }
+        
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Iniciar Rastreo GPS';
         btn.classList.remove('btn-danger');
         btn.classList.add('btn-primary');
         btn.disabled = false;
+        
         document.getElementById('currentCoords').textContent = 'Rastreo detenido.';
+        
         const statusContainer = document.getElementById('statusMessageContainer');
         statusContainer.classList.remove('status-active');
         statusContainer.classList.add('status-inactive');
         document.getElementById('trackingStatusText').textContent = 'Rastreo Desactivado';
+    }
+
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
     }
 </script>
 </body>
