@@ -111,6 +111,49 @@
             object-fit: cover;
             margin-right: 1rem;
         }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-out;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: #28a745;
+        }
+
+        .notification.error {
+            background-color: #dc3545;
+        }
+
+        .notification.info {
+            background-color: #17a2b8;
+        }
+
+        .arrival-notification {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .arrival-notification.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -138,6 +181,7 @@
                     <p id="technician-name" class="font-bold text-white"></p>
                     <p id="technician-specialty" class="text-sm text-gray-400"></p>
                     <p id="technician-experience" class="text-sm text-gray-400"></p>
+                    <p id="technician-bio" class="text-sm text-gray-400 mt-2"></p>
                 </div>
             </div>
         </div>
@@ -146,17 +190,24 @@
             <p class="text-center text-gray-400 mb-2">Ubicación del Técnico</p>
             <div id="map"></div>
         </div>
+
+        <div id="arrival-notification" class="arrival-notification">
+            <p class="font-bold">🎉 ¡El técnico ha llegado a tu ubicación!</p>
+        </div>
     </div>
 </div>
+
+<div id="notification" class="notification"></div>
 
 <script>
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const { createClient } = window.supabase;
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
-    let map, technicianMarker;
+    let map, technicianMarker, customerMarker;
     let orderData = null;
     let technicianData = null;
+    let locationCheckInterval = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
         const solicitudIdDisplay = document.getElementById('solicitud-id');
@@ -248,9 +299,33 @@
             document.getElementById('technician-specialty').textContent = `Especialidad: ${tecnico.especialidad}`;
             document.getElementById('technician-experience').textContent = `Experiencia: ${tecnico.experiencia} años`;
             
-            // Cargar la foto del técnico si está disponible
+            // Mostrar la biografía si existe
+            if (tecnico.bio) {
+                document.getElementById('technician-bio').textContent = tecnico.bio;
+            } else {
+                document.getElementById('technician-bio').style.display = 'none';
+            }
+            
+            // Cargar la foto del técnico
             if (tecnico.foto_selfie_url) {
-                document.getElementById('technician-avatar').src = tecnico.foto_selfie_url;
+                // Verificar si la URL es completa o necesita ser construida
+                let imageUrl = tecnico.foto_selfie_url;
+                if (!imageUrl.startsWith('http')) {
+                    // Si no es una URL completa, construirla para Supabase Storage
+                    imageUrl = `${supabaseUrl}/storage/v1/object/public/technician-avatars/${imageUrl}`;
+                }
+                
+                // Verificar si la imagen se puede cargar
+                const img = new Image();
+                img.onload = function() {
+                    document.getElementById('technician-avatar').src = imageUrl;
+                };
+                img.onerror = function() {
+                    // Si hay un error al cargar la imagen, usar una imagen por defecto
+                    document.getElementById('technician-avatar').src = 'https://picsum.photos/seed/technician/60/60.jpg';
+                    console.error('Error al cargar la imagen del técnico:', imageUrl);
+                };
+                img.src = imageUrl;
             } else {
                 // Usar una imagen por defecto si no hay foto
                 document.getElementById('technician-avatar').src = 'https://picsum.photos/seed/technician/60/60.jpg';
@@ -258,6 +333,7 @@
             
         } catch (error) {
             console.error('Error al cargar información del técnico:', error);
+            showNotification('Error al cargar información del técnico', 'error');
         }
     }
 
@@ -268,12 +344,41 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
         console.log("Mapa de Leaflet inicializado correctamente.");
+        
+        // Añadir marcador para la ubicación del cliente si tenemos la dirección
+        if (orderData && orderData.direccion) {
+            // Aquí podrías usar un servicio de geocodificación para convertir la dirección en coordenadas
+            // Por ahora, usaremos coordenadas de ejemplo
+            const customerCoords = [14.0723, -87.1921];
+            customerMarker = L.marker(customerCoords, {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map).bindPopup('Tu ubicación').openPopup();
+        }
     }
 
     function listenForTechnicianLocation(tecnicoId) {
         if (!tecnicoId) return;
         console.log(`Escuchando ubicaciones para el técnico ID: ${tecnicoId}`);
         
+        // Primero, obtener la última ubicación conocida
+        supabaseClient.from('tecnico_ubicacion').select('lat, lng').eq('tecnico_id', tecnicoId).single().then(({ data, error }) => {
+            if (data) {
+                console.log('Última ubicación conocida encontrada:', data);
+                updateTechnicianMarker(data.lat, data.lng);
+            } else if (error) {
+                console.log('El técnico aún no ha activado su GPS. Esperando...');
+                showNotification('El técnico aún no ha activado su GPS. Te notificaremos cuando lo haga.', 'info');
+            }
+        });
+        
+        // Suscribirse a cambios en tiempo real
         const subscription = supabaseClient.channel(`public:tecnico_ubicacion:tecnico_id=eq.${tecnicoId}`).on('postgres_changes', { 
             event: 'UPDATE', 
             schema: 'public', 
@@ -284,17 +389,10 @@
             console.log('¡Nueva ubicación recibida en tiempo real!', newLocation);
             updateTechnicianMarker(newLocation.lat, newLocation.lng);
             updateStatusToOnRoute();
+            
+            // Iniciar verificación de llegada
+            startArrivalCheck(newLocation.lat, newLocation.lng);
         }).subscribe();
-
-        // Obtener la última ubicación conocida
-        supabaseClient.from('tecnico_ubicacion').select('lat, lng').eq('tecnico_id', tecnicoId).single().then(({ data, error }) => {
-            if (data) {
-                console.log('Última ubicación conocida encontrada:', data);
-                updateTechnicianMarker(data.lat, data.lng);
-            } else if (error) {
-                console.log('El técnico aún no ha activado su GPS. Esperando...');
-            }
-        });
     }
     
     function updateTechnicianMarker(lat, lng) {
@@ -302,14 +400,121 @@
         if (technicianMarker) {
             technicianMarker.setLatLng(newPos);
         } else {
-            technicianMarker = L.marker(newPos).addTo(map).bindPopup('Tu técnico está aquí.').openPopup();
+            technicianMarker = L.marker(newPos, {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map).bindPopup('Tu técnico está aquí').openPopup();
         }
-        map.setView(newPos);
+        
+        // Ajustar la vista del mapa para mostrar ambos marcadores si existen
+        if (customerMarker) {
+            const group = new L.featureGroup([technicianMarker, customerMarker]);
+            map.fitBounds(group.getBounds().pad(0.1));
+        } else {
+            map.setView(newPos);
+        }
     }
 
     function updateStatusToOnRoute() {
         const statusContainer = document.getElementById('status-container');
         statusContainer.innerHTML = `<div class="text-center"><div class="status-badge status-onroute mb-4">🚗 Técnico en Camino</div><p class="text-gray-300">Mira el mapa para ver su ubicación en tiempo real.</p></div>`;
+    }
+
+    function startArrivalCheck(techLat, techLng) {
+        // Si ya hay un intervalo de verificación, limpiarlo
+        if (locationCheckInterval) {
+            clearInterval(locationCheckInterval);
+        }
+        
+        // Coordenadas del cliente (deberían obtenerse de la dirección)
+        const customerCoords = [14.0723, -87.1921];
+        
+        // Verificar cada 5 segundos si el técnico está cerca
+        locationCheckInterval = setInterval(() => {
+            const distance = calculateDistance(techLat, techLng, customerCoords[0], customerCoords[1]);
+            
+            // Si el técnico está a menos de 100 metros, notificar llegada
+            if (distance < 0.1) {
+                notifyArrival();
+                clearInterval(locationCheckInterval);
+            }
+        }, 5000);
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        // Fórmula de Haversine para calcular la distancia entre dos puntos
+        const R = 6371; // Radio de la Tierra en km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance = R * c;
+        return distance; // Distancia en km
+    }
+
+    function notifyArrival() {
+        const arrivalNotification = document.getElementById('arrival-notification');
+        arrivalNotification.classList.add('show');
+        
+        // Enviar notificación al administrador
+        sendArrivalNotification();
+        
+        // Actualizar el estado de la orden a "tecnico_llego"
+        updateOrderStatus('tecnico_llego');
+    }
+
+    async function sendArrivalNotification() {
+        try {
+            // Aquí podrías implementar una función para enviar notificaciones al administrador
+            // Por ejemplo, usando un servicio de notificaciones push o enviando un correo electrónico
+            console.log('Enviando notificación de llegada al administrador');
+            
+            // También podrías guardar un registro en la base de datos
+            await supabaseClient.from('notificaciones').insert({
+                tipo: 'llegada_tecnico',
+                orden_id: orderData.id,
+                tecnico_id: technicianData.id,
+                mensaje: `El técnico ${technicianData.nombre} ha llegado a la ubicación del cliente.`,
+                leida: false,
+                created_at: new Date()
+            });
+        } catch (error) {
+            console.error('Error al enviar notificación de llegada:', error);
+        }
+    }
+
+    async function updateOrderStatus(newStatus) {
+        try {
+            const { error } = await supabaseClient
+                .from('clientes')
+                .update({ status: newStatus })
+                .eq('id', orderData.id);
+                
+            if (error) throw error;
+            console.log(`Estado de la orden actualizado a: ${newStatus}`);
+        } catch (error) {
+            console.error('Error al actualizar el estado de la orden:', error);
+        }
+    }
+
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 5000);
     }
 </script>
 </body>

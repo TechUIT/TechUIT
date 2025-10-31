@@ -93,6 +93,10 @@
             background-color: #dc3545;
             color: white;
         }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
         .status-container {
             display: flex;
             align-items: center;
@@ -167,6 +171,40 @@
         .notification.error {
             background-color: #dc3545;
         }
+        .notification.info {
+            background-color: #17a2b8;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .tab-button {
+            flex: 1;
+            padding: 0.75rem;
+            background-color: transparent;
+            border: none;
+            color: var(--color-text-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .arrival-button {
+            background-color: #ffc107;
+            color: #212529;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -190,7 +228,7 @@
         <div id="dashboard-view" class="hidden">
             <header class="text-center mb-8">
                 <h1 class="text-2xl font-extrabold text-white mb-2">¡Hola, <span id="tecnico-nombre">Técnico</span>!</h1>
-                <p class="text-sm text-gray-400">Aquí están tus órdenes disponibles.</p>
+                <p class="text-sm text-gray-400">Aquí están tus órdenes.</p>
             </header>
             
             <div class="space-y-4 mb-6">
@@ -204,10 +242,26 @@
                 </div>
             </div>
             
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles</h2>
-                <div id="orders-container">
-                    <p class="text-center text-gray-500 py-4">Cargando órdenes...</p>
+            <div class="tab-container">
+                <button class="tab-button active" onclick="switchTab('available')">Órdenes Disponibles</button>
+                <button class="tab-button" onclick="switchTab('accepted')">Mis Órdenes</button>
+            </div>
+            
+            <div id="available-tab" class="tab-content active">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles</h2>
+                    <div id="orders-container">
+                        <p class="text-center text-gray-500 py-4">Cargando órdenes...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="accepted-tab" class="tab-content">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Mis Órdenes</h2>
+                    <div id="accepted-orders-container">
+                        <p class="text-center text-gray-500 py-4">Cargando órdenes...</p>
+                    </div>
                 </div>
             </div>
             
@@ -232,9 +286,10 @@
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
     
     let currentTechnician = null;
-    let map, technicianMarker;
+    let map, technicianMarker, customerMarker;
     let watchId = null;
     let acceptedOrders = [];
+    let currentOrderId = null;
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -274,6 +329,24 @@
             showNotification('Error al iniciar sesión. Inténtalo de nuevo.', 'error');
         }
     });
+
+    function switchTab(tabName) {
+        // Ocultar todos los contenidos de las pestañas
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Desactivar todos los botones de las pestañas
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        // Mostrar la pestaña seleccionada
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        
+        // Activar el botón de la pestaña seleccionada
+        event.target.classList.add('active');
+    }
 
     async function loadAvailableOrders() {
         console.log("Cargando órdenes disponibles...");
@@ -315,8 +388,50 @@
             
             acceptedOrders = orders || [];
             console.log("Órdenes aceptadas cargadas:", acceptedOrders);
+            
+            const container = document.getElementById('accepted-orders-container');
+            
+            if (acceptedOrders.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-10">No tienes órdenes aceptadas.</p>';
+                return;
+            }
+            
+            container.innerHTML = acceptedOrders.map(order => {
+                let statusBadge = '';
+                let actionButton = '';
+                
+                switch(order.status) {
+                    case 'tecnico_asignado':
+                        statusBadge = '<span class="status-badge status-assigned">Asignado</span>';
+                        actionButton = `<button class="btn-warning mt-3" onclick="startNavigation(${order.id})">Iniciar Navegación</button>`;
+                        break;
+                    case 'tecnico_en_camino':
+                        statusBadge = '<span class="status-badge status-onroute">En Camino</span>';
+                        actionButton = `<button class="btn-warning arrival-button mt-3" onclick="notifyArrival(${order.id})">Notificar Llegada</button>`;
+                        break;
+                    case 'tecnico_llego':
+                        statusBadge = '<span class="status-badge status-success">Llegado</span>';
+                        actionButton = `<button class="btn-success mt-3" onclick="completeOrder(${order.id})">Completar Servicio</button>`;
+                        break;
+                    default:
+                        statusBadge = `<span class="status-badge">${order.status}</span>`;
+                        break;
+                }
+                
+                return `
+                    <div class="order-item">
+                        <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
+                        <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
+                        <p class="text-sm text-gray-400">Dirección: ${order.direccion}</p>
+                        <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
+                        <div class="mt-2">${statusBadge}</div>
+                        ${actionButton}
+                    </div>
+                `;
+            }).join('');
         } catch (error) {
             console.error('Error al cargar órdenes aceptadas:', error);
+            document.getElementById('accepted-orders-container').innerHTML = '<p class="text-center text-red-400">Error al cargar las órdenes aceptadas.</p>';
         }
     }
 
@@ -341,6 +456,122 @@
         } catch (error) {
             console.error('Error al aceptar orden:', error);
             showNotification('Error al aceptar la orden.', 'error');
+        }
+    }
+
+    async function startNavigation(orderId) {
+        if (!currentTechnician) return;
+        
+        currentOrderId = orderId;
+        
+        try {
+            const { error } = await supabaseClient.from('clientes').update({ 
+                status: 'tecnico_en_camino'
+            }).eq('id', orderId);
+            
+            if (error) throw error;
+            
+            showNotification('Navegación iniciada. El cliente puede ver tu ubicación.', 'success');
+            
+            // Recargar las órdenes aceptadas
+            loadAcceptedOrders();
+            
+            // Obtener la dirección del cliente para mostrar en el mapa
+            const { data: order, error: orderError } = await supabaseClient
+                .from('clientes')
+                .select('direccion')
+                .eq('id', orderId)
+                .single();
+                
+            if (!orderError && order && order.direccion) {
+                // Aquí podrías usar un servicio de geocodificación para convertir la dirección en coordenadas
+                // Por ahora, usaremos coordenadas de ejemplo
+                const customerCoords = [14.0723, -87.1921];
+                
+                if (customerMarker) {
+                    customerMarker.setLatLng(customerCoords);
+                } else {
+                    customerMarker = L.marker(customerCoords, {
+                        icon: L.icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        })
+                    }).addTo(map).bindPopup('Ubicación del cliente').openPopup();
+                }
+                
+                // Ajustar la vista del mapa para mostrar ambos marcadores si existen
+                if (technicianMarker) {
+                    const group = new L.featureGroup([technicianMarker, customerMarker]);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                }
+            }
+        } catch (error) {
+            console.error('Error al iniciar navegación:', error);
+            showNotification('Error al iniciar navegación.', 'error');
+        }
+    }
+
+    async function notifyArrival(orderId) {
+        if (!currentTechnician) return;
+        
+        try {
+            const { error } = await supabaseClient.from('clientes').update({ 
+                status: 'tecnico_llego'
+            }).eq('id', orderId);
+            
+            if (error) throw error;
+            
+            showNotification('Has notificado tu llegada al cliente.', 'success');
+            
+            // Recargar las órdenes aceptadas
+            loadAcceptedOrders();
+            
+            // Enviar notificación al administrador
+            await supabaseClient.from('notificaciones').insert({
+                tipo: 'llegada_tecnico',
+                orden_id: orderId,
+                tecnico_id: currentTechnician.id,
+                mensaje: `El técnico ${currentTechnician.nombre} ha llegado a la ubicación del cliente.`,
+                leida: false,
+                created_at: new Date()
+            });
+        } catch (error) {
+            console.error('Error al notificar llegada:', error);
+            showNotification('Error al notificar llegada.', 'error');
+        }
+    }
+
+    async function completeOrder(orderId) {
+        if (!currentTechnician) return;
+        
+        try {
+            const { error } = await supabaseClient.from('clientes').update({ 
+                status: 'servicio_completado'
+            }).eq('id', orderId);
+            
+            if (error) throw error;
+            
+            showNotification('¡Servicio completado con éxito!', 'success');
+            
+            // Recargar las órdenes aceptadas
+            loadAcceptedOrders();
+            
+            // Enviar notificación al administrador
+            await supabaseClient.from('notificaciones').insert({
+                tipo: 'servicio_completado',
+                orden_id: orderId,
+                tecnico_id: currentTechnician.id,
+                mensaje: `El técnico ${currentTechnician.nombre} ha completado el servicio.`,
+                leida: false,
+                created_at: new Date()
+            });
+        } catch (error) {
+            console.error('Error al completar servicio:', error);
+            showNotification('Error al completar servicio.', 'error');
         }
     }
 
@@ -406,10 +637,25 @@
         if (technicianMarker) {
             technicianMarker.setLatLng(newPos);
         } else {
-            technicianMarker = L.marker(newPos).addTo(map);
+            technicianMarker = L.marker(newPos, {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
         }
         
-        map.setView(newPos);
+        // Ajustar la vista del mapa para mostrar ambos marcadores si existen
+        if (customerMarker) {
+            const group = new L.featureGroup([technicianMarker, customerMarker]);
+            map.fitBounds(group.getBounds().pad(0.1));
+        } else {
+            map.setView(newPos);
+        }
         
         document.getElementById('currentCoords').textContent = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
         
