@@ -116,6 +116,34 @@
         .notification.error {
             background-color: #dc3545;
         }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--color-text-light);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -129,13 +157,45 @@
         </p>
     </header>
 
-    <div class="card">
-        <h2 class="text-xl font-bold mb-4">Órdenes Pendientes de Verificación</h2>
-        <p class="text-sm text-gray-400 mb-4">
-            Estas son las solicitudes que han completado el formulario y están esperando la verificación del pago en Ko-fi.
-        </p>
-        <div id="orders-container">
-            <p class="text-center text-gray-500 py-10">Cargando órdenes...</p>
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('orders')">Órdenes Pendientes</div>
+        <div class="tab" onclick="showTab('clients')">Clientes</div>
+        <div class="tab" onclick="showTab('technicians')">Técnicos</div>
+    </div>
+
+    <div id="orders-tab" class="tab-content active">
+        <div class="card">
+            <h2 class="text-xl font-bold mb-4">Órdenes Pendientes de Verificación</h2>
+            <p class="text-sm text-gray-400 mb-4">
+                Estas son las solicitudes que han completado el formulario y están esperando la verificación del pago en Ko-fi.
+            </p>
+            <div id="orders-container">
+                <p class="text-center text-gray-500 py-10">Cargando órdenes...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="clients-tab" class="tab-content">
+        <div class="card">
+            <h2 class="text-xl font-bold mb-4">Clientes Registrados</h2>
+            <p class="text-sm text-gray-400 mb-4">
+                Lista de todos los clientes registrados en el sistema.
+            </p>
+            <div id="clients-container">
+                <p class="text-center text-gray-500 py-10">Cargando clientes...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="technicians-tab" class="tab-content">
+        <div class="card">
+            <h2 class="text-xl font-bold mb-4">Técnicos Registrados</h2>
+            <p class="text-sm text-gray-400 mb-4">
+                Lista de todos los técnicos registrados en el sistema.
+            </p>
+            <div id="technicians-container">
+                <p class="text-center text-gray-500 py-10">Cargando técnicos...</p>
+            </div>
         </div>
     </div>
 </div>
@@ -150,7 +210,27 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         loadPendingOrders();
+        loadClients();
+        loadTechnicians();
     });
+
+    function showTab(tabName) {
+        // Ocultar todos los contenidos de pestañas
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Desactivar todas las pestañas
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Mostrar la pestaña seleccionada
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        
+        // Activar la pestaña seleccionada
+        event.target.classList.add('active');
+    }
 
     async function loadPendingOrders() {
         const ordersContainer = document.getElementById('orders-container');
@@ -178,8 +258,10 @@
                         <div>
                             <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
                             <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
-                            <p class="text-sm text-gray-400">Servicio: ${order.tipo_servicio}</p>
+                            <p class="text-sm text-gray-400">Servicio: ${order.tipo_servicio || 'No especificado'}</p>
                             <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
+                            <p class="text-sm text-gray-400">Dirección: ${order.direccion}</p>
+                            <p class="text-sm text-gray-400">Teléfono: ${order.telefono}</p>
                         </div>
                         <span class="status-badge status-pending">Pendiente</span>
                     </div>
@@ -194,6 +276,90 @@
         } catch (error) {
             console.error('Error al cargar órdenes:', error);
             ordersContainer.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar las órdenes: ${error.message}.</p>`;
+        }
+    }
+
+    async function loadClients() {
+        const clientsContainer = document.getElementById('clients-container');
+        
+        try {
+            const { data: clients, error } = await supabaseClient
+                .from('clientes')
+                .select('*')
+                .order('fecha_solicitud', { ascending: false });
+            
+            if (error) {
+                console.error('Error from Supabase:', error);
+                throw error;
+            }
+            
+            if (clients.length === 0) {
+                clientsContainer.innerHTML = '<p class="text-center text-gray-500 py-10">No hay clientes registrados.</p>';
+                return;
+            }
+            
+            clientsContainer.innerHTML = clients.map(client => `
+                <div class="order-item">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-white">ID: ${client.id}</h3>
+                            <p class="text-sm text-gray-400">Nombre: ${client.nombre}</p>
+                            <p class="text-sm text-gray-400">Email: ${client.email}</p>
+                            <p class="text-sm text-gray-400">Teléfono: ${client.telefono}</p>
+                            <p class="text-sm text-gray-400">Dirección: ${client.direccion}</p>
+                            <p class="text-sm text-gray-400">Estado: ${client.status}</p>
+                        </div>
+                        <span class="status-badge ${client.status === 'pagado_verificado' ? 'status-verified' : 'status-pending'}">
+                            ${client.status === 'pagado_verificado' ? 'Verificado' : 'Pendiente'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error al cargar clientes:', error);
+            clientsContainer.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar los clientes: ${error.message}.</p>`;
+        }
+    }
+
+    async function loadTechnicians() {
+        const techniciansContainer = document.getElementById('technicians-container');
+        
+        try {
+            const { data: technicians, error } = await supabaseClient
+                .from('tecnicos')
+                .select('*')
+                .order('nombre', { ascending: true });
+            
+            if (error) {
+                console.error('Error from Supabase:', error);
+                throw error;
+            }
+            
+            if (technicians.length === 0) {
+                techniciansContainer.innerHTML = '<p class="text-center text-gray-500 py-10">No hay técnicos registrados.</p>';
+                return;
+            }
+            
+            techniciansContainer.innerHTML = technicians.map(technician => `
+                <div class="order-item">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-white">ID: ${technician.id}</h3>
+                            <p class="text-sm text-gray-400">Nombre: ${technician.nombre}</p>
+                            <p class="text-sm text-gray-400">Email: ${technician.email}</p>
+                            <p class="text-sm text-gray-400">Teléfono: ${technician.telefono}</p>
+                            <p class="text-sm text-gray-400">Especialidad: ${technician.especialidad || 'No especificada'}</p>
+                            <p class="text-sm text-gray-400">Experiencia: ${technician.experiencia || 0} años</p>
+                        </div>
+                        <span class="status-badge status-verified">Disponible</span>
+                    </div>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error al cargar técnicos:', error);
+            techniciansContainer.innerHTML = `<p class="text-center text-red-400 py-10">Error al cargar los técnicos: ${error.message}.</p>`;
         }
     }
 
@@ -222,9 +388,10 @@
             
             showNotification(`Orden ${orderId} verificada exitosamente.`, 'success');
             
-            // Recargar la lista después de un breve retraso
+            // Recargar todas las pestañas después de un breve retraso
             setTimeout(() => {
                 loadPendingOrders();
+                loadClients();
             }, 2000);
             
         } catch (error) {
