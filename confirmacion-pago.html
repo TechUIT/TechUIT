@@ -124,9 +124,49 @@
             margin-right: 8px;
         }
         
-        /* Estilo para el enlace oculto */
-        .hidden-link {
+        /* Estilos para el modal de pago */
+        .payment-modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .payment-modal-content {
+            width: 90%;
+            max-width: 500px;
+            height: 80%;
+            background-color: white;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--color-accent);
+            color: var(--color-dark-bg);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        .payment-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -168,15 +208,12 @@
                     <span class="step-number">2</span> Pega el ID en Ko-fi y paga:
                 </p>
                 
-                <!-- Botón de pago modificado para usar un enlace oculto -->
+                <!-- Botón de pago modificado para abrir un modal con iframe -->
                 <button id="pay-button" 
                     class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
                 >
                     PAGAR EN KOFI
                 </button>
-                
-                <!-- Enlace oculto que se activará con JavaScript -->
-                <a id="kofi-link" href="https://ko-fi.com/c/8d720c6c86" target="_blank" class="hidden-link"></a>
             </div>
         </div>
 
@@ -196,6 +233,14 @@
         </div>
 
         <p id="status-message" class="text-center mt-4 font-semibold text-gray-400"></p>
+    </div>
+</div>
+
+<!-- Modal para mostrar la página de pago de Ko-fi -->
+<div id="payment-modal" class="payment-modal">
+    <div class="payment-modal-content">
+        <button id="close-modal" class="close-modal">X</button>
+        <iframe id="payment-iframe" class="payment-iframe" src="https://ko-fi.com/c/8d720c6c86"></iframe>
     </div>
 </div>
 
@@ -226,17 +271,26 @@
         });
     });
 
-    // Función para abrir el enlace de Ko-fi usando un enlace oculto
-    function openKofiPayment() {
-        // Obtener el enlace oculto
-        const kofiLink = document.getElementById('kofi-link');
-        
-        // Simular un clic en el enlace oculto
-        kofiLink.click();
+    // Función para abrir el modal de pago
+    function openPaymentModal() {
+        document.getElementById('payment-modal').style.display = 'flex';
     }
 
-    // Event listener para el botón de pago
-    document.getElementById('pay-button').addEventListener('click', openKofiPayment);
+    // Función para cerrar el modal de pago
+    function closePaymentModal() {
+        document.getElementById('payment-modal').style.display = 'none';
+    }
+
+    // Event listeners para el modal
+    document.getElementById('pay-button').addEventListener('click', openPaymentModal);
+    document.getElementById('close-modal').addEventListener('click', closePaymentModal);
+
+    // Cerrar el modal al hacer clic fuera del contenido
+    document.getElementById('payment-modal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closePaymentModal();
+        }
+    });
 
     document.getElementById('seguimiento-btn').addEventListener('click', () => {
         const urlParams = new URLSearchParams(window.location.search);
