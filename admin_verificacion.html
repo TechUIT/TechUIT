@@ -369,6 +369,7 @@
         const buttonsContainer = orderElement.querySelector('.flex.justify-end');
         
         try {
+            // Actualizar en la base de datos
             const { error } = await supabaseClient
                 .from('clientes')
                 .update({ 
@@ -378,6 +379,7 @@
             
             if (error) throw error;
             
+            // Actualizar la interfaz
             statusBadge.textContent = 'Verificado';
             statusBadge.classList.remove('status-pending');
             statusBadge.classList.add('status-verified');
