@@ -126,7 +126,6 @@
     </style>
 </head>
 <body>
-
 <div class="main-card">
     <div class="content-wrapper">
         <header class="text-center mb-6">
@@ -164,7 +163,8 @@
                     <span class="step-number">2</span> Pega el ID en Ko-fi y paga:
                 </p>
                 
-                <a id="pay-button" href="https://ko-fi.com/c/8d720c6c86" target="_blank"
+                <!-- ¡SOLUCIÓN APLICADA! Se usa el enlace largo y completo para asegurar la funcionalidad en móviles. -->
+                <a id="pay-button" href="https://ko-fi.com/techuit/commissions?commissionAlias=8d720c6c86&openCommissionsMenu=True#buyShopCommissionModal" target="_blank"
                     class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
                 >
                     PAGAR EN KOFI
@@ -180,7 +180,6 @@
                 Después de pagar, presiona el botón para ver tu estado
             </p>
             
-            <!-- ¡SOLUCIÓN! Cambiamos el <a> por un <button> y le añadimos un id -->
             <button id="seguimiento-btn" 
                 class="btn-primary w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
             >
@@ -209,7 +208,6 @@
         }
     });
 
-    // Función para copiar el ID al portapapeles
     document.getElementById('solicitud-id-display').addEventListener('click', function() {
         const textToCopy = this.textContent;
         navigator.clipboard.writeText(textToCopy).then(() => {
@@ -220,17 +218,13 @@
         });
     });
 
-    // ¡SOLUCIÓN! Añadimos el evento click al botón de seguimiento
     document.getElementById('seguimiento-btn').addEventListener('click', () => {
-        // Obtenemos el ID de la URL actual
         const urlParams = new URLSearchParams(window.location.search);
         const solicitudId = urlParams.get('solicitud');
 
         if (solicitudId) {
-            // Si el ID existe, redirigimos a la página de seguimiento con el ID
             window.location.href = `seguimiento_cliente.html?solicitud=${solicitudId}`;
         } else {
-            // Manejo de error, aunque no debería pasar en esta página
             alert('Error: No se encontró el ID de la solicitud para continuar.');
         }
     });
