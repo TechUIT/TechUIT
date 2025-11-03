@@ -163,12 +163,12 @@
                     <span class="step-number">2</span> Pega el ID en Ko-fi y paga:
                 </p>
                 
-                <!-- Botón de pago modificado para funcionar correctamente en móviles -->
-                <button id="pay-button" 
+                <!-- ÚNICO CAMBIO: Se usa el enlace más directo y fiable para móviles -->
+                <a id="pay-button" href="https://ko-fi.com/c/8d720c6c86" target="_blank"
                     class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
                 >
                     PAGAR EN KOFI
-                </button>
+                </a>
             </div>
         </div>
 
@@ -217,31 +217,6 @@
             }, 3000);
         });
     });
-
-    // Función para detectar si es un dispositivo móvil
-    function isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-
-    // Función para abrir la ventana de pago de Ko-fi
-    function openKofiPayment() {
-        const isMobile = isMobileDevice();
-        let paymentUrl;
-        
-        if (isMobile) {
-            // URL específica para móviles que abre directamente la ventana de pago
-            paymentUrl = 'https://ko-fi.com/s/8d720c6c86';
-        } else {
-            // URL para escritorio
-            paymentUrl = 'https://ko-fi.com/techuit/commissions?commissionAlias=8d720c6c86&openCommissionsMenu=True#buyShopCommissionModal';
-        }
-        
-        // Abrir en una nueva ventana
-        window.open(paymentUrl, '_blank');
-    }
-
-    // Event listener para el botón de pago
-    document.getElementById('pay-button').addEventListener('click', openKofiPayment);
 
     document.getElementById('seguimiento-btn').addEventListener('click', () => {
         const urlParams = new URLSearchParams(window.location.search);
