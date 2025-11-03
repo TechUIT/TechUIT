@@ -205,6 +205,36 @@
             color: #212529;
             margin-top: 1rem;
         }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        .status-assigned {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+        .status-onroute {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        .status-success {
+            background-color: rgba(0, 123, 255, 0.2);
+            color: var(--color-primary);
+        }
+        .distance-badge {
+            background-color: rgba(0, 123, 255, 0.2);
+            color: var(--color-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -249,9 +279,9 @@
             
             <div id="available-tab" class="tab-content active">
                 <div class="mb-6">
-                    <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles</h2>
+                    <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles (15 km a la redonda)</h2>
                     <div id="orders-container">
-                        <p class="text-center text-gray-500 py-4">Cargando órdenes...</p>
+                        <p class="text-center text-gray-500 py-4">Activa tu GPS para ver órdenes cercanas.</p>
                     </div>
                 </div>
             </div>
@@ -290,6 +320,7 @@
     let watchId = null;
     let acceptedOrders = [];
     let currentOrderId = null;
+    let technicianLocation = null; // Nueva variable para guardar la ubicación del técnico
 
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -313,7 +344,6 @@
             
             try {
                 initMap();
-                loadAvailableOrders();
                 loadAcceptedOrders();
             } catch (mapError) {
                 console.error("Error al inicializar el mapa:", mapError);
@@ -343,12 +373,54 @@
         event.target.classList.add('active');
     }
 
+    // Función para calcular la distancia entre dos puntos en kilómetros
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radio de la Tierra en km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance = R * c; // Distancia en km
+        return distance;
+    }
+
+    // Función para obtener coordenadas aproximadas basadas en la ciudad
+    function getCityCoordinates(city) {
+        if (!city) return null;
+        
+        const cityLower = city.toLowerCase();
+        if (cityLower.includes('tegucigalpa') || cityLower.includes('tg')) {
+            return { lat: 14.0723, lng: -87.1921 };
+        } else if (cityLower.includes('san pedro sula') || cityLower.includes('sps')) {
+            return { lat: 15.5042, lng: -88.0250 };
+        } else if (cityLower.includes('la ceiba')) {
+            return { lat: 15.7891, lng: -86.7914 };
+        } else if (cityLower.includes('comayagua')) {
+            return { lat: 14.4492, lng: -87.6407 };
+        }
+        
+        return null;
+    }
+
     async function loadAvailableOrders() {
         console.log("Cargando órdenes disponibles...");
         const container = document.getElementById('orders-container');
         
         try {
-            const { data: orders, error } = await supabaseClient.from('clientes').select('*').eq('status', 'pagado_verificado').is('tecnico_asignado_id', null);
+            // Si no tenemos la ubicación del técnico, mostrar mensaje
+            if (!technicianLocation) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-10">Activa tu GPS para ver órdenes cercanas.</p>';
+                return;
+            }
+            
+            const { data: orders, error } = await supabaseClient
+                .from('clientes')
+                .select('*')
+                .eq('status', 'pagado_verificado')
+                .is('tecnico_asignado_id', null);
             
             if (error) throw error;
             
@@ -357,16 +429,55 @@
                 return;
             }
             
-            console.log("Órdenes encontradas:", orders);
-            container.innerHTML = orders.map(order => `
-                <div class="order-item">
-                    <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
-                    <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
-                    <p class="text-sm text-gray-400">Dirección: ${order.direccion}</p>
-                    <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
-                    <button class="btn-success mt-3" onclick="acceptOrder(${order.id})">Aceptar Orden</button>
-                </div>
-            `).join('');
+            // Filtrar órdenes por proximidad (usando coordenadas aproximadas basadas en la ciudad)
+            const nearbyOrders = orders.filter(order => {
+                // Obtener coordenadas del cliente
+                const customerCoords = getCityCoordinates(order.ciudad);
+                
+                if (!customerCoords) {
+                    // Si no se puede determinar la ciudad, asumimos que está lejos
+                    return false;
+                }
+                
+                const distance = calculateDistance(
+                    technicianLocation.lat, 
+                    technicianLocation.lng, 
+                    customerCoords.lat, 
+                    customerCoords.lng
+                );
+                
+                return distance <= 15; // Solo mostrar órdenes a 15 km o menos
+            });
+            
+            if (nearbyOrders.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes disponibles en tu área (radio de 15 km).</p>';
+                return;
+            }
+            
+            console.log("Órdenes cercanas encontradas:", nearbyOrders);
+            container.innerHTML = nearbyOrders.map(order => {
+                // Obtener coordenadas del cliente para calcular la distancia
+                const customerCoords = getCityCoordinates(order.ciudad);
+                
+                const distance = calculateDistance(
+                    technicianLocation.lat, 
+                    technicianLocation.lng, 
+                    customerCoords.lat, 
+                    customerCoords.lng
+                );
+                
+                return `
+                    <div class="order-item">
+                        <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
+                        <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
+                        <p class="text-sm text-gray-400">Dirección: ${order.direccion}</p>
+                        <p class="text-sm text-gray-400">Ciudad: ${order.ciudad || 'No especificada'}</p>
+                        <div class="distance-badge">Distancia: ${distance.toFixed(1)} km</div>
+                        <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
+                        <button class="btn-success mt-3" onclick="acceptOrder(${order.id}, ${customerCoords.lat}, ${customerCoords.lng})">Aceptar Orden</button>
+                    </div>
+                `;
+            }).join('');
         } catch (error) {
             console.error('Error al cargar órdenes:', error);
             container.innerHTML = '<p class="text-center text-red-400">Error al cargar las órdenes.</p>';
@@ -377,7 +488,11 @@
         if (!currentTechnician) return;
         
         try {
-            const { data: orders, error } = await supabaseClient.from('clientes').select('*').eq('tecnico_asignado_id', currentTechnician.id);
+            const { data: orders, error } = await supabaseClient
+                .from('clientes')
+                .select('*')
+                .eq('tecnico_asignado_id', currentTechnician.id)
+                .order('created_at', { ascending: false });
             
             if (error) throw error;
             
@@ -430,7 +545,7 @@
         }
     }
 
-    async function acceptOrder(orderId) {
+    async function acceptOrder(orderId, customerLat, customerLng) {
         if (!currentTechnician) return;
         
         console.log(`Aceptando orden ${orderId}`);
@@ -453,9 +568,8 @@
                 .single();
 
             if (!orderError && order && order.direccion) {
-                // IMPORTANTE: Aquí deberías usar un servicio de geocodificación para convertir la dirección a coordenadas.
-                // Por ahora, usaremos una coordenada de ejemplo para simular la ubicación del cliente.
-                const customerCoords = [14.0645, -87.1723]; // Coordenada de ejemplo en Tegucigalpa
+                // Usar las coordenadas pasadas como parámetro
+                const customerCoords = [customerLat, customerLng];
                 
                 if (customerMarker) {
                     map.removeLayer(customerMarker);
@@ -481,6 +595,7 @@
                 }
             }
             
+            // Recargar ambas listas de órdenes
             loadAvailableOrders();
             loadAcceptedOrders();
         } catch (error) {
@@ -566,6 +681,12 @@
                 leida: false,
                 created_at: new Date()
             });
+            
+            // Si el técnico completó el servicio, recargar las órdenes disponibles
+            // para que pueda ver nuevas órdenes cercanas
+            setTimeout(() => {
+                loadAvailableOrders();
+            }, 2000);
         } catch (error) {
             console.error('Error al completar servicio:', error);
             showNotification('Error al completar servicio.', 'error');
@@ -622,6 +743,9 @@
 
     async function updateLocation(lat, lng) {
         if (!currentTechnician) return;
+        
+        // Guardar la ubicación del técnico para usarla en el filtrado
+        technicianLocation = { lat, lng };
         
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Detener Rastreo GPS';
@@ -680,6 +804,9 @@
             console.error('Error al guardar ubicación:', error);
             showNotification('Error al guardar tu ubicación en la base de datos.', 'error');
         }
+        
+        // Cargar órdenes disponibles ahora que tenemos la ubicación del técnico
+        loadAvailableOrders();
     }
 
     function stopTracking() {

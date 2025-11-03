@@ -82,6 +82,12 @@
             border-radius: 0.75rem;
             padding: 1.5rem;
             text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 123, 255, 0.2);
         }
         .stat-number {
             font-size: 2rem;
@@ -174,6 +180,30 @@
         .tab-content.active {
             display: block;
         }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-out;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .notification.success {
+            background-color: #28a745;
+        }
+        .notification.error {
+            background-color: #dc3545;
+        }
+        .notification.info {
+            background-color: #17a2b8;
+        }
     </style>
 </head>
 <body>
@@ -181,27 +211,28 @@
         <div class="logo">TechUIT</div>
         <nav class="nav-links">
             <a href="index.html" class="nav-link">Inicio</a>
+            <a href="panel_verificacion.html" class="nav-link">Verificar Pagos</a>
             <a href="#" class="nav-link">Panel de Control</a>
         </nav>
     </header>
 
     <div class="container">
-        <h1 class="section-title">Panel de Control Administrativo</h1>
+        <h1 class="section-title">Panel de Control</h1>
         
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" onclick="showTab('orders')">
                 <div class="stat-number" id="total-orders">0</div>
                 <div class="stat-label">Total de Órdenes</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="filterOrdersByStatus('pagado_verificado')">
                 <div class="stat-number" id="pending-orders">0</div>
                 <div class="stat-label">Órdenes Pendientes</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="filterOrdersByStatus('tecnico_asignado')">
                 <div class="stat-number" id="assigned-orders">0</div>
                 <div class="stat-label">Órdenes Asignadas</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="showTab('technicians')">
                 <div class="stat-number" id="total-techs">0</div>
                 <div class="stat-label">Técnicos Disponibles</div>
             </div>
@@ -216,6 +247,12 @@
         <div id="orders-tab" class="tab-content active">
             <div class="card">
                 <h2 class="section-title">Gestión de Órdenes</h2>
+                <div class="mb-4">
+                    <button class="btn btn-primary" onclick="loadOrders()">Recargar Órdenes</button>
+                    <button class="btn btn-success ml-2" onclick="filterOrdersByStatus('pagado_verificado')">Ver Pendientes</button>
+                    <button class="btn btn-primary ml-2" onclick="filterOrdersByStatus('tecnico_asignado')">Ver Asignadas</button>
+                    <button class="btn btn-danger ml-2" onclick="filterOrdersByStatus('servicio_completado')">Ver Completadas</button>
+                </div>
                 <table class="table">
                     <thead>
                         <tr>
@@ -239,6 +276,9 @@
         <div id="technicians-tab" class="tab-content">
             <div class="card">
                 <h2 class="section-title">Gestión de Técnicos</h2>
+                <div class="mb-4">
+                    <button class="btn btn-primary" onclick="loadTechnicians()">Recargar Técnicos</button>
+                </div>
                 <table class="table">
                     <thead>
                         <tr>
@@ -262,10 +302,15 @@
         <div id="map-tab" class="tab-content">
             <div class="card">
                 <h2 class="section-title">Ubicación en Vivo de Técnicos</h2>
+                <div class="mb-4">
+                    <button class="btn btn-primary" onclick="updateTechnicianMarkers()">Actualizar Ubicaciones</button>
+                </div>
                 <div id="map"></div>
             </div>
         </div>
     </div>
+
+    <div id="notification" class="notification"></div>
 
     <script>
         // Configuración de Supabase
@@ -277,6 +322,7 @@
         // Variables globales
         let map;
         let technicianMarkers = [];
+        let currentOrders = [];
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
@@ -285,6 +331,18 @@
             loadTechnicians();
             initMap();
         });
+
+        // Función para mostrar notificaciones
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
 
         // Función para cambiar entre pestañas
         function showTab(tabName) {
@@ -311,6 +369,60 @@
                     updateTechnicianMarkers();
                 }, 100);
             }
+        }
+
+        // Función para filtrar órdenes por estado
+        function filterOrdersByStatus(status) {
+            showTab('orders');
+            
+            const filteredOrders = currentOrders.filter(order => order.status === status);
+            
+            const ordersTable = document.getElementById('orders-table');
+            
+            if (filteredOrders.length === 0) {
+                ordersTable.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay órdenes con este estado</td></tr>';
+                return;
+            }
+            
+            ordersTable.innerHTML = filteredOrders.map(order => {
+                let statusBadge = '';
+                let technicianName = 'No asignado';
+                
+                switch (order.status) {
+                    case 'pagado_verificado':
+                        statusBadge = '<span class="status-badge status-pending">Pendiente</span>';
+                        break;
+                    case 'tecnico_asignado':
+                        statusBadge = '<span class="status-badge status-assigned">Asignado</span>';
+                        if (order.tecnicos) {
+                            technicianName = order.tecnicos.nombre;
+                        }
+                        break;
+                    case 'servicio_completado':
+                        statusBadge = '<span class="status-badge status-completed">Completado</span>';
+                        if (order.tecnicos) {
+                            technicianName = order.tecnicos.nombre;
+                        }
+                        break;
+                    default:
+                        statusBadge = `<span class="status-badge">${order.status}</span>`;
+                }
+                
+                return `
+                    <tr>
+                        <td>${order.id}</td>
+                        <td>${order.nombre}</td>
+                        <td>${order.problema}</td>
+                        <td>${statusBadge}</td>
+                        <td>${technicianName}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="viewOrderDetails(${order.id})">Ver</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            showNotification(`Mostrando ${filteredOrders.length} órdenes con estado: ${status}`, 'info');
         }
 
         // Cargar estadísticas
@@ -345,6 +457,7 @@
                 document.getElementById('total-techs').textContent = totalTechs || 0;
             } catch (error) {
                 console.error('Error al cargar estadísticas:', error);
+                showNotification('Error al cargar estadísticas', 'error');
             }
         }
 
@@ -364,14 +477,15 @@
                 
                 if (error) throw error;
                 
+                currentOrders = orders || [];
                 const ordersTable = document.getElementById('orders-table');
                 
-                if (orders.length === 0) {
+                if (currentOrders.length === 0) {
                     ordersTable.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay órdenes registradas</td></tr>';
                     return;
                 }
                 
-                ordersTable.innerHTML = orders.map(order => {
+                ordersTable.innerHTML = currentOrders.map(order => {
                     let statusBadge = '';
                     let technicianName = 'No asignado';
                     
@@ -385,7 +499,7 @@
                                 technicianName = order.tecnicos.nombre;
                             }
                             break;
-                        case 'completado':
+                        case 'servicio_completado':
                             statusBadge = '<span class="status-badge status-completed">Completado</span>';
                             if (order.tecnicos) {
                                 technicianName = order.tecnicos.nombre;
@@ -408,9 +522,12 @@
                         </tr>
                     `;
                 }).join('');
+                
+                showNotification('Órdenes cargadas correctamente', 'success');
             } catch (error) {
                 console.error('Error al cargar órdenes:', error);
                 document.getElementById('orders-table').innerHTML = '<tr><td colspan="6" style="text-align: center;">Error al cargar las órdenes</td></tr>';
+                showNotification('Error al cargar las órdenes', 'error');
             }
         }
 
@@ -445,9 +562,12 @@
                         </tr>
                     `;
                 }).join('');
+                
+                showNotification('Técnicos cargados correctamente', 'success');
             } catch (error) {
                 console.error('Error al cargar técnicos:', error);
                 document.getElementById('technicians-table').innerHTML = '<tr><td colspan="6" style="text-align: center;">Error al cargar los técnicos</td></tr>';
+                showNotification('Error al cargar los técnicos', 'error');
             }
         }
 
@@ -485,6 +605,11 @@
                 
                 if (error) throw error;
                 
+                if (locations.length === 0) {
+                    showNotification('No hay técnicos con ubicación activa', 'info');
+                    return;
+                }
+                
                 // Agregar marcadores para cada técnico
                 locations.forEach(location => {
                     const marker = L.marker([location.lat, location.lng])
@@ -493,8 +618,11 @@
                     
                     technicianMarkers.push(marker);
                 });
+                
+                showNotification(`Se han cargado ${locations.length} ubicaciones de técnicos`, 'success');
             } catch (error) {
                 console.error('Error al actualizar marcadores de técnicos:', error);
+                showNotification('Error al actualizar ubicaciones de técnicos', 'error');
             }
         }
 
