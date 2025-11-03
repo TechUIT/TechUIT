@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- ESQUEMA VISUAL UNIFICADO --- */
         :root {
             --color-primary: #007bff;
             --color-dark-bg: #0d1117;
@@ -17,9 +16,7 @@
             --color-accent: #ffc107;
             --color-success: #25D366;
         }
-        
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -31,7 +28,6 @@
             justify-content: center;
             align-items: center;
         }
-        
         .main-card {
             max-width: 440px;
             width: 100%;
@@ -43,7 +39,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .main-card::before {
             content: '';
             position: absolute;
@@ -54,12 +49,10 @@
             background: radial-gradient(circle, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0) 70%);
             z-index: 0;
         }
-
         .content-wrapper {
             position: relative;
             z-index: 1;
         }
-
         .code-display {
             background-color: #0d1117;
             border: 3px solid var(--color-accent);
@@ -75,14 +68,12 @@
             box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
             transition: all 0.2s;
         }
-
         .btn-primary {
             background-color: var(--color-primary);
             box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
             position: relative;
             overflow: hidden;
         }
-
         .btn-primary::before {
             content: '';
             position: absolute;
@@ -93,16 +84,13 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
         }
-
         .btn-primary:hover::before {
             left: 100%;
         }
-
         #pay-button {
             background-color: var(--color-success);
             box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
         }
-
         .warning-box {
             background-color: rgba(255, 193, 7, 0.1);
             border: 2px solid var(--color-accent);
@@ -110,7 +98,6 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
-
         .step-number {
             display: inline-flex;
             align-items: center;
@@ -142,7 +129,7 @@
                 ⚠️ ¡IMPORTANTE! Lea atentamente.
             </h3>
             <p class="text-white text-sm">
-                <strong>En móviles, el enlace de Ko-fi puede abrir la página principal en lugar de la ventana de pago.</strong> Si eso pasa, busque el botón <strong>"Comprar"</strong> o <strong>"Shop"</strong> en la página para abrir la ventana de pago.
+                <strong>En móviles, el enlace puede abrir la página principal de Ko-fi en lugar de la ventana de pago.</strong> Si eso pasa, no te preocupes. Busca y presiona el botón <strong>"Comprar"</strong> o <strong>"Shop"</strong> en la página para abrir la ventana de pago.
             </p>
         </div>
 
@@ -163,7 +150,6 @@
                     <span class="step-number">2</span> Pega el ID en Ko-fi y paga:
                 </p>
                 
-                <!-- Usamos el enlace largo, que es el que tiene más probabilidades de funcionar. -->
                 <a id="pay-button" href="https://ko-fi.com/techuit/commissions?commissionAlias=8d720c6c86&openCommissionsMenu=True#buyShopCommissionModal" target="_blank"
                     class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
                 >
@@ -189,7 +175,6 @@
 
         <p id="status-message" class="text-center mt-4 font-semibold text-gray-400"></p>
     </div>
-</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
