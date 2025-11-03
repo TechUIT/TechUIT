@@ -296,8 +296,8 @@
             
             // Actualizar la información del técnico en la interfaz
             document.getElementById('technician-name').textContent = tecnico.nombre;
-            document.getElementById('technician-specialty').textContent = `Especialidad: ${tecnico.especialidad}`;
-            document.getElementById('technician-experience').textContent = `Experiencia: ${tecnico.experiencia} años`;
+            document.getElementById('technician-specialty').textContent = `Especialidad: ${tecnico.especialidad || 'No especificada'}`;
+            document.getElementById('technician-experience').textContent = `Experiencia: ${tecnico.experiencia || 0} años`;
             
             // Mostrar la biografía si existe
             if (tecnico.bio) {

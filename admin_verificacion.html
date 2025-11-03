@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Verificación de Pagos | TechUIT</title>
-    <!-- ¡SOLUCIÓN! Cargamos la librería SIN defer para que tenga máxima prioridad -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -92,10 +91,34 @@
             background-color: var(--color-success);
             color: #fff;
         }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: #28a745;
+        }
+
+        .notification.error {
+            background-color: #dc3545;
+        }
     </style>
 </head>
 <body>
-
 <div class="container">
     <header class="text-center py-6 mb-8 border-b border-[var(--color-border)]">
         <h1 class="text-3xl font-extrabold text-[var(--color-accent)]">
@@ -117,14 +140,12 @@
     </div>
 </div>
 
-<!-- ¡SOLUCIÓN! Movemos nuestro script al final del body y usamos defer -->
-<script defer>
-    // Comprobación de depuración para asegurarnos de que 'supabase' existe.
-    console.log("Script principal cargado. Objeto window.supabase:", window.supabase);
+<div id="notification" class="notification"></div>
 
+<script>
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
-    const { createClient } = window.supabase; // Accedemos desde window para ser explícitos
+    const { createClient } = window.supabase;
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -176,7 +197,7 @@
         }
     }
 
-    window.simulateVerification = async function(orderId) {
+    async function simulateVerification(orderId) {
         const orderElement = document.getElementById(`order-${orderId}`);
         const statusBadge = orderElement.querySelector('.status-badge');
         const buttonsContainer = orderElement.querySelector('.flex.justify-end');
@@ -199,14 +220,29 @@
             
             buttonsContainer.innerHTML = '<span class="text-green-400 text-sm font-bold">✅ Verificado</span>';
             
-            console.log(`Orden ${orderId} verificada exitosamente.`);
+            showNotification(`Orden ${orderId} verificada exitosamente.`, 'success');
+            
+            // Recargar la lista después de un breve retraso
+            setTimeout(() => {
+                loadPendingOrders();
+            }, 2000);
             
         } catch (error) {
             console.error('Error al verificar la orden:', error);
-            alert('Error al verificar la orden. Revisa la consola para más detalles.');
+            showNotification('Error al verificar la orden. Revisa la consola para más detalles.', 'error');
         }
-    };
-</script>
+    }
 
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+</script>
 </body>
 </html>
