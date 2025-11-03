@@ -123,6 +123,11 @@
             font-weight: bold;
             margin-right: 8px;
         }
+        
+        /* Estilo para el enlace oculto */
+        .hidden-link {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -163,12 +168,15 @@
                     <span class="step-number">2</span> Pega el ID en Ko-fi y paga:
                 </p>
                 
-                <!-- Botón de pago modificado para intentar múltiples enlaces -->
+                <!-- Botón de pago modificado para usar un enlace oculto -->
                 <button id="pay-button" 
                     class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
                 >
                     PAGAR EN KOFI
                 </button>
+                
+                <!-- Enlace oculto que se activará con JavaScript -->
+                <a id="kofi-link" href="https://ko-fi.com/c/8d720c6c86" target="_blank" class="hidden-link"></a>
             </div>
         </div>
 
@@ -218,44 +226,17 @@
         });
     });
 
-    // Función para detectar si es un dispositivo móvil
-    function isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-
-    // Función para intentar abrir múltiples enlaces hasta encontrar uno que funcione
-    function tryOpenKofiLinks() {
-        const isMobile = isMobileDevice();
+    // Función para abrir el enlace de Ko-fi usando un enlace oculto
+    function openKofiPayment() {
+        // Obtener el enlace oculto
+        const kofiLink = document.getElementById('kofi-link');
         
-        // Lista de enlaces a probar, en orden de preferencia
-        const links = [
-            'https://ko-fi.com/c/8d720c6c86',  // Enlace corto que funcionaba antes
-            'https://ko-fi.com/techuit/commissions?commissionAlias=8d720c6c86&openCommissionsMenu=True#buyShopCommissionModal',  // Enlace largo
-            'https://ko-fi.com/techuit/commissions'  // Enlace a la página de comisiones
-        ];
-        
-        // Intentar abrir cada enlace hasta que uno funcione
-        for (let i = 0; i < links.length; i++) {
-            try {
-                // Abrir en una nueva ventana
-                const newWindow = window.open(links[i], '_blank');
-                
-                // Si la ventana se abrió correctamente, salir de la función
-                if (newWindow && !newWindow.closed) {
-                    return;
-                }
-            } catch (e) {
-                // Si hay un error al abrir el enlace, continuar con el siguiente
-                console.error('Error al abrir el enlace:', e);
-            }
-        }
-        
-        // Si ninguno de los enlaces funcionó, mostrar un mensaje de error
-        alert('No se pudo abrir la ventana de pago. Por favor, intenta nuevamente más tarde.');
+        // Simular un clic en el enlace oculto
+        kofiLink.click();
     }
 
     // Event listener para el botón de pago
-    document.getElementById('pay-button').addEventListener('click', tryOpenKofiLinks);
+    document.getElementById('pay-button').addEventListener('click', openKofiPayment);
 
     document.getElementById('seguimiento-btn').addEventListener('click', () => {
         const urlParams = new URLSearchParams(window.location.search);
