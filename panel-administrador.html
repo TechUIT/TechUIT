@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Administrador | TechUIT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --color-primary: #007bff;
+            --color-dark-bg: #0d1117;
+            --color-card-bg: #161b22;
+            --color-text-light: #f3f4f6;
+            --color-border: #30363d;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-dark-bg);
+            color: var(--color-text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .main-card {
+            max-width: 440px;
+            width: 100%;
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            padding: 3rem 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0) 70%);
+            z-index: 0;
+        }
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #0d1117;
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            color: var(--color-text-light);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--text-light);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            background-color: #0056b9;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .error-message {
+            text-align: center;
+            color: #dc3545;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="main-card">
+    <div class="content-wrapper">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-white mb-2">Acceso Administrador</h1>
+            <p class="text-sm text-gray-400">Ingresa tus credenciales para acceder al panel de control.</p>
+        </header>
+        <form id="login-form">
+            <div class="mb-4">
+                <label for="username" class="block text-sm font-medium text-gray-300 mb-2">Usuario</label>
+                <input type="text" id="username" class="form-input" placeholder="Ej. TechUIT_Admin" required>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Contraseña</label>
+                <input type="password" id="password" class="form-input" type="password" placeholder="Tu contraseña de administrador" required>
+            </div>
+            <button type="submit" class="btn-primary">Iniciar Sesión</button>
+            <p id="login-error" class="error-message">Usuario o contraseña incorrectos.</p>
+        </form>
+    </div>
+</div>
+
+<script>
+    const ADMIN_USER = 'TechUIT_Admin';
+    const ADMIN_PASS = 'bjjbjjaebbzxctX1cm'; // <-- CAMBIA ESTA CONTRASEÑA POR UNA CONTRASEÑA SEGURA
+
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorEl = document.getElementById('login-error');
+
+        if (username === ADMIN_USER && password === ADMIN_PASS) {
+            // Guardar el estado de la sesión
+            sessionStorage.setItem('isAdminLoggedIn', 'true');
+            // Redirigir al panel principal
+            window.location.href = 'panel_administrador.html';
+        } else {
+            errorEl.classList.remove('hidden');
+        }
+    });
+</script>
+</body>
+</html>
