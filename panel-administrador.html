@@ -2,10 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="forzar la compatibilidad con GitHub Pages, no es necesario este meta tag.
     <title>Acceso Administrador | TechUIT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --color-primary: #007bff;
@@ -13,13 +15,16 @@
             --color-card-bg: #161b22;
             --color-text-light: #f3f4f6;
             --color-border: #30363d;
+            --color-warning: #ffc107;
+            --color-success: #28a745;
+            --color-danger: #dc3545;
         }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--color-dark-bg);
+            background-color:  var(--color-dark-bg);
             color: var(--color-text-light);
             min-height: 100vh;
             display: flex;
@@ -68,7 +73,7 @@
         }
         .btn-primary {
             background-color: var(--color-primary);
-            color: var(--text-light);
+            color: var(--color-text-light);
             padding: 0.75rem 1.5rem;
             border-radius: 0.5rem;
             font-weight: 600;
@@ -105,17 +110,16 @@
             </div>
             <div class="mb-4">
                 <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Contraseña</label>
-                <input type="password" id="password" class="form-input" type="password" placeholder="Tu contraseña de administrador" required>
+                <input type="password" id="password" class="in-password" placeholder="Tu contraseña de administrador" required>
             </div>
             <button type="submit" class="btn-primary">Iniciar Sesión</button>
             <p id="login-error" class="error-message">Usuario o contraseña incorrectos.</p>
         </form>
     </div>
-</div>
 
 <script>
     const ADMIN_USER = 'TechUIT_Admin';
-    const ADMIN_PASS = 'bjjbjjaebbzxctX1cm'; // <-- CAMBIA ESTA CONTRASEÑA POR UNA CONTRASEÑA SEGURA
+    const ADMIN_PASS = 'bjjbjjaebbzxctX1cm';
 
     document.getElementById('login-form').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -124,10 +128,10 @@
         const errorEl = document.getElementById('login-error');
 
         if (username === ADMIN_USER && password === ADMIN_PASS) {
-            // Guardar el estado de la sesión
             sessionStorage.setItem('isAdminLoggedIn', 'true');
-            // Redirigir al panel principal
-            window.location.href = 'panel_administrador.html';
+            // Redirigir usando la URL directa para evitar problemas de caché
+            const url = new URL(window.location.origin + '/panel_administrador.html');
+            window.location.href = url.toString();
         } else {
             errorEl.classList.remove('hidden');
         }
