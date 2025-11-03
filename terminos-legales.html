@@ -4,105 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Términos y Condiciones TechUIT</title>
-    <!-- Incluir Tailwind CSS para facilitar la estética de app-móvil -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos base consistentes con el diseño oscuro de la App */
-        body {
-            font-family: 'Inter', Arial, sans-serif;
-            margin: 0;
-            padding: 0; /* Quitamos el padding del body para que la app-container lo maneje */
-            background-color: #000; /* Fondo negro elegante */
-            color: #fff;
-            line-height: 1.6;
-            text-align: justify;
-            min-height: 100vh;
-        }
-        /* La clase container se convierte en el contenedor principal con estilo de App Card */
-        .app-container {
-            max-width: 800px;
-            margin: 20px auto;
-            background-color: #1a1a1a; /* Oscuro consistente */
-            padding: 30px 20px;
-            border-radius: 15px; /* Bordes redondeados consistentes */
-            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2); /* Sombra azul para acento */
-        }
-        
-        h1, h2, h3 {
-            color: #007bff; /* Azul primario para títulos */
-            font-weight: 700;
-            margin-top: 25px;
-        }
-        h1 {
-            font-size: 2rem;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-        h2 {
-            font-size: 1.5rem;
-            border-bottom: 1px solid #2a2a2a; /* Borde más sutil */
-            padding-bottom: 5px;
-        }
-        h3 {
-            font-size: 1.1rem;
-            margin-top: 15px;
-            color: #0099ff;
-            font-weight: 600;
-        }
-        p, ul {
-            margin-bottom: 15px;
-            font-size: 0.95rem;
-            color: #ccc;
-        }
-        strong {
-            color: #fff;
-        }
-        ul {
-            list-style-type: disc;
-            margin-left: 25px;
-            padding-left: 0;
-            margin-top: 10px;
-        }
-        ul li {
-            margin-bottom: 5px;
-        }
-        
-        /* Estilo del botón de Volver (píldora consistente) */
-        .back-button-content {
-            display: inline-flex;
-            align-items: center;
-            padding: 10px 15px;
-            border-radius: 50px;
-            background-color: #333;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .back-button-content:hover {
-            background-color: #555;
-        }
-        
-        /* Ajuste para el aviso importante */
-        .important-notice {
-            background-color: #3d3d00; /* Fondo amarillo oscuro para alto contraste */
-            color: #ffcc00; /* Texto amarillo/oro */
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
+        body { font-family: 'Inter', Arial, sans-serif; margin: 0; padding: 0; background-color: #000; color: #fff; line-height: 1.6; text-align: justify; min-height: 100vh; }
+        .app-container { max-width: 800px; margin: 20px auto; background-color: #1a1a1a; padding: 30px 20px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0, 123, 255, 0.2); }
+        h1, h2, h3 { color: #007bff; font-weight: 700; margin-top: 25px; }
+        h1 { font-size: 2rem; text-align: center; margin-bottom: 5px; }
+        h2 { font-size: 1.5rem; border-bottom: 1px solid #2a2a2a; padding-bottom: 5px; }
+        h3 { font-size: 1.1rem; margin-top: 15px; color: #0099ff; font-weight: 600; }
+        p, ul { margin-bottom: 15px; font-size: 0.95rem; color: #ccc; }
+        strong { color: #fff; }
+        ul { list-style-type: disc; margin-left: 25px; padding-left: 0; margin-top: 10px; }
+        ul li { margin-bottom: 5px; }
+        .back-button-content { display: inline-flex; align-items: center; padding: 10px 15px; border-radius: 50px; background-color: #333; color: white; text-decoration: none; font-weight: bold; transition: background-color 0.3s; }
+        .back-button-content:hover { background-color: #555; }
+        .important-notice { background-color: #3d3d00; color: #ffcc00; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; font-weight: 600; }
+        .new-clause { background-color: rgba(0, 123, 255, 0.1); border-left: 3px solid #007bff; padding: 10px; margin: 15px 0; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        
-        <!-- Botón Volver Consistente -->
-        <a href="terminos-clientes.html" class="back-button" style="text-decoration: none;">
+        <a href="index.html" class="back-button" style="text-decoration: none;">
             <div class="back-button-content">
                 <span style="font-size: 20px; margin-right: 5px;">&#x2190;</span>
-                <span style="font-size: 16px;">Volver a Pasos</span>
+                <span style="font-size: 16px;">Volver</span>
             </div>
         </a>
         
@@ -114,79 +39,90 @@
         </p>
 
         <h2>1. DISPOSICIONES GENERALES</h2>
-        
         <h3>1.1 Identificación de las Partes</h3>
         <p>Los presentes Términos y Condiciones constituyen un acuerdo legalmente vinculante entre: <strong>TechUIT, S.A. de C.V.</strong> (en adelante, "TechUIT" o "la Compañía"), con domicilio fiscal en **[Dirección Legal Completa]**, y el Usuario (en adelante, "Usuario" o "usted"), cualquier persona que utilice la Plataforma.</p>
-
         <h3>1.2 Objeto y Alcance</h3>
         <p>TechUIT es una plataforma tecnológica que actúa como **intermediaria**, facilitando la conexión entre usuarios que requieren servicios técnicos y profesionales independientes. La Plataforma no presta directamente los servicios técnicos. Estos Términos regulan el acceso y uso de la Plataforma.</p>
-
         <h3>1.3 Capacidad Legal</h3>
-        <p>El Usuario declara ser mayor de edad y poseer plena capacidad legal para celebrar contratos. Si representa a una persona moral, cuenta con las facultades suficientes para obligarla. Toda la información proporcionada es veraz, precisa y completa.</p>
-        
+        <p>El Usuario declara ser mayor de edad y poseer plena capacidad legal para celebrar contratos. Si representa a una persona moral, cuenta con las facultades suficientes para representarla y obligarla. Toda la información proporcionada es veraz, precisa y completa.</p>
         <h3>1.4 Modificaciones</h3>
         <p>TechUIT se reserva el derecho de modificar estos Términos en cualquier momento. El uso continuado de la Plataforma tras la publicación de cambios constituirá la aceptación de dichas modificaciones.</p>
 
         <h2>2. PROPIEDAD INTELECTUAL E INDUSTRIAL</h2>
-        
         <h3>2.1 Titularidad de los Derechos</h3>
         <p>TechUIT es titular exclusivo de todos los derechos de propiedad intelectual e industrial relacionados con la Plataforma.</p>
-        
         <h3>2.2 Licencia de Uso Limitada</h3>
         <p>TechUIT otorga al Usuario una licencia limitada, personal y no transferible para acceder y usar la Plataforma exclusivamente para los fines previstos.</p>
-        
         <h3>2.3 Restricciones Expresas</h3>
-        <p>El Usuario se compromete a no realizar, y reconoce que está expresamente prohibido:</p>
-        <ul>
-            <li>La ingeniería inversa o cualquier intento de acceder al código fuente.</li>
-            <li>La reproducción, modificación o distribución total o parcial de la Plataforma.</li>
-            <li>El uso de herramientas para extraer datos de forma sistemática.</li>
-            <li>Cualquier uso que infrinja los derechos de propiedad intelectual.</li>
-        </ul>
-
+        <p>El Usuario se compromete a no realizar, y reconoce que está expresamente prohibido: la ingeniería inversa, la reproducción, modificación o distribución total o parcial de la Plataforma, el uso de herramientas para extraer datos, o cualquier uso que infrinja los derechos de propiedad intelectual.</p>
+        
         <h2>3. REGISTRO Y CUENTA DE USUARIO</h2>
-        
         <h3>3.1 Proceso de Registro</h3>
-        <p>Para usar la Plataforma, el Usuario deberá crear una cuenta proporcionando información precisa y completa (nombre, correo, teléfono y contraseña segura).</p>
-        
+        <p>Para usar la Plataforma, el Usuario deberá crear una cuenta proporcionando información precisa y completa (nombre, correo electrónico, contraseña segura).</p>
         <h3>3.2 Responsabilidad sobre la Cuenta</h3>
         <p>El Usuario es responsable de mantener la confidencialidad de sus credenciales y de notificar a TechUIT sobre cualquier uso no autorizado.</p>
-        
         <h3>3.3 Verificación de Identidad y Seguridad</h3>
-        <p>TechUIT implementa un riguroso proceso de verificación de identidad para proteger a los usuarios.</p>
-        
+        <p>TechUIT implementa un riguroso proceso de verificación de identidad para proteger a los usuarios. El Usuario autoriza expresamente a TechUIT a realizar estas verificaciones.</p>
         <h3>3.4 Rechazo, Suspensión y Cancelación de Cuentas</h3>
-        <p>TechUIT se reserva el derecho de rechazar, suspender o cancelar cualquier cuenta por incumplimientos o actividades fraudulentas.</p>
+        <p>TechUIT se reserva el derecho de rechazar, suspender o cancelar cualquier cuenta por incumplimientos, actividades fraudulentas, suplantación de identidad o cualquier otra causa legítima.</p>
         
         <h2>4. FUNCIONAMIENTO DE LA PLATAFORMA</h2>
-        
         <h3>4.1 Descripción del Servicio de Intermediación</h3>
-        <p>TechUIT facilita: Perfiles verificados, conexión entre partes (proximidad/servicio), procesamiento de pagos y sistema de calificaciones.</p>
-        
+        <p>TechUIT facilita: Perfiles verificados, conexión entre partes (proximidad/servicio), procesamiento de pagos y sistema de calificaciones. TechUIT no presta directamente los servicios técnicos, no emplea a los técnicos, ni asume responsabilidad directa por los servicios prestados por estos.</p>
         <h3>4.2 Solicitud y Pago de Servicios</h3>
-        <p>El proceso de solicitud incluye:</p>
-        <ul>
-            <li><strong>Pago de Diagnóstico Inmediato:</strong> El costo del diagnóstico se debita y queda retenido en la Plataforma.</li>
-            <li><strong>Conversión de Moneda:</strong> Todos los precios se muestran en Dólares estadounidenses (USD) y se convierten a la moneda local (ej. Lempiras).</li>
-            <li><strong>Presupuesto:</strong> El profesional realiza el diagnóstico y envía un presupuesto para el servicio completo.</li>
-            <li><strong>Pago Final:</strong> Si el cliente acepta, autoriza el pago del resto del servicio a través de la Plataforma.</li>
-        </ul>
-        
+        <p>El proceso de solicitud incluye: Pago de Diagnóstico Inmediato, Conversión de Moneda, Presupuesto, y Pago Final a través de la Plataforma.</p>
         <h3>4.3 Relación entre Usuarios y Técnicos</h3>
         <p>La relación contractual para la prestación del servicio se establece **directamente entre el usuario y el técnico**. TechUIT es únicamente un facilitador tecnológico.</p>
-        
         <h3>4.4 Geolocalización y Seguimiento</h3>
-        <p>La Plataforma utiliza tecnología de geolocalización para la conexión y el rastreo en tiempo real del profesional.</p>
-        
+        <p>La Plataforma utiliza tecnología de geolocalización para la conexión y el rastreo en tiempo real del profesional. El Usuario autoriza expresamente a TechUIT a recopilar y procesar estos datos.</p>
+
         <h2>5. OBLIGACIONES DE LOS USUARIOS</h2>
-        
         <h3>5.1 Obligaciones Generales</h3>
         <p>Todo Usuario se compromete a usar la Plataforma de buena fe, proporcionar información veraz y no realizar actividades ilegales o fraudulentas.</p>
-        
-        <p class="mt-8 text-sm text-center text-gray-500">
-            **FIN DEL DOCUMENTO LEGAL**
-        </p>
+        <h3>5.2 Obligaciones Específicas para Clientes</h3>
+        <p>Proporcionar información precisa, estar presente durante el servicio, y efectuar el pago del servicio.</p>
+        <h3>5.3 Obligaciones Específicas para Técnicos</h3>
+        <p>Poseer y mantener las cualificaciones necesarias, prestar los servicios con profesionalidad, y acudir puntualmente a las citas.</p>
 
+        <h2>6. LIMITACIONES DE RESPONSABILIDAD Y SEGURIDAD</h2>
+        <h3>6.1 Naturaleza del Servicio de Intermediación</h3>
+        <p>TechUIT no es parte en el contrato de servicio. En consecuencia, TechUIT no asume responsabilidad directa por la calidad, seguridad, legalidad o cualquier otro aspecto de los servicios prestados por los técnicos.</p>
+        <h3>6.2 Exención de Garantías</h3>
+        <p>TechUIT proporciona la Plataforma "tal cual" y "según disponibilidad", sin garantías de ningún tipo. El Usuario reconoce y acepta que el uso de la Plataforma se realiza bajo su propio riesgo.</p>
+        
+        <div class="new-clause">
+            <h3>6.3 Limitación de Responsabilidad (Clave)</h3>
+            <p>En la máxima medida permitida por la ley, <strong>TechUIT no será responsable por ningún daño indirecto, incidental, especial o consecuente</strong> que surja del uso de la plataforma, incluyendo但不限于, daños a equipos, pérdida de datos o ganancias. Los servicios técnicos son prestados por terceros independientes, no por TechUIT. Cualquier reclamación por daños debe ser dirigida exclusivamente al técnico que prestó el servicio.</p>
+        </div>
+
+        <div class="new-clause">
+            <h3>6.4 Indemnización (Tu Escudo)</h3>
+            <p>El Usuario acepta <strong>indemnizar y mantener a TechUIT, sus directores, empleados y afiliados a salvo</strong> de cualquier demanda, pérdida, daño, costo y gasto (incluyendo honorarios razonables de abogados) que surja de: (a) su uso de la Plataforma; (b) su incumplimiento de estos Términos; o (c) su violación de los derechos de un tercero.</p>
+        </div>
+
+        <h3>6.5 Seguridad y Protección de la Información</h3>
+        <p>TechUIT implementa medidas de seguridad robustas para proteger los datos de los usuarios. Sin embargo, el Usuario reconoce que ninguna transmisión por internet es 100% segura. TechUIT no será responsable si demuestra que se tomaron las medidas razonables para prevenir ataques cibernéticos o fallos técnicos.</p>
+
+        <h2>7. RESOLUCIÓN DE DISPUTAS</h2>
+        <h3>7.1 Procedimiento Interno de Reclamaciones</h3>
+        <p>Antes de iniciar cualquier acción legal, el Usuario debe intentar resolver la disputa a través del procedimiento interno de reclamaciones de TechUIT.</p>
+        <h3>7.2 Manejo de Disputas sobre el Pago</h3>
+        <p>Profesional no se presenta: El cliente recibe un crédito. Cliente cancela: El profesional recibe una compensación. Ambas partes son penalizadas en su reputación.</p>
+        
+        <div class="new-clause">
+            <h3>7.3 Legislación y Jurisdicción (Clave)</h3>
+            <p>Estos Términos y Condiciones se regirán por las leyes de [País]. Cualquier disputa se someterá a la jurisdicción exclusiva de los tribunales competentes de [Ciudad], renunciando el Usuario a cualquier otra jurisdicción. <strong>Se recomienda encarecidamente el arbitraje como método de resolución más rápido y económico.</strong></p>
+        </div>
+
+        <h2>8. PROTECCIÓN DE DATOS Y PRIVACIDAD</h2>
+        <p>TechUIT cumple con la legislación aplicable en materia de protección de datos personales. La información detallada se encuentra en nuestra Política de Privacidad.</p>
+        
+        <div class="new-clause">
+            <h3>8.1 Contacto</h3>
+            <p>Para cualquier pregunta sobre estos Términos, puede contactarnos a través de nuestro correo electrónico: [tu-correo-de-soporte-anonimo@dominio.com]. <strong>No se realizarán gestiones por teléfono.</strong></p>
+        </div>
+
+        <p class="mt-8 text-sm text-center text-gray-500">**FIN DEL DOCUMENTO LEGAL**</p>
     </div>
 </body>
 </html>
