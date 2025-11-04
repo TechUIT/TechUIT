@@ -175,10 +175,20 @@
             align-items: center;
         }
         
+        /* NUEVO: Contenedor para el iframe con la "máscara" */
+        .iframe-container {
+            width: 100%;
+            height: calc(100% - 50px); /* Altura total menos la del header */
+            overflow: hidden; /* ¡Esta es la clave! Oculta todo lo que se salga del contenedor */
+            position: relative;
+        }
+        
         .payment-iframe {
             width: 100%;
-            height: calc(100% - 50px);
+            height: 120%; /* Hacemos el iframe más alto para poder desplazarlo */
             border: none;
+            /* Usamos un margen negativo para "subir" el contenido y ocultar el header de Ko-fi */
+            margin-top: -220px; 
         }
         
         .loading-spinner {
@@ -283,7 +293,10 @@
         <div class="loading-spinner" id="loading-spinner">
             <div class="spinner"></div>
         </div>
-        <iframe id="payment-iframe" class="payment-iframe" src="" style="display: none;"></iframe>
+        <!-- NUEVO: El iframe ahora está dentro del contenedor con máscara -->
+        <div class="iframe-container">
+            <iframe id="payment-iframe" class="payment-iframe" src="" style="display: none;"></iframe>
+        </div>
     </div>
 </div>
 
@@ -324,6 +337,7 @@
         
         // Cargar la página de Ko-fi en el iframe
         const iframe = document.getElementById('payment-iframe');
+        // Usamos el enlace directo al producto
         iframe.src = 'https://ko-fi.com/c/8d720c6c86';
         
         // Cuando el iframe termine de cargar, ocultar el spinner
@@ -331,22 +345,6 @@
             setTimeout(() => {
                 document.getElementById('loading-spinner').style.display = 'none';
                 document.getElementById('payment-iframe').style.display = 'block';
-                
-                // Intentar ocultar el botón de "tips" después de cargar
-                try {
-                    iframe.contentWindow.onload = function() {
-                        // Intentar inyectar CSS para ocultar elementos no deseados
-                        const style = iframe.contentDocument.createElement('style');
-                        style.textContent = `
-                            .support-button, .tips-button, .donation-button {
-                                display: none !important;
-                            }
-                        `;
-                        iframe.contentDocument.head.appendChild(style);
-                    };
-                } catch (e) {
-                    console.error('No se pudo modificar el contenido del iframe:', e);
-                }
             }, 2000); // Esperar 2 segundos para asegurar que la página se haya cargado completamente
         };
     }
@@ -354,6 +352,8 @@
     // Función para cerrar el modal de pago
     function closePaymentModal() {
         document.getElementById('payment-modal').style.display = 'none';
+        // Limpiar el src del iframe para que se detenga la reproducción de video, etc.
+        document.getElementById('payment-iframe').src = '';
     }
 
     // Event listeners para el modal
