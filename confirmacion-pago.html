@@ -175,7 +175,7 @@
             align-items: center;
         }
         
-        /* MODIFICADO: Contenedor para el iframe con la "máscara" */
+        /* Contenedor para el iframe con la "máscara" */
         .iframe-container {
             width: 100%;
             height: calc(100% - 50px); /* Altura total menos la del header */
@@ -183,17 +183,13 @@
             position: relative;
         }
         
-        /* MODIFICADO: Iframe ajustado para mostrar solo la ventana de pago */
+        /* Iframe ajustado para mostrar solo la ventana de pago */
         .payment-iframe {
             width: 100%;
-            height: 150%; /* Hacemos el iframe más alto para poder desplazarlo */
+            height: 170%; /* Hacemos el iframe más alto para poder desplazarlo */
             border: none;
-            /* Usamos un margen negativo para "subir" el contenido y ocultar el header de Ko-fi */
-            margin-top: -320px; /* Ajustado para mostrar el formulario completo */
-            /* Deshabilitamos el scroll para que el usuario no pueda navegar por otras secciones */
-            overflow: hidden;
-            /* Evitamos que el usuario pueda hacer zoom */
-            touch-action: none;
+            /* AJUSTADO: Margen para enfocar el formulario de pago y el campo del ID */
+            margin-top: -420px; 
         }
         
         .loading-spinner {
@@ -350,21 +346,6 @@
             setTimeout(() => {
                 document.getElementById('loading-spinner').style.display = 'none';
                 document.getElementById('payment-iframe').style.display = 'block';
-                
-                // Intentar deshabilitar el scroll dentro del iframe
-                try {
-                    iframe.contentWindow.addEventListener('scroll', function(e) {
-                        e.preventDefault();
-                        iframe.contentWindow.scrollTo(0, 320);
-                    });
-                    
-                    // Intentar deshabilitar el touch scroll en dispositivos móviles
-                    iframe.contentDocument.addEventListener('touchmove', function(e) {
-                        e.preventDefault();
-                    }, { passive: false });
-                } catch (e) {
-                    console.error('No se pudo deshabilitar el scroll en el iframe:', e);
-                }
             }, 2000); // Esperar 2 segundos para asegurar que la página se haya cargado completamente
         };
     }
