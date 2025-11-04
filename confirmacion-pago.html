@@ -189,7 +189,7 @@
             height: 150%; /* Hacemos el iframe más alto para poder desplazarlo */
             border: none;
             /* Usamos un margen negativo para "subir" el contenido y ocultar el header de Ko-fi */
-            margin-top: -400px; 
+            margin-top: -320px; /* Ajustado para mostrar el formulario completo */
             /* Deshabilitamos el scroll para que el usuario no pueda navegar por otras secciones */
             overflow: hidden;
             /* Evitamos que el usuario pueda hacer zoom */
@@ -355,7 +355,7 @@
                 try {
                     iframe.contentWindow.addEventListener('scroll', function(e) {
                         e.preventDefault();
-                        iframe.contentWindow.scrollTo(0, 400);
+                        iframe.contentWindow.scrollTo(0, 320);
                     });
                     
                     // Intentar deshabilitar el touch scroll en dispositivos móviles
