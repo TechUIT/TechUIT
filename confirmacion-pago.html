@@ -183,12 +183,15 @@
             position: relative;
         }
         
-        /* Iframe ajustado para que el JavaScript haga el trabajo de centrar */
+        /* Iframe ajustado para mostrar solo la ventana de pago */
         .payment-iframe {
             width: 100%;
-            height: 100%; /* Dejamos que el contenido se adapte */
+            height: 150%; /* Hacemos el iframe más alto para poder desplazarlo */
             border: none;
-            /* No usamos margin-top, el JS se encargará */
+            /* AJUSTADO: Margen para mostrar el formulario completo incluyendo el campo de comentarios */
+            margin-top: -350px; 
+            /* Evitamos que el usuario pueda hacer zoom */
+            touch-action: none;
         }
         
         .loading-spinner {
@@ -337,37 +340,15 @@
         
         // Cargar la página de Ko-fi en el iframe
         const iframe = document.getElementById('payment-iframe');
+        // Usamos el enlace directo al producto
         iframe.src = 'https://ko-fi.com/c/8d720c6c86';
         
-        // Cuando el iframe termine de cargar, ocultar el spinner y centrar el formulario
+        // Cuando el iframe termine de cargar, ocultar el spinner
         iframe.onload = function() {
             setTimeout(() => {
                 document.getElementById('loading-spinner').style.display = 'none';
                 document.getElementById('payment-iframe').style.display = 'block';
-                
-                // NUEVO: Intentar centrar el formulario de pago automáticamente
-                try {
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    
-                    // Buscar el contenedor principal del formulario de pago
-                    const paymentForm = iframeDoc.querySelector('#shop-item') || iframeDoc.querySelector('.support-item');
-                    
-                    if (paymentForm) {
-                        // Centrar el formulario en la vista
-                        paymentForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    } else {
-                        // Si no encuentra el formulario, busca el botón de "Request"
-                        const requestButton = iframeDoc.querySelector('button[data-testid="Request-button"]');
-                        if (requestButton) {
-                            requestButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                    }
-                } catch (e) {
-                    // Esto puede fallar por políticas de seguridad del navegador (cross-origin)
-                    console.error("No se pudo ajustar la vista automáticamente:", e);
-                    // Si falla, no pasa nada, el iframe se mostrará desde arriba.
-                }
-            }, 2500); // Damos un poco más de tiempo para que todo cargue
+            }, 2000); // Esperar 2 segundos para asegurar que la página se haya cargado completamente
         };
     }
 
