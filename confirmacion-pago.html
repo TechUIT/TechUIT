@@ -175,7 +175,7 @@
             align-items: center;
         }
         
-        /* NUEVO: Contenedor para el iframe con la "máscara" */
+        /* MODIFICADO: Contenedor para el iframe con la "máscara" */
         .iframe-container {
             width: 100%;
             height: calc(100% - 50px); /* Altura total menos la del header */
@@ -183,12 +183,17 @@
             position: relative;
         }
         
+        /* MODIFICADO: Iframe ajustado para mostrar solo la ventana de pago */
         .payment-iframe {
             width: 100%;
-            height: 120%; /* Hacemos el iframe más alto para poder desplazarlo */
+            height: 150%; /* Hacemos el iframe más alto para poder desplazarlo */
             border: none;
             /* Usamos un margen negativo para "subir" el contenido y ocultar el header de Ko-fi */
-            margin-top: -220px; 
+            margin-top: -400px; 
+            /* Deshabilitamos el scroll para que el usuario no pueda navegar por otras secciones */
+            overflow: hidden;
+            /* Evitamos que el usuario pueda hacer zoom */
+            touch-action: none;
         }
         
         .loading-spinner {
@@ -293,9 +298,9 @@
         <div class="loading-spinner" id="loading-spinner">
             <div class="spinner"></div>
         </div>
-        <!-- NUEVO: El iframe ahora está dentro del contenedor con máscara -->
+        <!-- El iframe está dentro del contenedor con máscara -->
         <div class="iframe-container">
-            <iframe id="payment-iframe" class="payment-iframe" src="" style="display: none;"></iframe>
+            <iframe id="payment-iframe" class="payment-iframe" src="" style="display: none;" scrolling="no"></iframe>
         </div>
     </div>
 </div>
@@ -345,6 +350,21 @@
             setTimeout(() => {
                 document.getElementById('loading-spinner').style.display = 'none';
                 document.getElementById('payment-iframe').style.display = 'block';
+                
+                // Intentar deshabilitar el scroll dentro del iframe
+                try {
+                    iframe.contentWindow.addEventListener('scroll', function(e) {
+                        e.preventDefault();
+                        iframe.contentWindow.scrollTo(0, 400);
+                    });
+                    
+                    // Intentar deshabilitar el touch scroll en dispositivos móviles
+                    iframe.contentDocument.addEventListener('touchmove', function(e) {
+                        e.preventDefault();
+                    }, { passive: false });
+                } catch (e) {
+                    console.error('No se pudo deshabilitar el scroll en el iframe:', e);
+                }
             }, 2000); // Esperar 2 segundos para asegurar que la página se haya cargado completamente
         };
     }
