@@ -340,6 +340,7 @@
                     </div>
                 </div>
             </div>
+            </div>
             
 
             <div class="space-y-4">
@@ -522,7 +523,7 @@
                         <p class="text-sm text-gray-400">Ciudad: ${order.ciudad || 'No especificada'}</p>
                         <div class="distance-badge">Distancia: ${distance.toFixed(1)} km</div>
                         <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
-                        <button class="btn-success mt-3" onclick="acceptOrder(${order.solicitud_id}, ${customerCoords.lat}, ${customerCoords.lng})">Aceptar Orden</button>
+                        <button class="btn-success mt-3" onclick="acceptOrder('${order.solicitud_id}', ${customerCoords.lat}, ${customerCoords.lng})">Aceptar Orden</button>
                     </div>
                 `;
             }).join('');
@@ -561,15 +562,15 @@
                 switch(order.estado) {
                     case 'tecnico_asignado':
                         statusBadge = '<span class="status-badge status-assigned">Asignado</span>';
-                        actionButton = `<button class="btn-warning mt-3" onclick="startNavigation(${order.solicitud_id})">Iniciar Navegación</button>`;
+                        actionButton = `<button class="btn-warning mt-3" onclick="startNavigation('${order.solicitud_id}')">Iniciar Navegación</button>`;
                         break;
                     case 'tecnico_en_camino':
                         statusBadge = '<span class="status-badge status-onroute">En Camino</span>';
-                        actionButton = `<button class="btn-warning arrival-button mt-3" onclick="notifyArrival(${order.solicitud_id})">Notificar Llegada</button>`;
+                        actionButton = `<button class="btn-warning arrival-button mt-3" onclick="notifyArrival('${order.solicitud_id}')">Notificar Llegada</button>`;
                         break;
                     case 'tecnico_llego':
                         statusBadge = '<span class="status-badge status-success">Llegado</span>';
-                        actionButton = `<button class="btn-success mt-3" onclick="completeOrder(${order.solicitud_id})">Completar Servicio</button>`;
+                        actionButton = `<button class="btn-success mt-3" onclick="completeOrder('${order.solicitud_id}')">Completar Servicio</button>`;
                         break;
                     default:
                         statusBadge = `<span class="status-badge">${order.estado}</span>`;
