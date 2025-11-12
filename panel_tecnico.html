@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* --- ESQUEMA VISUAL UNIFICADO --- */
         :root {
             --color-primary: #007bff;
             --color-dark-bg: #0d1117;
@@ -19,9 +18,7 @@
             --color-accent: #ffc107;
             --color-success: #25D366;
         }
-       
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-       
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -33,7 +30,6 @@
             justify-content: center;
             align-items: center;
         }
-       
         .main-card {
             max-width: 440px;
             width: 100%;
@@ -177,9 +173,6 @@
         .notification.error {
             background-color: #dc3545;
         }
-        .notification.info {
-            background-color: #17a2b8;
-        }
         .tab-container {
             display: flex;
             margin-bottom: 1rem;
@@ -285,7 +278,7 @@
            
             <div id="available-tab" class="tab-content active">
                 <div class="mb-6">
-                    <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles (15 km a la redonda)</h2>
+                    <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles (15 km)</h2>
                     <div id="orders-container">
                         <p class="text-center text-gray-500 py-4">Activa tu GPS para ver órdenes cercanas.</p>
                     </div>
@@ -316,4 +309,243 @@
 <div id="notification" class="notification"></div>
 <script>
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
+    const { createClient } = window.supabase;
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
+   
+    let currentTechnician = null;
+    let map, technicianMarker, customerMarker;
+    let watchId = null;
+    let technicianLocation = null;
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const errorEl = document.getElementById('login-error');
+       
+        try {
+            const { data: tecnico, error } = await supabaseClient
+                .from('tecnicos')
+                .select('*')
+                .eq('email', email)
+                .single();
+           
+            if (error || !tecnico) {
+                errorEl.classList.remove('hidden');
+                return;
+            }
+           
+            currentTechnician = tecnico;
+            document.getElementById('tecnico-nombre').textContent = tecnico.nombre;
+            document.getElementById('technicianIdDisplay').textContent = tecnico.id;
+           
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+           
+            initMap();
+            loadAcceptedOrders();
+           
+            const gpsBtn = document.getElementById('gps-toggle-btn');
+            gpsBtn.disabled = false;
+            gpsBtn.textContent = 'Iniciar Rastreo GPS';
+        } catch (error) {
+            console.error('Error login:', error);
+            showNotification('Error al iniciar sesión.', 'error');
+        }
+    });
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // CIUDADES 100% CASE-INSENSITIVE + TODAS LAS DE HONDURAS
+    function getCityCoordinates(city) {
+        if (!city) return null;
+        const c = city.toLowerCase().trim();
+        const cities = {
+            'tegucigalpa': [14.0723, -87.1921], 'tg': [14.0723, -87.1921], 'tgu': [14.0723, -87.1921], 'tegus': [14.0723, -87.1921],
+            'san pedro sula': [15.5042, -88.0250], 'sps': [15.5042, -88.0250], 'sanpedrosula': [15.5042, -88.0250],
+            'la ceiba': [15.7891, -86.7914], 'ceiba': [15.7891, -86.7914],
+            'choluteca': [13.6097, -87.2614], 'cholu': [13.6097, -87.2614],
+            'el progreso': [15.4400, -87.8200], 'progreso': [15.4400, -87.8200],
+            'puerto cortes': [15.8583, -87.9306], 'cortes': [15.8583, -87.9306], 'puerto cortés': [15.8583, -87.9306],
+            'comayagua': [14.4492, -87.6407], 'comay': [14.4492, -87.6407],
+            'danli': [14.0600, -86.9800], 'danlí': [14.0600, -86.9800],
+            'juticalpa': [14.6667, -86.0500], 'juti': [14.6667, -86.0500],
+            'siguatepeque': [14.6000, -87.9333], 'sigua': [14.6000, -87.9333],
+            'santa barbara': [15.0000, -88.2333], 'santabarbara': [15.0000, -88.2333],
+            'la esperanza': [14.3000, -88.1833], 'esperanza': [14.3000, -88.1833],
+            'roatan': [16.3000, -86.5333], 'roatán': [16.3000, -86.5333], 'islas de la bahia': [16.3000, -86.5333],
+            'yoro': [15.2667, -87.5000],
+            'gracias': [14.1000, -88.5833],
+            'ocotepeque': [14.4333, -89.2667], 'ocote': [14.4333, -89.2667]
+        };
+        for (const [key, coords] of Object.entries(cities)) {
+            if (c.includes(key)) return { lat: coords[0], lng: coords[1] };
+        }
+        return null;
+    }
+
+    async function loadAvailableOrders() {
+        const container = document.getElementById('orders-container');
+        if (!technicianLocation) {
+            container.innerHTML = '<p class="text-center text-gray-500 py-10">Activa tu GPS para ver órdenes cercanas.</p>';
+            return;
+        }
+
+        try {
+            const { data: orders, error } = await supabaseClient
+                .from('clientes')
+                .select('*')
+                .eq('status', 'pagado_verificado')
+                .is('tecnico_asignado_id', null);
+
+            if (error) throw error;
+            if (orders.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes nuevas.</p>';
+                return;
+            }
+
+            const nearby = orders.filter(order => {
+                const coords = getCityCoordinates(order.ciudad);
+                if (!coords) return false;
+                const dist = calculateDistance(technicianLocation.lat, technicianLocation.lng, coords.lat, coords.lng);
+                return dist <= 15;
+            });
+
+            if (nearby.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes en 15 km.</p>';
+                return;
+            }
+
+            container.innerHTML = nearby.map(order => {
+                const coords = getCityCoordinates(order.ciudad);
+                const dist = calculateDistance(technicianLocation.lat, technicianLocation.lng, coords.lat, coords.lng);
+                return `
+                    <div class="order-item">
+                        <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
+                        <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
+                        <p class="text-sm text-gray-400">Ciudad: ${order.ciudad}</p>
+                        <div class="distance-badge">Distancia: ${dist.toFixed(1)} km</div>
+                        <button class="btn-success mt-3" onclick="acceptOrder('${order.id}', ${coords.lat}, ${coords.lng})">Aceptar</button>
+                    </div>
+                `;
+            }).join('');
+
+            setTimeout(loadAvailableOrders, 30000);
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = '<p class="text-center text-red-400">Error al cargar órdenes.</p>';
+        }
+    }
+
+    async function loadAcceptedOrders() {
+        if (!currentTechnician) return;
+        const { data: orders } = await supabaseClient
+            .from('clientes')
+            .select('*')
+            .eq('tecnico_asignado_id', currentTechnician.id);
+        const container = document.getElementById('accepted-orders-container');
+        if (!orders || orders.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-500 py-10">No tienes órdenes.</p>';
+            return;
+        }
+        container.innerHTML = orders.map(o => {
+            let btn = '';
+            if (o.status === 'tecnico_asignado') btn = `<button class="btn-warning mt-3" onclick="startNavigation('${o.id}')">Iniciar Ruta</button>`;
+            if (o.status === 'tecnico_en_camino') btn = `<button class="btn-warning arrival-button mt-3" onclick="notifyArrival('${o.id}')">Llegué</button>`;
+            if (o.status === 'tecnico_llego') btn = `<button class="btn-success mt-3" onclick="completeOrder('${o.id}')">Completar</button>`;
+            return `<div class="order-item"><h3>ID: ${o.id}</h3><p>${o.nombre} - ${o.direccion}</p><span class="status-badge ${o.status.includes('camino') ? 'status-onroute' : ''}">${o.status}</span>${btn}</div>`;
+        }).join('');
+    }
+
+    async function acceptOrder(id, lat, lng) {
+        await supabaseClient.from('clientes').update({ tecnico_asignado_id: currentTechnician.id, status: 'tecnico_asignado' }).eq('id', id);
+        showNotification('Orden aceptada', 'success');
+        loadAvailableOrders();
+        loadAcceptedOrders();
+    }
+
+    async function startNavigation(id) {
+        await supabaseClient.from('clientes').update({ status: 'tecnico_en_camino' }).eq('id', id);
+        showNotification('En camino', 'success');
+        loadAcceptedOrders();
+    }
+
+    async function notifyArrival(id) {
+        await supabaseClient.from('clientes').update({ status: 'tecnico_llego' }).eq('id', id);
+        showNotification('Llegada notificada', 'success');
+        loadAcceptedOrders();
+    }
+
+    async function completeOrder(id) {
+        await supabaseClient.from('clientes').update({ status: 'servicio_completado' }).eq('id', id);
+        showNotification('¡Completado!', 'success');
+        loadAcceptedOrders();
+        setTimeout(loadAvailableOrders, 2000);
+    }
+
+    function initMap() {
+        map = L.map('map').setView([14.0723, -87.1921], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    }
+
+    document.getElementById('gps-toggle-btn').addEventListener('click', () => {
+        watchId ? stopTracking() : startTracking();
+    });
+
+    function startTracking() {
+        if (!navigator.geolocation) return showNotification('GPS no soportado', 'error');
+        const btn = document.getElementById('gps-toggle-btn');
+        btn.textContent = 'Deteniendo...'; btn.disabled = true;
+        watchId = navigator.geolocation.watchPosition(
+            pos => updateLocation(pos.coords.latitude, pos.coords.longitude),
+            err => { showNotification('Error GPS', 'error'); stopTracking(); },
+            { enableHighAccuracy: true }
+        );
+    }
+
+    async function updateLocation(lat, lng) {
+        technicianLocation = { lat, lng };
+        const btn = document.getElementById('gps-toggle-btn');
+        btn.textContent = 'Detener GPS'; btn.classList.replace('btn-primary', 'btn-danger'); btn.disabled = false;
+
+        if (!technicianMarker) {
+            technicianMarker = L.marker([lat, lng], { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', iconSize: [25,41], iconAnchor: [12,41] }) }).addTo(map);
+        } else {
+            technicianMarker.setLatLng([lat, lng]);
+        }
+
+        // GUARDAR EN SUPABASE
+        await supabaseClient.from('tecnico_ubicacion').upsert({ tecnico_id: currentTechnician.id, lat, lng });
+
+        loadAvailableOrders();
+    }
+
+    function stopTracking() {
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        const btn = document.getElementById('gps-toggle-btn');
+        btn.textContent = 'Iniciar GPS'; btn.classList.replace('btn-danger', 'btn-primary');
+    }
+
+    function showNotification(msg, type) {
+        const n = document.getElementById('notification');
+        n.textContent = msg; n.className = `notification ${type} show`;
+        setTimeout(() => n.classList.remove('show'), 3000);
+    }
+</script>
+</body>
+</html>
