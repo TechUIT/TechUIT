@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estatus de Servicio  | TechUIT</title>
-    <!-- Carga de Supabase SDK y Tailwind CSS -->
+    <title>Estatus de Servicio | TechUIT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* --- ESTILOS DE LUJO Y CONSISTENTES --- */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
         :root {
-            --color-dark-bg: #000;      
-            --color-card-bg: #1a1a1a;   
-            --color-primary: #007bff;   
+            --color-dark-bg: #000;
+            --color-card-bg: #1a1a1a;
+            --color-primary: #007bff;
+            --color-accent: #ffc107;
             --color-text-light: #f3f4f6;
-            --color-success: #25D366;
-            --color-danger: #ff4d4d;
         }
-        
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -31,174 +28,255 @@
             align-items: center;
             min-height: 100vh;
         }
-
         .main-card {
             max-width: 440px;
             width: 100%;
             padding: 24px;
             background-color: var(--color-card-bg);
             border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
             border: 1px solid #30363d;
         }
-        
         input[type="text"] {
             background-color: #0d1117;
             border: 2px solid #30363d;
             color: var(--color-text-light);
-            padding: 18px; 
+            padding: 18px;
             font-size: 1.25rem;
             font-weight: 700;
             border-radius: 8px;
+            text-align: center;
             transition: border-color 0.2s;
         }
-
         input[type="text"]:focus {
             outline: none;
-            border-color: #ffc107; /* Foco amarillo */
+            border-color: var(--color-accent);
+        }
+        #check-status-button {
+            background-color: #1e88e5;
+            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.4);
+            transition: all 0.2s;
+        }
+        #check-status-button:hover {
+            background-color: #1565c0;
+            transform: translateY(-1px);
+        }
+        .status-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid;
+            background: rgba(0,0,0,0.3);
+        }
+        .status-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+        #map {
+            height: 280px;
+            border-radius: 12px;
+            margin-top: 1rem;
+            border: 1px solid #30363d;
+        }
+        .tracking-info {
+            font-size: 0.9rem;
+            color: #60a5fa;
+            text-align: center;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
 <body>
-
 <div class="main-card">
     <header class="text-center mb-6">
         <h1 class="text-3xl font-extrabold text-yellow-400 mb-1">
             Estatus de Servicio VIP
         </h1>
         <p class="text-sm text-gray-400">
-            Ingresa tu Código Único (ID) para verificar tu clasificación.
+            Ingresa tu Código Único (ID) para ver el avance en tiempo real.
         </p>
     </header>
 
-    <div id="form-container" class="space-y-6">
-        
+    <div class="space-y-6">
         <div>
             <label for="solicitud-code" class="block text-sm font-medium mb-2 text-white">
                 CÓDIGO ÚNICO DE SOLICITUD
             </label>
-            <input type="text" id="solicitud-code" placeholder="Pega tu ID aquí (Ej: X9H7Z)" class="w-full uppercase text-center" required>
+            <input type="text" id="solicitud-code" placeholder="Ej: 88" class="w-full uppercase" required>
         </div>
-        
+
         <button id="check-status-button"
-            class="w-full bg-blue-600 text-white font-extrabold py-4 rounded-lg hover:bg-blue-700 transition duration-200 ease-in-out transform hover:scale-[1.01] shadow-lg shadow-blue-500/40 text-xl"
+            class="w-full text-white font-extrabold py-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-[1.01] text-xl"
         >
             VER ESTADO DE MI SERVICIO
         </button>
 
-        <div id="status-display" class="mt-8 p-4 rounded-lg hidden">
-            <h3 id="status-title" class="text-xl font-bold mb-2"></h3>
-            <p id="status-detail" class="text-sm"></p>
+        <!-- ESTADO -->
+        <div id="status-display" class="hidden">
+            <div id="status-box" class="status-box">
+                <h3 id="status-title" class="status-title text-center"></h3>
+                <p id="status-detail" class="text-sm text-center mt-2"></p>
+            </div>
+            <div id="map-container" class="mt-4" style="display: none;">
+                <div id="map"></div>
+                <p class="tracking-info" id="tracking-status">Conectando con el técnico...</p>
+            </div>
         </div>
 
         <p id="message-container" class="text-center mt-4 font-semibold text-white"></p>
     </div>
 </div>
 
-<script type="module">
-    // *** CONFIGURACIÓN CRÍTICA DE SUPABASE (CORREGIDA) ***
-    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co '; // ¡IMPORTANTE: Reemplazar!
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'; // ¡IMPORTANTE: Reemplazar!
-    const REQUESTS_TABLE = 'service_requests';
-    
-    // Inicialización Corregida del Cliente Supabase
-    let supabase = null;
-    if (SUPABASE_URL !== 'https://hsdhsgyzxalhjdihpuvo.supabase.co ') {
-        supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-        document.getElementById('message-container').textContent = '⚠️ ERROR CRÍTICO: Configuración de Supabase no definida.';
-        document.getElementById('message-container').classList.add('text-red-500');
-    }
+<script>
+    const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
+    const { createClient } = window.supabase;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const solicitudCodeInput = document.getElementById('solicitud-code');
-    const checkStatusButton = document.getElementById('check-status-button');
+    const solicitudInput = document.getElementById('solicitud-code');
+    const checkButton = document.getElementById('check-status-button');
     const messageContainer = document.getElementById('message-container');
     const statusDisplay = document.getElementById('status-display');
+    const statusBox = document.getElementById('status-box');
     const statusTitle = document.getElementById('status-title');
     const statusDetail = document.getElementById('status-detail');
+    const mapContainer = document.getElementById('map-container');
+    const mapEl = document.getElementById('map');
+    const trackingStatus = document.getElementById('tracking-status');
 
+    let map, technicianMarker, customerMarker;
+    let channel;
 
-    checkStatusButton.addEventListener('click', async () => {
-        const solicitudCode = solicitudCodeInput.value.trim().toUpperCase();
-        
-        if (!supabase) {
-             messageContainer.textContent = "🔴 ERROR: La aplicación no está conectada al servidor.";
-             messageContainer.className = 'text-center mt-4 font-semibold text-red-500';
-             return;
-        }
-
-        if (!solicitudCode) {
-            messageContainer.textContent = "🔴 Ingresa tu Código Único (ID).";
-            messageContainer.className = 'text-center mt-4 font-semibold text-red-500';
-            statusDisplay.classList.add('hidden');
+    checkButton.addEventListener('click', () => {
+        const id = solicitudInput.value.trim();
+        if (!id) {
+            showMessage('Ingresa tu ID', 'text-red-400');
             return;
         }
-
-        checkStatusButton.disabled = true;
-        checkStatusButton.textContent = "VERIFICANDO ESTATUS...";
-        messageContainer.textContent = '';
-        statusDisplay.classList.add('hidden');
-
-        try {
-            // Buscamos la solicitud con el código (ID)
-            const { data, error } = await supabase
-                .from(REQUESTS_TABLE)
-                .select('id, status, payment_verified, assigned_technician_id')
-                .eq('id', solicitudCode) 
-                .limit(1);
-
-            if (error) throw new Error(error.message);
-
-            if (data && data.length > 0) {
-                const request = data[0];
-                
-                // Lógica de visualización de estado
-                statusDisplay.classList.remove('hidden');
-
-                if (request.payment_verified) {
-                    // PAGO CONFIRMADO por el Admin (tú)
-                    statusDisplay.className = 'mt-8 p-4 rounded-lg bg-green-900 border border-green-500';
-                    statusTitle.textContent = "✅ CLASIFICADO: Técnico Asignado";
-                    statusTitle.classList.add('text-green-400');
-                    
-                    if (request.assigned_technician_id) {
-                        statusDetail.textContent = `¡Tu servicio ya fue asignado! ID del Técnico: ${request.assigned_technician_id}. Te contactarán pronto.`;
-                    } else {
-                        statusDetail.textContent = "Pago verificado. Estamos buscando al mejor técnico disponible en tu zona (máximo 15 minutos).";
-                    }
-                    
-                } else if (request.status === 'PAGO_EN_CURSO') {
-                    // Cliente fue a pagar, pero Admin no ha verificado (Estado Manual)
-                    statusDisplay.className = 'mt-8 p-4 rounded-lg bg-yellow-900 border border-yellow-500';
-                    statusTitle.textContent = "⏳ VERIFICACIÓN PENDIENTE";
-                    statusTitle.classList.add('text-yellow-400');
-                    statusDetail.textContent = "Hemos recibido la solicitud. Estamos verificando el pago en Kofi (recuerda que este proceso es manual y puede tardar de 5 a 10 minutos).";
-                    
-                } else {
-                    // Estado Inicial o no pagado
-                    statusDisplay.className = 'mt-8 p-4 rounded-lg bg-gray-700 border border-gray-500';
-                    statusTitle.textContent = "🟠 SOLICITUD EN PROCESO";
-                    statusTitle.classList.add('text-gray-400');
-                    statusDetail.textContent = "Se generó el ID, pero el pago aún no se registra. Asegúrate de haber completado la transacción en Kofi con el ID como nota.";
-                }
-
-            } else {
-                // No hay solicitud con ese código.
-                messageContainer.textContent = "🔴 ERROR: Código de Solicitud no válido o inexistente.";
-                messageContainer.className = 'text-center mt-4 font-semibold text-red-500';
-                statusDisplay.classList.add('hidden');
-            }
-
-        } catch (error) {
-            console.error("Fallo al verificar servicio:", error);
-            messageContainer.textContent = `🔴 ERROR DEL SISTEMA: ${error.message}.`;
-            messageContainer.className = 'text-center mt-4 font-semibold text-red-500';
-        }
-
-        checkStatusButton.disabled = false;
-        checkStatusButton.textContent = "VER ESTADO DE MI SERVICIO";
+        fetchStatus(id);
     });
 
+    async function fetchStatus(id) {
+        checkButton.disabled = true;
+        checkButton.textContent = 'BUSCANDO...';
+        showMessage('', '');
+
+        try {
+            const { data: order, error } = await supabase
+                .from('clientes')
+                .select('*, tecnicos(nombre)')
+                .eq('id', id)
+                .single();
+
+            if (error || !order) {
+                showMessage('ID no encontrado', 'text-red-400');
+                return;
+            }
+
+            displayStatus(order);
+            if (['tecnico_en_camino', 'tecnico_llego'].includes(order.status)) {
+                initMap(order);
+                startTracking(order.tecnico_asignado_id);
+                mapContainer.style.display = 'block';
+            } else {
+                mapContainer.style.display = 'none';
+            }
+
+        } catch (err) {
+            showMessage('Error de conexión', 'text-red-400');
+        } finally {
+            checkButton.disabled = false;
+            checkButton.textContent = 'VER ESTADO DE MI SERVICIO';
+        }
+    }
+
+    function displayStatus(order) {
+        const status = order.status;
+        const map = {
+            'Pendiente - Formulario Enviado': { title: 'Solicitud Recibida', detail: 'Estamos procesando tu solicitud.', color: 'border-yellow-500', bg: 'bg-yellow-900/40', text: 'text-yellow-400' },
+            'pagado_verificado': { title: 'Pago Confirmado', detail: 'Estamos asignando un técnico...', color: 'border-green-500', bg: 'bg-green-900/40', text: 'text-green-400' },
+            'tecnico_asignado': { title: 'Técnico Asignado', detail: `Técnico: ${order.tecnicos?.nombre || 'ID ' + order.tecnico_asignado_id}`, color: 'border-blue-500', bg: 'bg-blue-900/40', text: 'text-blue-400' },
+            'tecnico_en_camino': { title: '¡En Camino!', detail: 'El técnico va hacia ti', color: 'border-orange-500', bg: 'bg-orange-900/40', text: 'text-orange-400' },
+            'tecnico_llego': { title: '¡Técnico Llegó!', detail: 'El servicio está iniciando', color: 'border-purple-500', bg: 'bg-purple-900/40', text: 'text-purple-400' },
+            'servicio_completado': { title: '¡Completado!', detail: 'Gracias por usar TechUIT', color: 'border-cyan-500', bg: 'bg-cyan-900/40', text: 'text-cyan-400' }
+        };
+
+        const s = map[status] || { title: status, detail: '', color: 'border-gray-500', bg: 'bg-gray-900/40', text: 'text-gray-400' };
+
+        statusBox.className = `status-box ${s.color} ${s.bg}`;
+        statusTitle.textContent = s.title;
+        statusTitle.className = `status-title text-center ${s.text}`;
+        statusDetail.textContent = s.detail;
+        statusDisplay.classList.remove('hidden');
+    }
+
+    function showMessage(msg, className) {
+        messageContainer.textContent = msg;
+        messageContainer.className = `text-center mt-4 font-semibold ${className}`;
+    }
+
+    function initMap(order) {
+        const coords = getCityCoordinates(order.ciudad) || [14.0723, -87.1921];
+        map = L.map('map').setView(coords, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        customerMarker = L.marker(coords, {
+            icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', iconSize: [25,41], iconAnchor: [12,41] })
+        }).addTo(map).bindPopup("Tu ubicación");
+    }
+
+    function startTracking(tecnicoId) {
+        trackingStatus.textContent = "Buscando al técnico...";
+        channel = supabase.channel(`tecnico-${tecnicoId}`)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tecnico_ubicacion', filter: `tecnico_id=eq.${tecnicoId}` }, payload => {
+                const { lat, lng } = payload.new;
+                updateMarker(lat, lng);
+            })
+            .subscribe();
+
+        supabase.from('tecnico_ubicacion').select('*').eq('tecnico_id', tecnicoId).single()
+            .then(({ data }) => { if (data) updateMarker(data.lat, data.lng); });
+    }
+
+    function updateMarker(lat, lng) {
+        const pos = [lat, lng];
+        if (!technicianMarker) {
+            technicianMarker = L.marker(pos, {
+                icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', iconSize: [25,41], iconAnchor: [12,41] })
+            }).addTo(map).bindPopup("Técnico");
+            trackingStatus.textContent = "Técnico en movimiento";
+        } else {
+            technicianMarker.setLatLng(pos);
+        }
+        if (customerMarker) map.fitBounds(L.featureGroup([technicianMarker, customerMarker]).getBounds().pad(0.1));
+    }
+
+    function getCityCoordinates(city) {
+        if (!city) return null;
+        const c = city.toLowerCase().trim();
+        const cities = {
+            'san pedro sula': [15.5042, -88.0250], 'sps': [15.5042, -88.0250],
+            'tegucigalpa': [14.0723, -87.1921], 'tg': [14.0723, -87.1921],
+            'la ceiba': [15.7891, -86.7914],
+            'choluteca': [13.6097, -87.2614],
+            'el progreso': [15.4400, -87.8200],
+            'puerto cortes': [15.8583, -87.9306],
+            'comayagua': [14.4492, -87.6407],
+            'danli': [14.0600, -86.9800], 'danlí': [14.0600, -86.9800],
+            'juticalpa': [14.6667, -86.0500],
+            'siguatepeque': [14.6000, -87.9333],
+            'roatan': [16.3000, -86.5333], 'roatán': [16.3000, -86.5333]
+        };
+        for (const [key, coords] of Object.entries(cities)) {
+            if (c.includes(key)) return coords;
+        }
+        return null;
+    }
+
+    // LIMPIAR AL SALIR
+    window.addEventListener('beforeunload', () => {
+        if (channel) supabase.removeChannel(channel);
+    });
 </script>
 </body>
 </html>
