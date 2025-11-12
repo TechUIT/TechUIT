@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* --- ESQUEMA VISUAL UNIFICADO --- */
         :root {
             --color-primary: #007bff;
             --color-dark-bg: #0d1117;
@@ -19,9 +18,7 @@
             --color-accent: #ffc107;
             --color-success: #25D366;
         }
-        
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -33,7 +30,6 @@
             justify-content: center;
             align-items: center;
         }
-        
         .main-card {
             max-width: 440px;
             width: 100%;
@@ -45,7 +41,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .main-card::before {
             content: '';
             position: absolute;
@@ -56,12 +51,10 @@
             background: radial-gradient(circle, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0) 70%);
             z-index: 0;
         }
-
         .content-wrapper {
             position: relative;
             z-index: 1;
         }
-
         .form-input {
             width: 100%;
             padding: 0.75rem;
@@ -72,13 +65,11 @@
             font-size: 1rem;
             transition: border-color 0.2s;
         }
-
         .form-input:focus {
             outline: none;
             border-color: var(--color-primary);
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
         }
-
         .btn-primary {
             background-color: var(--color-primary);
             color: var(--color-text-light);
@@ -90,30 +81,24 @@
             cursor: pointer;
             width: 100%;
         }
-
         .btn-primary:hover {
             background-color: #0069d9;
         }
-
         .btn-primary:active {
             transform: scale(0.98);
         }
-
         .btn-success {
             background-color: #28a745;
             color: white;
         }
-
         .btn-danger {
             background-color: #dc3545;
             color: white;
         }
-
         .btn-warning {
             background-color: #ffc107;
             color: #212529;
         }
-
         .status-container {
             display: flex;
             align-items: center;
@@ -123,19 +108,16 @@
             font-weight: 700;
             transition: all 0.3s;
         }
-
         .status-active {
             background-color: rgba(40, 167, 69, 0.2);
             color: #28a745;
             border: 1px solid #28a745;
         }
-
         .status-inactive {
             background-color: rgba(220, 53, 69, 0.2);
             color: #dc3545;
             border: 1px solid #dc3545;
         }
-
         .status-indicator {
             width: 0.75rem;
             height: 0.75rem;
@@ -143,17 +125,14 @@
             background-color: white;
             margin-right: 0.5rem;
         }
-
         .status-active .status-indicator {
             animation: pulse 2s infinite;
         }
-
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
             100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
         }
-
         #map {
             height: 250px;
             width: 100%;
@@ -161,7 +140,6 @@
             margin-top: 1.5rem;
             border: 1px solid var(--color-border);
         }
-
         .order-item {
             background-color: #1e242a;
             border-left: 4px solid var(--color-primary);
@@ -169,13 +147,11 @@
             border-radius: 0.5rem;
             margin-bottom: 1rem;
         }
-
         .order-item h3 {
             font-size: 1.1rem;
             font-weight: 700;
             color: white;
         }
-
         .notification {
             position: fixed;
             top: 20px;
@@ -188,29 +164,23 @@
             transform: translateX(150%);
             transition: transform 0.3s ease-out;
         }
-
         .notification.show {
             transform: translateX(0);
         }
-
         .notification.success {
             background-color: #28a745;
         }
-
         .notification.error {
             background-color: #dc3545;
         }
-
         .notification.info {
             background-color: #17a2b8;
         }
-
         .tab-container {
             display: flex;
             margin-bottom: 1rem;
             border-bottom: 1px solid var(--color-border);
         }
-
         .tab-button {
             flex: 1;
             padding: 0.75rem;
@@ -222,26 +192,21 @@
             transition: all 0.2s;
             border-bottom: 2px solid transparent;
         }
-
         .tab-button.active {
             color: var(--color-primary);
             border-bottom-color: var(--color-primary);
         }
-
         .tab-content {
             display: none;
         }
-
         .tab-content.active {
             display: block;
         }
-
         .arrival-button {
             background-color: #ffc107;
             color: #212529;
             margin-top: 1rem;
         }
-
         .status-badge {
             padding: 4px 8px;
             border-radius: 4px;
@@ -250,22 +215,18 @@
             display: inline-block;
             margin-top: 0.5rem;
         }
-
         .status-assigned {
             background-color: rgba(40, 167, 69, 0.2);
             color: #28a745;
         }
-
         .status-onroute {
             background-color: rgba(255, 193, 7, 0.2);
             color: #ffc107;
         }
-
         .status-success {
             background-color: rgba(0, 123, 255, 0.2);
             color: var(--color-primary);
         }
-
         .distance-badge {
             background-color: rgba(0, 123, 255, 0.2);
             color: var(--color-primary);
@@ -295,15 +256,13 @@
             </form>
             <p id="login-error" class="text-center text-red-400 mt-4 hidden">Correo no encontrado.</p>
         </div>
-        
-
+       
         <div id="dashboard-view" class="hidden">
             <header class="text-center mb-8">
                 <h1 class="text-2xl font-extrabold text-white mb-2">¡Hola, <span id="tecnico-nombre">Técnico</span>!</h1>
                 <p class="text-sm text-gray-400">Aquí están tus órdenes.</p>
             </header>
-            
-
+           
             <div class="space-y-4 mb-6">
                 <div class="p-3 rounded-lg border" style="border-color: var(--color-border); background-color: #1e242a;">
                     <p class="text-sm text-gray-400 mb-1">ID de Técnico:</p>
@@ -314,14 +273,12 @@
                     <span id="trackingStatusText" class="font-bold text-white">Rastreo Desactivado</span>
                 </div>
             </div>
-            
-
+           
             <div class="tab-container">
                 <button class="tab-button active" onclick="switchTab('available')">Órdenes Disponibles</button>
                 <button class="tab-button" onclick="switchTab('accepted')">Mis Órdenes</button>
             </div>
-            
-
+           
             <div id="available-tab" class="tab-content active">
                 <div class="mb-6">
                     <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Órdenes Disponibles (15 km a la redonda)</h2>
@@ -330,8 +287,7 @@
                     </div>
                 </div>
             </div>
-            
-
+           
             <div id="accepted-tab" class="tab-content">
                 <div class="mb-6">
                     <h2 class="text-xl font-semibold mb-3" style="color: var(--color-primary);">Mis Órdenes</h2>
@@ -341,8 +297,7 @@
                 </div>
             </div>
             </div>
-            
-
+           
             <div class="space-y-4">
                 <button id="gps-toggle-btn" class="btn-primary" disabled>Inicializando...</button>
                 <div id="map"></div>
@@ -354,15 +309,13 @@
         </div>
     </div>
 </div>
-
 <div id="notification" class="notification"></div>
-
 <script>
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const { createClient } = window.supabase;
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
-    
+   
     let currentTechnician = null;
     let map, technicianMarker, customerMarker;
     let watchId = null;
@@ -374,29 +327,29 @@
         e.preventDefault();
         const email = document.getElementById('email').value;
         const errorEl = document.getElementById('login-error');
-        
+       
         try {
             const { data: tecnico, error } = await supabaseClient.from('tecnicos').select('*').eq('email', email).single();
-            
+           
             if (error || !tecnico) {
                 errorEl.classList.remove('hidden');
                 return;
             }
-            
+           
             currentTechnician = tecnico;
             document.getElementById('tecnico-nombre').textContent = tecnico.nombre;
             document.getElementById('technicianIdDisplay').textContent = tecnico.id;
-            
+           
             document.getElementById('login-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
-            
+           
             try {
                 initMap();
                 loadAcceptedOrders();
             } catch (mapError) {
                 console.error("Error al inicializar el mapa:", mapError);
             }
-            
+           
             const gpsBtn = document.getElementById('gps-toggle-btn');
             gpsBtn.disabled = false;
             gpsBtn.classList.remove('cursor-not-allowed', 'opacity-50');
@@ -412,121 +365,97 @@
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
         });
-        
         document.querySelectorAll('.tab-button').forEach(button => {
             button.classList.remove('active');
         });
-        
         document.getElementById(`${tabName}-tab`).classList.add('active');
         event.target.classList.add('active');
     }
 
-    // Función para calcular la distancia entre dos puntos en kilómetros
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Radio de la Tierra en km
+        const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        const distance = R * c; // Distancia en km
-        return distance;
+        return R * c;
     }
 
-    // Función para obtener coordenadas aproximadas basadas en la ciudad
     function getCityCoordinates(city) {
         if (!city) return null;
-        
         const cityLower = city.toLowerCase();
-        if (cityLower.includes('tegucigalpa') || cityLower.includes('tg')) {
-            return { lat: 14.0723, lng: -87.1921 };
-        } else if (cityLower.includes('san pedro sula') || cityLower.includes('sps')) {
-            return { lat: 15.5042, lng: -88.0250 };
-        } else if (cityLower.includes('la ceiba')) {
-            return { lat: 15.7891, lng: -86.7914 };
-        } else if (cityLower.includes('comayagua')) {
-            return { lat: 14.4492, lng: -87.6407 };
-        }
-        
+        if (cityLower.includes('tegucigalpa') || cityLower.includes('tg')) return { lat: 14.0723, lng: -87.1921 };
+        if (cityLower.includes('san pedro sula') || cityLower.includes('sps')) return { lat: 15.5042, lng: -88.0250 };
+        if (cityLower.includes('la ceiba')) return { lat: 15.7891, lng: -86.7914 };
+        if (cityLower.includes('comayagua')) return { lat: 14.4492, lng: -87.6407 };
         return null;
     }
 
+    // === FUNCIÓN CORREGIDA: USA `status` (TU COLUMNA) ===
     async function loadAvailableOrders() {
         console.log("Cargando órdenes disponibles...");
         const container = document.getElementById('orders-container');
-        
+
         try {
-            // Si no tenemos la ubicación del técnico, mostrar mensaje
             if (!technicianLocation) {
                 container.innerHTML = '<p class="text-center text-gray-500 py-10">Activa tu GPS para ver órdenes cercanas.</p>';
                 return;
             }
-            
-            // CORRECCIÓN CLAVE: Cargar solo órdenes pagadas y no asignadas
+
             const { data: orders, error } = await supabaseClient
                 .from('clientes')
                 .select('*')
-                .eq('estado', 'pagado_verificado') // <-- CAMBIO AQUÍ
-                .is('tecnico_asignado_id', null); // <-- Y AQUÍ
-            
+                .eq('status', 'pagado_verificado')   // ← TU COLUMNA EXACTA
+                .is('tecnico_asignado_id', null);
+
             if (error) throw error;
-            
+
             if (orders.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes nuevas por ahora.</p>';
                 return;
             }
-            
-            // Filtrar órdenes por proximidad (usando coordenadas aproximadas basadas en la ciudad)
+
             const nearbyOrders = orders.filter(order => {
-                // Obtener coordenadas del cliente
                 const customerCoords = getCityCoordinates(order.ciudad);
-                
-                if (!customerCoords) {
-                    // Si no se puede determinar la ciudad, asumimos que está lejos
-                    return false;
-                }
-                
+                if (!customerCoords) return false;
                 const distance = calculateDistance(
-                    technicianLocation.lat, 
-                    technicianLocation.lng, 
-                    customerCoords.lat, 
+                    technicianLocation.lat,
+                    technicianLocation.lng,
+                    customerCoords.lat,
                     customerCoords.lng
                 );
-                
-                return distance <= 15; // Solo mostrar órdenes a 15 km o menos
+                return distance <= 15;
             });
-            
+
             if (nearbyOrders.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-500 py-10">No hay órdenes disponibles en tu área (radio de 15 km).</p>';
                 return;
             }
-            
-            console.log("Órdenes cercanas encontradas:", nearbyOrders);
+
             container.innerHTML = nearbyOrders.map(order => {
-                // Obtener coordenadas del cliente para calcular la distancia
                 const customerCoords = getCityCoordinates(order.ciudad);
-                
                 const distance = calculateDistance(
-                    technicianLocation.lat, 
-                    technicianLocation.lng, 
-                    customerCoords.lat, 
+                    technicianLocation.lat,
+                    technicianLocation.lng,
+                    customerCoords.lat,
                     customerCoords.lng
                 );
-                
+
                 return `
                     <div class="order-item">
-                        <h3 class="text-lg font-bold text-white">ID: ${order.solicitud_id}</h3>
+                        <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
                         <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
                         <p class="text-sm text-gray-400">Dirección: ${order.direccion}</p>
                         <p class="text-sm text-gray-400">Ciudad: ${order.ciudad || 'No especificada'}</p>
                         <div class="distance-badge">Distancia: ${distance.toFixed(1)} km</div>
                         <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
-                        <button class="btn-success mt-3" onclick="acceptOrder('${order.solicitud_id}', ${customerCoords.lat}, ${customerCoords.lng})">Aceptar Orden</button>
+                        <button class="btn-success mt-3" onclick="acceptOrder('${order.id}', ${customerCoords.lat}, ${customerCoords.lng})">Aceptar Orden</button>
                     </div>
                 `;
             }).join('');
+
+            setTimeout(loadAvailableOrders, 30000);
+
         } catch (error) {
             console.error('Error al cargar órdenes:', error);
             container.innerHTML = '<p class="text-center text-red-400">Error al cargar las órdenes.</p>';
@@ -535,51 +464,49 @@
 
     async function loadAcceptedOrders() {
         if (!currentTechnician) return;
-        
+       
         try {
             const { data: orders, error } = await supabaseClient
                 .from('clientes')
                 .select('*')
                 .eq('tecnico_asignado_id', currentTechnician.id)
-                .order('created_at', { ascending: false });
-            
+                .order('fecha_solicitud', { ascending: false });
+           
             if (error) throw error;
-            
+           
             acceptedOrders = orders || [];
-            console.log("Órdenes aceptadas cargadas:", acceptedOrders);
-            
             const container = document.getElementById('accepted-orders-container');
-            
+           
             if (acceptedOrders.length === 0) {
                 container.innerHTML = '<p class="text-center text-gray-500 py-10">No tienes órdenes aceptadas.</p>';
                 return;
             }
-            
+           
             container.innerHTML = acceptedOrders.map(order => {
                 let statusBadge = '';
                 let actionButton = '';
-                
-                switch(order.estado) {
+               
+                switch(order.status) {
                     case 'tecnico_asignado':
                         statusBadge = '<span class="status-badge status-assigned">Asignado</span>';
-                        actionButton = `<button class="btn-warning mt-3" onclick="startNavigation('${order.solicitud_id}')">Iniciar Navegación</button>`;
+                        actionButton = `<button class="btn-warning mt-3" onclick="startNavigation('${order.id}')">Iniciar Navegación</button>`;
                         break;
                     case 'tecnico_en_camino':
                         statusBadge = '<span class="status-badge status-onroute">En Camino</span>';
-                        actionButton = `<button class="btn-warning arrival-button mt-3" onclick="notifyArrival('${order.solicitud_id}')">Notificar Llegada</button>`;
+                        actionButton = `<button class="btn-warning arrival-button mt-3" onclick="notifyArrival('${order.id}')">Notificar Llegada</button>`;
                         break;
                     case 'tecnico_llego':
                         statusBadge = '<span class="status-badge status-success">Llegado</span>';
-                        actionButton = `<button class="btn-success mt-3" onclick="completeOrder('${order.solicitud_id}')">Completar Servicio</button>`;
+                        actionButton = `<button class="btn-success mt-3" onclick="completeOrder('${order.id}')">Completar Servicio</button>`;
                         break;
                     default:
-                        statusBadge = `<span class="status-badge">${order.estado}</span>`;
+                        statusBadge = `<span class="status-badge">${order.status}</span>`;
                         break;
                 }
-                
+               
                 return `
                     <div class="order-item">
-                        <h3 class="text-lg font-bold text-white">ID: ${order.solicitud_id}</h3>
+                        <h3 class="text-lg font-bold text-white">ID: ${order.id}</h3>
                         <p class="text-sm text-gray-400">Cliente: ${order.nombre}</p>
                         <p class="text-sm text-gray-400">Dirección: ${order.direccion}</p>
                         <p class="text-sm text-gray-400">Problema: ${order.problema}</p>
@@ -596,34 +523,26 @@
 
     async function acceptOrder(orderId, customerLat, customerLng) {
         if (!currentTechnician) return;
-        
-        console.log(`Aceptando orden ${orderId}`);
-        
+       
         try {
-            const { error } = await supabaseClient.from('clientes').update({ 
+            const { error } = await supabaseClient.from('clientes').update({
                 tecnico_asignado_id: currentTechnician.id,
-                estado: 'tecnico_asignado'
-            }).eq('solicitud_id', orderId);
-            
+                status: 'tecnico_asignado'
+            }).eq('id', orderId);
+           
             if (error) throw error;
-            
-            showNotification('¡Orden aceptada! Revisa el mapa para ver la dirección del cliente.', 'success');
-            
-            // Cargar la orden aceptada para obtener la dirección
-            const { data: order, error: orderError } = await supabaseClient
+           
+            showNotification('¡Orden aceptada! Revisa el mapa.', 'success');
+           
+            const { data: order } = await supabaseClient
                 .from('clientes')
                 .select('direccion')
-                .eq('solicitud_id', orderId)
+                .eq('id', orderId)
                 .single();
 
-            if (!orderError && order && order.direccion) {
-                // Usar las coordenadas pasadas como parámetro
+            if (order && order.direccion) {
                 const customerCoords = [customerLat, customerLng];
-                
-                if (customerMarker) {
-                    map.removeLayer(customerMarker);
-                }
-
+                if (customerMarker) map.removeLayer(customerMarker);
                 customerMarker = L.marker(customerCoords, {
                     icon: L.icon({
                         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
@@ -633,9 +552,8 @@
                         popupAnchor: [1, -34],
                         shadowSize: [41, 41]
                     })
-                }).addTo(map).bindPopup(`Dirección del cliente: ${order.direccion}`).openPopup();
+                }).addTo(map).bindPopup(`Dirección: ${order.direccion}`).openPopup();
 
-                // Ajustar la vista del mapa para mostrar ambos marcadores si el técnico ya tiene uno
                 if (technicianMarker) {
                     const group = new L.featureGroup([technicianMarker, customerMarker]);
                     map.fitBounds(group.getBounds().pad(0.1));
@@ -643,8 +561,7 @@
                     map.setView(customerCoords, 13);
                 }
             }
-            
-            // Recargar ambas listas de órdenes
+           
             loadAvailableOrders();
             loadAcceptedOrders();
         } catch (error) {
@@ -654,203 +571,110 @@
     }
 
     async function startNavigation(orderId) {
-        if (!currentTechnician) return;
-        
-        currentOrderId = orderId;
-        
         try {
-            const { error } = await supabaseClient.from('clientes').update({ 
-                estado: 'tecnico_en_camino'
-            }).eq('solicitud_id', orderId);
-            
-            if (error) throw error;
-            
-            showNotification('Navegación iniciada. El cliente puede ver tu ubicación.', 'success');
-            
+            await supabaseClient.from('clientes').update({ status: 'tecnico_en_camino' }).eq('id', orderId);
+            showNotification('Navegación iniciada.', 'success');
             loadAcceptedOrders();
-            
-            // Ajustar la vista del mapa para mostrar ambos marcadores
             if (technicianMarker && customerMarker) {
                 const group = new L.featureGroup([technicianMarker, customerMarker]);
                 map.fitBounds(group.getBounds().pad(0.1));
             }
         } catch (error) {
-            console.error('Error al iniciar navegación:', error);
             showNotification('Error al iniciar navegación.', 'error');
         }
     }
 
     async function notifyArrival(orderId) {
-        if (!currentTechnician) return;
-        
         try {
-            const { error } = await supabaseClient.from('clientes').update({ 
-                estado: 'tecnico_llego'
-            }).eq('solicitud_id', orderId);
-            
-            if (error) throw error;
-            
-            showNotification('Has notificado tu llegada al cliente.', 'success');
-            
+            await supabaseClient.from('clientes').update({ status: 'tecnico_llego' }).eq('id', orderId);
+            showNotification('Llegada notificada.', 'success');
             loadAcceptedOrders();
-            
-            await supabaseClient.from('notificaciones').insert({
-                tipo: 'llegada_tecnico',
-                orden_id: orderId,
-                tecnico_id: currentTechnician.id,
-                mensaje: `El técnico ${currentTechnician.nombre} ha llegado a la ubicación del cliente.`,
-                leida: false,
-                created_at: new Date()
-            });
         } catch (error) {
-            console.error('Error al notificar llegada:', error);
             showNotification('Error al notificar llegada.', 'error');
         }
     }
 
     async function completeOrder(orderId) {
-        if (!currentTechnician) return;
-        
         try {
-            const { error } = await supabaseClient.from('clientes').update({ 
-                estado: 'servicio_completado'
-            }).eq('solicitud_id', orderId);
-            
-            if (error) throw error;
-            
-            showNotification('¡Servicio completado con éxito!', 'success');
-            
+            await supabaseClient.from('clientes').update({ status: 'servicio_completado' }).eq('id', orderId);
+            showNotification('¡Servicio completado!', 'success');
             loadAcceptedOrders();
-            
-            await supabaseClient.from('notificaciones').insert({
-                tipo: 'servicio_completado',
-                orden_id: orderId,
-                tecnico_id: currentTechnician.id,
-                mensaje: `El técnico ${currentTechnician.nombre} ha completado el servicio.`,
-                leida: false,
-                created_at: new Date()
-            });
-            
-            // Si el técnico completó el servicio, recargar las órdenes disponibles
-            // para que pueda ver nuevas órdenes cercanas
-            setTimeout(() => {
-                loadAvailableOrders();
-            }, 2000);
+            setTimeout(loadAvailableOrders, 2000);
         } catch (error) {
-            console.error('Error al completar servicio:', error);
             showNotification('Error al completar servicio.', 'error');
         }
     }
 
     function initMap() {
-        console.log("Inicializando mapa de Leaflet...");
         map = L.map('map').setView([14.0723, -87.1921], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
-        console.log("Mapa de Leaflet inicializado correctamente.");
     }
 
     document.getElementById('gps-toggle-btn').addEventListener('click', () => {
-        if (watchId) {
-            stopTracking();
-        } else {
-            startTracking();
-        }
+        if (watchId) stopTracking();
+        else startTracking();
     });
 
     function startTracking() {
-        if (!navigator.geolocation) {
-            showNotification('Tu navegador no soporta geolocalización.', 'error');
-            return;
-        }
-        
-        if (!currentTechnician) {
-            showNotification('El sistema aún no te ha autenticado.', 'error');
-            return;
-        }
-        
-        console.log("Iniciando rastreo GPS...");
-        
+        if (!navigator.geolocation) return showNotification('Geolocalización no soportada.', 'error');
+        if (!currentTechnician) return showNotification('Aún no autenticado.', 'error');
+
         const btn = document.getElementById('gps-toggle-btn');
-        btn.textContent = 'Deteniendo Rastreo...';
+        btn.textContent = 'Deteniendo...';
         btn.disabled = true;
-        
+
         watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                updateLocation(latitude, longitude);
-            },
-            (error) => {
-                console.error('Error de GPS:', error);
-                showNotification('No se pudo obtener tu ubicación.', 'error');
-                stopTracking();
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            pos => updateLocation(pos.coords.latitude, pos.coords.longitude),
+            err => { showNotification('Error GPS.', 'error'); stopTracking(); },
+            { enableHighAccuracy: true, timeout: 10000 }
         );
     }
 
     async function updateLocation(lat, lng) {
-        if (!currentTechnician) return;
-        
-        // Guardar la ubicación del técnico para usarla en el filtrado
         technicianLocation = { lat, lng };
-        
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Detener Rastreo GPS';
-        btn.classList.remove('btn-primary');
-        btn.classList.add('btn-danger');
+        btn.classList.remove('btn-primary'); btn.classList.add('btn-danger');
         btn.disabled = false;
-        
+
         const newPos = [lat, lng];
-        
-        if (technicianMarker) {
-            technicianMarker.setLatLng(newPos);
-        } else {
+        if (technicianMarker) technicianMarker.setLatLng(newPos);
+        else {
             technicianMarker = L.marker(newPos, {
                 icon: L.icon({
                     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
                     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
+                    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
                 })
             }).addTo(map);
         }
-        
-        // Ajustar la vista del mapa para mostrar ambos marcadores si existen
+
         if (customerMarker) {
             const group = new L.featureGroup([technicianMarker, customerMarker]);
             map.fitBounds(group.getBounds().pad(0.1));
         }
+
+        loadAvailableOrders();
     }
 
     function stopTracking() {
-        if (watchId) {
-            navigator.geolocation.clearWatch(watchId);
-            watchId = null;
-            
-            const btn = document.getElementById('gps-toggle-btn');
-            btn.textContent = 'Iniciar Rastreo GPS';
-            btn.classList.remove('btn-danger');
-            btn.classList.add('btn-primary');
-            btn.disabled = false;
-            
-            document.getElementById('statusMessageContainer').classList.remove('status-active');
-            document.getElementById('trackingStatusText').textContent = 'Rastreo Desactivado';
-        }
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        const btn = document.getElementById('gps-toggle-btn');
+        btn.textContent = 'Iniciar Rastreo GPS';
+        btn.classList.remove('btn-danger'); btn.classList.add('btn-primary');
+        btn.disabled = false;
+        document.getElementById('statusMessageContainer').classList.remove('status-active');
+        document.getElementById('trackingStatusText').textContent = 'Rastreo Desactivado';
     }
 
     function showNotification(message, type) {
-        const notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.className = `notification ${type}`;
-        notification.classList.add('show');
-        
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
+        const n = document.getElementById('notification');
+        n.textContent = message;
+        n.className = `notification ${type} show`;
+        setTimeout(() => n.classList.remove('show'), 3000);
     }
 </script>
 </body>
