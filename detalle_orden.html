@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Orden | TechUIT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0d1117;
+            color: #f3f4f6;
+            padding: 20px;
+            margin: 0;
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .status-pending { background: #ffc107; color: #212529; }
+        .status-assigned { background: #17a2b8; color: white; }
+        .status-enroute { background: #fd7e14; color: white; }
+        .status-arrived { background: #28a745; color: white; }
+        .status-completed { background: #6f42c1; color: white; }
+        #map {
+            height: 300px;
+            border-radius: 12px;
+            margin-top: 1rem;
+            border: 1px solid #30363d;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 0.5rem 1rem;
+            font-size: 0.95rem;
+        }
+        .info-grid strong {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-2xl mx-auto">
+        <a href="/TechUIT/panel_admin.html" class="inline-block mb-4 text-blue-400 hover:underline">← Volver al Panel</a>
+        
+        <div class="card">
+            <h1 class="text-2xl font-bold mb-4">Detalle de Orden #<span id="order-id"></span></h1>
+            <div id="order-details" class="space-y-3">
+                <p class="text-gray-400">Cargando información...</p>
+            </div>
+        </div>
+
+        <!-- MAPA EN VIVO (solo si técnico en camino o llegó) -->
+        <div id="map-container" class="card" style="display: none;">
+            <h2 class="text-lg font-semibold mb-2">Ubicación en Vivo del Técnico</h2>
+            <div id="map"></div>
+            <p class="text-sm text-gray-400 mt-2" id="tracking-status">Conectando con el técnico...</p>
+        </div>
+
+        <!-- BOTÓN PARA CLIENTE -->
+        <div id="client-link-container" class="card" style="display: none;">
+            <p class="text-sm mb-2">Comparte este enlace con el cliente:</p>
+            <div class="flex items-center gap-2">
+                <input type="text" id="client-link" class="flex-1 px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-sm" readonly>
+                <button onclick="copyLink()" class="btn btn-primary">Copiar</button>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">El cliente verá el técnico en movimiento.</p>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
+        const { createClient } = window.supabase;
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('id');
+        let map, technicianMarker, customerMarker;
+        let channel;
+
+        document.getElementById('order-id').textContent = orderId;
+
+        async function loadOrder() {
+            const { data: order, error } = await supabase
+                .from('clientes')
+                .select('*, tecnicos(nombre, email)')
+                .eq('id', orderId)
+                .single();
+
+            if (error || !order) {
+                document.getElementById('order-details').innerHTML = '<p class="text-red-400">Orden no encontrada.</p>';
+                return;
+            }
+
+            const statusMap = {
+                'pagado_verificado': { text: 'Pago Confirmado', class: 'status-pending' },
+                'tecnico_asignado': { text: 'Técnico Asignado', class: 'status-assigned' },
+                'tecnico_en_camino': { text: 'En Camino', class: 'status-enroute' },
+                'tecnico_llego': { text: 'Técnico Llegó', class: 'status-arrived' },
+                'servicio_completado': { text: 'Completado', class: 'status-completed' }
+            };
+            const status = statusMap[order.status] || { text: order.status, class: 'status-pending' };
+
+            document.getElementById('order-details').innerHTML = `
+                <div class="info-grid">
+                    <strong>Cliente:</strong> <span>${order.nombre}</span>
+                    <strong>Teléfono:</strong> <span>${order.telefono}</span>
+                    <strong>Dirección:</strong> <span>${order.direccion}</span>
+                    <strong>Ciudad:</strong> <span>${order.ciudad || 'No especificada'}</span>
+                    <strong>Servicio:</strong> <span>${order.tipo_servicio}</span>
+                    <strong>Problema:</strong> <span>${order.problema}</span>
+                    <strong>Técnico:</strong> <span>${order.tecnicos?.nombre || 'No asignado'}</span>
+                    <strong>Estado:</strong> 
+                        <span class="status-badge ${status.class}">${status.text}</span>
+                </div>
+            `;
+
+            // MOSTRAR MAPA Y SEGUIMIENTO SI HAY TÉCNICO EN CAMINO
+            if (order.tecnico_asignado_id && ['tecnico_en_camino', 'tecnico_llego'].includes(order.status)) {
+                initMap(order);
+                startRealtimeTracking(order.tecnico_asignado_id);
+                document.getElementById('map-container').style.display = 'block';
+            }
+
+            // MOSTRAR ENLACE PARA CLIENTE
+            const clientLink = `${window.location.origin}/TechUIT/seguimiento_cliente.html?id=${orderId}`;
+            document.getElementById('client-link').value = clientLink;
+            document.getElementById('client-link-container').style.display = 'block';
+        }
+
+        function initMap(order) {
+            const cityCoords = getCityCoordinates(order.ciudad) || [14.0723, -87.1921];
+            map = L.map('map').setView(cityCoords, 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            // Marcador del cliente
+            customerMarker = L.marker(cityCoords, {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    iconSize: [25, 41], iconAnchor: [12, 41]
+                })
+            }).addTo(map).bindPopup("Cliente").openPopup();
+        }
+
+        function startRealtimeTracking(tecnicoId) {
+            document.getElementById('tracking-status').textContent = "Buscando al técnico...";
+
+            channel = supabase
+                .channel(`tecnico-${tecnicoId}`)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'tecnico_ubicacion',
+                    filter: `tecnico_id=eq.${tecnicoId}`
+                }, payload => {
+                    const { lat, lng } = payload.new;
+                    updateTechnicianMarker(lat, lng);
+                })
+                .subscribe();
+
+            // Cargar ubicación inicial
+            supabase.from('tecnico_ubicacion')
+                .select('*')
+                .eq('tecnico_id', tecnicoId)
+                .single()
+                .then(({ data }) => {
+                    if (data) updateTechnicianMarker(data.lat, data.lng);
+                });
+        }
+
+        function updateTechnicianMarker(lat, lng) {
+            const pos = [lat, lng];
+            if (!technicianMarker) {
+                technicianMarker = L.marker(pos, {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        iconSize: [25, 41], iconAnchor: [12, 41]
+                    })
+                }).addTo(map).bindPopup("Técnico").openPopup();
+                document.getElementById('tracking-status').textContent = "Técnico en movimiento";
+            } else {
+                technicianMarker.setLatLng(pos);
+            }
+            if (customerMarker) {
+                map.fitBounds(L.featureGroup([technicianMarker, customerMarker]).getBounds().pad(0.1));
+            }
+        }
+
+        function getCityCoordinates(city) {
+            if (!city) return null;
+            const c = city.toLowerCase().trim();
+            const cities = {
+                'san pedro sula': [15.5042, -88.0250], 'sps': [15.5042, -88.0250],
+                'tegucigalpa': [14.0723, -87.1921], 'tg': [14.0723, -87.1921], 'tgu': [14.0723, -87.1921],
+                'la ceiba': [15.7891, -86.7914], 'ceiba': [15.7891, -86.7914],
+                'choluteca': [13.6097, -87.2614],
+                'el progreso': [15.4400, -87.8200],
+                'puerto cortes': [15.8583, -87.9306], 'cortes': [15.8583, -87.9306],
+                'comayagua': [14.4492, -87.6407],
+                'danli': [14.0600, -86.9800], 'danlí': [14.0600, -86.9800],
+                'juticalpa': [14.6667, -86.0500],
+                'siguatepeque': [14.6000, -87.9333],
+                'roatan': [16.3000, -86.5333], 'roatán': [16.3000, -86.5333]
+            };
+            for (const [key, coords] of Object.entries(cities)) {
+                if (c.includes(key)) return coords;
+            }
+            return null;
+        }
+
+        function copyLink() {
+            const link = document.getElementById('client-link');
+            link.select();
+            document.execCommand('copy');
+            alert('Enlace copiado al portapapeles');
+        }
+
+        // CARGAR AL INICIO
+        loadOrder();
+
+        // LIMPIAR AL SALIR
+        window.addEventListener('beforeunload', () => {
+            if (channel) supabase.removeChannel(channel);
+        });
+    </script>
+</body>
+</html>
