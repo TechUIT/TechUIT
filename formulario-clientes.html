@@ -117,20 +117,16 @@
     </style>
 </head>
 <body>
-
 <div class="card">
     <img src="logo.png" alt="TechUIT" class="logo">
-    <div class="login-link" id="loginLink">¿Ya sos cliente?</div>
-    
+    <div class="login-link" id="loginLink">Login</div>
+   
     <h1 class="title">Solicitar Técnico</h1>
-
     <div id="welcome" class="text-center text-green-400 font-bold mb-3" style="display:none;"></div>
-
     <form id="form">
         <input type="text" id="nombre" class="input" placeholder="Nombre completo" required>
         <input type="tel" id="telefono" class="input" placeholder="Teléfono" required>
         <input type="text" id="direccion" class="input" placeholder="Dirección exacta" required>
-
         <select id="ciudadManual" class="input hidden">
             <option value="">Elige ciudad</option>
             <option>San Pedro Sula</option>
@@ -145,9 +141,7 @@
             <option>Siguatepeque</option>
             <option>Roatán</option>
         </select>
-
         <p id="status" class="status">Buscando ubicación...</p>
-
         <select id="servicio" class="input" required>
             <option value="" disabled selected>Tipo de servicio</option>
             <option>Reparar PC</option>
@@ -156,17 +150,12 @@
             <option>Virus</option>
             <option>Otro</option>
         </select>
-
         <textarea id="problema" class="input" rows="3" placeholder="Describe tu problema" required></textarea>
-
         <input type="hidden" id="ciudad">
-
         <button type="submit" id="btn" class="btn">Solicitar Técnico</button>
     </form>
-
     <div id="msg" class="message"></div>
 </div>
-
 <div id="modal" class="modal">
     <div class="modal-content">
         <h3 class="text-xl font-bold text-center mb-4">Iniciar Sesión</h3>
@@ -176,13 +165,11 @@
         <button id="close" class="text-sm text-gray-400 text-center w-full mt-2">Cerrar</button>
     </div>
 </div>
-
 <script type="module">
     const supabase = window.supabase.createClient(
         'https://hsdhsgyzxalhjdihpuvo.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'
     );
-
     const form = document.getElementById('form');
     const btn = document.getElementById('btn');
     const status = document.getElementById('status');
@@ -194,13 +181,10 @@
     const loginBtn = document.getElementById('loginBtn');
     const msg = document.getElementById('msg');
     const welcome = document.getElementById('welcome');
-
     let ciudad = null;
-
     loginLink.onclick = () => modal.style.display = 'flex';
     close.onclick = () => modal.style.display = 'none';
     window.onclick = e => { if (e.target === modal) modal.style.display = 'none'; };
-
     loginBtn.onclick = async () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('pass').value;
@@ -215,7 +199,6 @@
         modal.style.display = 'none';
         location.reload();
     };
-
     const saved = localStorage.getItem('user');
     if (saved) {
         const u = JSON.parse(saved);
@@ -224,7 +207,6 @@
         welcome.textContent = `¡Hola, ${u.nombre}!`;
         welcome.style.display = 'block';
     }
-
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             async pos => {
@@ -241,7 +223,6 @@
             { timeout: 8000 }
         );
     } else fallback();
-
     function fallback() {
         status.textContent = 'Elige ciudad:';
         ciudadManual.classList.remove('hidden');
@@ -250,11 +231,10 @@
             ciudadInput.value = ciudad;
         };
     }
-
     function normalize(c) {
-        const map = { 
-            'san pedro sula': 'San Pedro Sula', 
-            'tegucigalpa': 'Tegucigalpa', 
+        const map = {
+            'san pedro sula': 'San Pedro Sula',
+            'tegucigalpa': 'Tegucigalpa',
             'la ceiba': 'La Ceiba',
             'choluteca': 'Choluteca',
             'el progreso': 'El Progreso',
@@ -269,14 +249,11 @@
         for (const [k, v] of Object.entries(map)) if (l.includes(k)) return v;
         return c;
     }
-
     form.onsubmit = async e => {
         e.preventDefault();
         if (!ciudad && !ciudadManual.value) return show('Elige ciudad', 'error');
-
         btn.disabled = true;
         btn.textContent = 'Enviando...';
-
         const data = {
             nombre: document.getElementById('nombre').value,
             telefono: document.getElementById('telefono').value,
@@ -286,7 +263,6 @@
             ciudad: ciudad || ciudadManual.value,
             status: 'Pendiente'
         };
-
         try {
             const { data: ins, error } = await supabase.from('clientes').insert([data]).select('id');
             if (error) throw error;
@@ -300,7 +276,6 @@
             btn.textContent = 'Solicitar Técnico';
         }
     };
-
     function show(text, type) {
         msg.textContent = text;
         msg.className = `message bg-${type === 'error' ? 'red' : 'green'}-600 text-white`;
@@ -308,6 +283,5 @@
         setTimeout(() => msg.style.display = 'none', 4000);
     }
 </script>
-
 </body>
 </html>
