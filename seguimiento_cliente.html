@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estado de mi Servicio | TechUIT</title>
+    <title>Seguimiento en Vivo | TechUIT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         :root {
             --color-primary: #007bff;
             --color-dark-bg: #0d1117;
             --color-card-bg: #161b22;
             --color-text-light: #f3f4f6;
             --color-border: #30363d;
+            --color-success: #28a745;
             --color-warning: #ffc107;
         }
-
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -31,7 +30,6 @@
             justify-content: center;
             align-items: center;
         }
-
         .main-card {
             max-width: 440px;
             width: 100%;
@@ -40,26 +38,7 @@
             padding: 2rem 1.5rem;
             border-radius: 1.5rem;
             box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
-            position: relative;
-            overflow: hidden;
         }
-
-        .main-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0) 70%);
-            z-index: 0;
-        }
-
-        .content-wrapper {
-            position: relative;
-            z-index: 1;
-        }
-
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -67,455 +46,237 @@
             border-radius: 50px;
             font-weight: 700;
             font-size: 0.9rem;
+            margin: 0 auto;
         }
-
-        .status-waiting { background-color: rgba(255, 193, 7, 0.2); color: var(--color-warning); border: 1px solid var(--color-warning); }
-        .status-searching { background-color: rgba(0, 123, 255, 0.2); color: var(--color-primary); border: 1px solid var(--color-primary); }
-        .status-assigned { background-color: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid #28a745; }
-        .status-onroute { background-color: rgba(255, 193, 7, 0.2); color: var(--color-warning); border: 1px solid var(--color-warning); }
-        
+        .status-waiting { background: rgba(255,193,7,0.2); color: var(--color-warning); border: 1px solid var(--color-warning); }
+        .status-searching { background: rgba(0,123,255,0.2); color: var(--color-primary); border: 1px solid var(--color-primary); }
+        .status-assigned { background: rgba(40,167,69,0.2); color: var(--color-success); border: 1px solid var(--color-success); }
+        .status-onroute { background: rgba(255,193,7,0.2); color: var(--color-warning); border: 1px solid var(--color-warning); }
+        .status-arrived { background: rgba(40,167,69,0.2); color: var(--color-success); border: 1px solid var(--color-success); }
         #map {
-            height: 250px;
-            width: 100%;
-            border-radius: 0.75rem;
-            margin-top: 20px;
+            height: 280px;
+            border-radius: 12px;
+            margin-top: 1rem;
             border: 1px solid var(--color-border);
         }
-
-        .loader { 
-            border: 4px solid #f3f3f3; 
-            border-top: 4px solid var(--color-primary); 
-            border-radius: 50%; 
-            width: 24px; 
-            height: 24px; 
-            animation: spin 2s linear infinite; 
-            margin: 20px auto; 
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--color-primary);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
-        
-        @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-        }
-
-        .technician-info {
-            background-color: #1e242a;
-            border-radius: 0.5rem;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .technician-card {
+            background: #1e242a;
+            border-radius: 12px;
             padding: 1rem;
             margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-
-        .technician-avatar {
+        .avatar {
             width: 60px;
             height: 60px;
             border-radius: 50%;
             object-fit: cover;
-            margin-right: 1rem;
         }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
+        .arrival-banner {
+            background: var(--color-success);
             color: white;
-            font-weight: 600;
-            z-index: 1000;
-            transform: translateX(150%);
-            transition: transform 0.3s ease-out;
-            max-width: 300px;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            background-color: #28a745;
-        }
-
-        .notification.error {
-            background-color: #dc3545;
-        }
-
-        .notification.info {
-            background-color: #17a2b8;
-        }
-
-        .arrival-notification {
-            background-color: #28a745;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            margin-top: 1rem;
             display: none;
         }
-
-        .arrival-notification.show {
-            display: block;
-        }
+        .arrival-banner.show { display: block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
     </style>
 </head>
 <body>
 <div class="main-card">
     <div class="content-wrapper">
         <header class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-white mb-2">
-                Estado de tu Servicio
-            </h1>
-            <p class="text-sm text-gray-400">
-                ID de Solicitud: <span id="solicitud-id" class="font-bold text-yellow-400">Cargando...</span>
-            </p>
+            <h1 class="text-3xl font-extrabold text-white mb-2">Seguimiento en Vivo</h1>
+            <p class="text-sm text-gray-400">ID: <span id="order-id" class="font-bold text-yellow-400">—</span></p>
         </header>
 
-        <div id="status-container">
+        <div id="status-container" class="text-center">
             <div class="loader"></div>
-            <p class="text-center text-gray-400">Cargando estado...</p>
+            <p class="text-gray-400">Cargando tu servicio...</p>
         </div>
 
-        <div id="technician-info" class="technician-info hidden">
-            <h3 class="text-lg font-semibold mb-2 text-white">Información del Técnico</h3>
-            <div class="flex items-center">
-                <img id="technician-avatar" src="" alt="Foto del técnico" class="technician-avatar">
-                <div>
-                    <p id="technician-name" class="font-bold text-white"></p>
-                    <p id="technician-specialty" class="text-sm text-gray-400"></p>
-                    <p id="technician-experience" class="text-sm text-gray-400"></p>
-                    <p id="technician-bio" class="text-sm text-gray-400 mt-2"></p>
-                </div>
+        <div id="technician-card" class="technician-card hidden">
+            <img id="tech-avatar" src="" alt="Técnico" class="avatar">
+            <div>
+                <p id="tech-name" class="font-bold text-white"></p>
+                <p id="tech-specialty" class="text-sm text-gray-400"></p>
             </div>
         </div>
 
         <div id="map-container" class="hidden">
-            <p class="text-center text-gray-400 mb-2">Ubicación del Técnico</p>
             <div id="map"></div>
+            <p class="text-xs text-gray-400 text-center mt-2" id="tracking-status">Conectando con el técnico...</p>
         </div>
 
-        <div id="arrival-notification" class="arrival-notification">
-            <p class="font-bold">🎉 ¡El técnico ha llegado a tu ubicación!</p>
+        <div id="arrival-banner" class="arrival-banner">
+            El técnico ha llegado a tu ubicación
         </div>
     </div>
 </div>
-
-<div id="notification" class="notification"></div>
 
 <script>
     const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const { createClient } = window.supabase;
-    const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     let map, technicianMarker, customerMarker;
-    let orderData = null;
-    let technicianData = null;
-    let locationCheckInterval = null;
+    let channel;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        const solicitudIdDisplay = document.getElementById('solicitud-id');
-        const statusContainer = document.getElementById('status-container');
-        const urlParams = new URLSearchParams(window.location.search);
-        const solicitudId = urlParams.get('solicitud');
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('id'); // CAMBIADO: ?id=88
 
-        if (!solicitudId) {
-            statusContainer.innerHTML = '<p class="text-center text-red-400">❌ Error: No se encontró el ID de la solicitud.</p>';
+    if (!orderId) {
+        document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">ID no válido</p>';
+        throw new Error('No ID');
+    }
+
+    document.getElementById('order-id').textContent = orderId;
+
+    async function loadOrder() {
+        const { data: order, error } = await supabase
+            .from('clientes')
+            .select('*, tecnicos(nombre, especialidad, foto_selfie_url)')
+            .eq('id', orderId)
+            .single();
+
+        if (error || !order) {
+            document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">Orden no encontrada</p>';
             return;
         }
 
-        solicitudIdDisplay.textContent = solicitudId;
-
-        try {
-            const { data: solicitud, error } = await supabaseClient
-                .from('clientes')
-                .select('*')
-                .eq('id', solicitudId)
-                .single();
-
-            if (error) throw error;
-            
-            orderData = solicitud;
-            renderStatus(solicitud);
-
-        } catch (error) {
-            console.error('Error al cargar la solicitud:', error);
-            statusContainer.innerHTML = '<p class="text-center text-red-400">❌ No pudimos encontrar tu solicitud. Verifica el ID.</p>';
+        renderStatus(order);
+        if (order.tecnico_asignado_id && ['tecnico_en_camino', 'tecnico_llego'].includes(order.status)) {
+            showTechnician(order.tecnicos);
+            initMap(order.ciudad);
+            startTracking(order.tecnico_asignado_id);
+            document.getElementById('map-container').classList.remove('hidden');
         }
+    }
+
+    function renderStatus(order) {
+        const container = document.getElementById('status-container');
+        const map = {
+            'pagado_verificado': { badge: 'status-searching', text: 'Buscando técnico...' },
+            'tecnico_asignado': { badge: 'status-assigned', text: 'Técnico asignado' },
+            'tecnico_en_camino': { badge: 'status-onroute', text: 'En camino' },
+            'tecnico_llego': { badge: 'status-arrived', text: 'Técnico llegó', showBanner: true },
+            'servicio_completado': { badge: 'status-arrived', text: 'Servicio completado', showBanner: true }
+        };
+
+        const s = map[order.status] || { badge: 'status-waiting', text: order.status };
+        container.innerHTML = `
+            <div class="status-badge ${s.badge} mb-3">${s.text}</div>
+            <p class="text-sm text-gray-400">${getDetail(order.status)}</p>
+        `;
+
+        if (s.showBanner) {
+            document.getElementById('arrival-banner').classList.add('show');
+        }
+    }
+
+    function getDetail(status) {
+        const details = {
+            'pagado_verificado': 'Estamos asignando al mejor técnico disponible.',
+            'tecnico_asignado': 'El técnico se prepara para salir.',
+            'tecnico_en_camino': 'Sigue su ubicación en el mapa.',
+            'tecnico_llego': 'El técnico está en tu ubicación.',
+            'servicio_completado': '¡Gracias por usar TechUIT!'
+        };
+        return details[status] || '';
+    }
+
+    function showTechnician(tech) {
+        if (!tech) return;
+        document.getElementById('tech-name').textContent = tech.nombre;
+        document.getElementById('tech-specialty').textContent = tech.especialidad || 'Técnico General';
+        const avatar = document.getElementById('tech-avatar');
+        avatar.src = tech.foto_selfie_url ? 
+            `${supabaseUrl}/storage/v1/object/public/technician-avatars/${tech.foto_selfie_url}` : 
+            'https://i.pravatar.cc/60?u=tech';
+        document.getElementById('technician-card').classList.remove('hidden');
+    }
+
+    function initMap(city) {
+        const coords = getCityCoordinates(city) || [14.0723, -87.1921];
+        map = L.map('map').setView(coords, 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        customerMarker = L.marker(coords, {
+            icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', iconSize: [25,41], iconAnchor: [12,41] })
+        }).addTo(map).bindPopup("Tu ubicación");
+    }
+
+    function startTracking(tecnicoId) {
+        document.getElementById('tracking-status').textContent = "Buscando al técnico...";
+
+        channel = supabase.channel(`tecnico-${tecnicoId}`)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'tecnico_ubicacion', filter: `tecnico_id=eq.${tecnicoId}` }, payload => {
+                const { lat, lng } = payload.new;
+                updateMarker(lat, lng);
+            })
+            .subscribe();
+
+        supabase.from('tecnico_ubicacion').select('lat,lng').eq('tecnico_id', tecnicoId).single()
+            .then(({ data }) => { if (data) updateMarker(data.lat, data.lng); });
+    }
+
+    function updateMarker(lat, lng) {
+        const pos = [lat, lng];
+        if (!technicianMarker) {
+            technicianMarker = L.marker(pos, {
+                icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', iconSize: [25,41], iconAnchor: [12,41] })
+            }).addTo(map).bindPopup("Técnico");
+            document.getElementById('tracking-status').textContent = "Técnico en movimiento";
+        } else {
+            technicianMarker.setLatLng(pos);
+        }
+        if (customerMarker) map.fitBounds(L.featureGroup([technicianMarker, customerMarker]).getBounds().pad(0.2));
+    }
+
+    function getCityCoordinates(city) {
+        if (!city) return null;
+        const c = city.toLowerCase().trim();
+        const cities = {
+            'san pedro sula': [15.5042, -88.0250], 'sps': [15.5042, -88.0250],
+            'tegucigalpa': [14.0723, -87.1921], 'tgu': [14.0723, -87.1921],
+            'la ceiba': [15.7891, -86.7914],
+            'choluteca': [13.6097, -87.2614],
+            'el progreso': [15.4400, -87.8200],
+            'puerto cortes': [15.8583, -87.9306],
+            'comayagua': [14.4492, -87.6407],
+            'danli': [14.0600, -86.9800], 'danlí': [14.0600, -86.9800],
+            'juticalpa': [14.6667, -86.0500],
+            'siguatepeque': [14.6000, -87.9333],
+            'roatan': [16.3000, -86.5333], 'roatán': [16.3000, -86.5333]
+        };
+        for (const [key, coords] of Object.entries(cities)) {
+            if (c.includes(key)) return coords;
+        }
+        return null;
+    }
+
+    loadOrder();
+
+    window.addEventListener('beforeunload', () => {
+        if (channel) supabase.removeChannel(channel);
     });
-
-    function renderStatus(solicitud) {
-        const statusContainer = document.getElementById('status-container');
-        const mapContainer = document.getElementById('map-container');
-        const technicianInfo = document.getElementById('technician-info');
-        let statusHTML = '';
-
-        switch (solicitud.status) {
-            case 'Pendiente - Pago Diagnóstico':
-                statusHTML = `<div class="text-center"><div class="status-badge status-waiting mb-4">⏳ Esperando Verificación de Pago</div><p class="text-gray-300">Esperando la verificación del pago para asignar un técnico.</p></div>`;
-                break;
-
-            case 'pagado_verificado':
-                statusHTML = `<div class="text-center"><div class="status-badge status-searching mb-4">🔍 Buscando Técnico Disponible</div><p class="text-gray-300">Ya verificamos tu pago. Estamos buscando al técnico más cercano.</p></div>`;
-                break;
-            
-            case 'tecnico_asignado':
-                // Buscamos al técnico por su ID de la tabla `tecnicos`
-                const tecnicoId = solicitud.tecnico_asignado_id;
-                
-                if (tecnicoId) {
-                    // Cargar información del técnico
-                    loadTechnicianInfo(tecnicoId);
-                    
-                    statusHTML = `<div class="text-center"><div class="status-badge status-assigned mb-4">👨‍🔧 Técnico Asignado</div><p class="text-gray-300">El técnico está en camino. Espera a que active su GPS para ver su ubicación.</p></div>`;
-                    mapContainer.classList.remove('hidden');
-                    technicianInfo.classList.remove('hidden');
-                    initMap();
-                    listenForTechnicianLocation(tecnicoId);
-                    break;
-                } else {
-                    statusHTML = `<p class="text-center text-red-400">Error: No se pudo identificar al técnico asignado. Por favor, contacta soporte.</p>`;
-                }
-                break;
-
-            default:
-                statusHTML = `<p class="text-center text-gray-400">Estado: ${solicitud.status || 'Desconocido'}</p>`;
-                break;
-        }
-
-        statusContainer.innerHTML = statusHTML;
-    }
-
-    async function loadTechnicianInfo(tecnicoId) {
-        try {
-            const { data: tecnico, error } = await supabaseClient
-                .from('tecnicos')
-                .select('*')
-                .eq('id', tecnicoId)
-                .single();
-
-            if (error) throw error;
-            
-            technicianData = tecnico;
-            
-            // Actualizar la información del técnico en la interfaz
-            document.getElementById('technician-name').textContent = tecnico.nombre;
-            document.getElementById('technician-specialty').textContent = `Especialidad: ${tecnico.especialidad || 'No especificada'}`;
-            document.getElementById('technician-experience').textContent = `Experiencia: ${tecnico.experiencia || 0} años`;
-            
-            // Mostrar la biografía si existe
-            if (tecnico.bio) {
-                document.getElementById('technician-bio').textContent = tecnico.bio;
-            } else {
-                document.getElementById('technician-bio').style.display = 'none';
-            }
-            
-            // Cargar la foto del técnico
-            if (tecnico.foto_selfie_url) {
-                // Verificar si la URL es completa o necesita ser construida
-                let imageUrl = tecnico.foto_selfie_url;
-                if (!imageUrl.startsWith('http')) {
-                    // Si no es una URL completa, construirla para Supabase Storage
-                    imageUrl = `${supabaseUrl}/storage/v1/object/public/technician-avatars/${imageUrl}`;
-                }
-                
-                // Verificar si la imagen se puede cargar
-                const img = new Image();
-                img.onload = function() {
-                    document.getElementById('technician-avatar').src = imageUrl;
-                };
-                img.onerror = function() {
-                    // Si hay un error al cargar la imagen, usar una imagen por defecto
-                    document.getElementById('technician-avatar').src = 'https://picsum.photos/seed/technician/60/60.jpg';
-                    console.error('Error al cargar la imagen del técnico:', imageUrl);
-                };
-                img.src = imageUrl;
-            } else {
-                // Usar una imagen por defecto si no hay foto
-                document.getElementById('technician-avatar').src = 'https://picsum.photos/seed/technician/60/60.jpg';
-            }
-            
-        } catch (error) {
-            console.error('Error al cargar información del técnico:', error);
-            showNotification('Error al cargar información del técnico', 'error');
-        }
-    }
-
-    function initMap() {
-        console.log("Inicializando mapa de Leaflet...");
-        map = L.map('map').setView([14.0723, -87.1921], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        console.log("Mapa de Leaflet inicializado correctamente.");
-        
-        // Añadir marcador para la ubicación del cliente si tenemos la dirección
-        if (orderData && orderData.direccion) {
-            // Aquí podrías usar un servicio de geocodificación para convertir la dirección en coordenadas
-            // Por ahora, usaremos coordenadas de ejemplo
-            const customerCoords = [14.0723, -87.1921];
-            customerMarker = L.marker(customerCoords, {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map).bindPopup('Tu ubicación').openPopup();
-        }
-    }
-
-    function listenForTechnicianLocation(tecnicoId) {
-        if (!tecnicoId) return;
-        console.log(`Escuchando ubicaciones para el técnico ID: ${tecnicoId}`);
-        
-        // Primero, obtener la última ubicación conocida
-        supabaseClient.from('tecnico_ubicacion').select('lat, lng').eq('tecnico_id', tecnicoId).single().then(({ data, error }) => {
-            if (data) {
-                console.log('Última ubicación conocida encontrada:', data);
-                updateTechnicianMarker(data.lat, data.lng);
-            } else if (error) {
-                console.log('El técnico aún no ha activado su GPS. Esperando...');
-                showNotification('El técnico aún no ha activado su GPS. Te notificaremos cuando lo haga.', 'info');
-            }
-        });
-        
-        // Suscribirse a cambios en tiempo real
-        const subscription = supabaseClient.channel(`public:tecnico_ubicacion:tecnico_id=eq.${tecnicoId}`).on('postgres_changes', { 
-            event: 'UPDATE', 
-            schema: 'public', 
-            table: 'tecnico_ubicacion', 
-            filter: `tecnico_id=eq.${tecnicoId}` 
-        }, (payload) => {
-            const newLocation = payload.new;
-            console.log('¡Nueva ubicación recibida en tiempo real!', newLocation);
-            updateTechnicianMarker(newLocation.lat, newLocation.lng);
-            updateStatusToOnRoute();
-            
-            // Iniciar verificación de llegada
-            startArrivalCheck(newLocation.lat, newLocation.lng);
-        }).subscribe();
-    }
-    
-    function updateTechnicianMarker(lat, lng) {
-        const newPos = [lat, lng];
-        if (technicianMarker) {
-            technicianMarker.setLatLng(newPos);
-        } else {
-            technicianMarker = L.marker(newPos, {
-                icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map).bindPopup('Tu técnico está aquí').openPopup();
-        }
-        
-        // Ajustar la vista del mapa para mostrar ambos marcadores si existen
-        if (customerMarker) {
-            const group = new L.featureGroup([technicianMarker, customerMarker]);
-            map.fitBounds(group.getBounds().pad(0.1));
-        } else {
-            map.setView(newPos);
-        }
-    }
-
-    function updateStatusToOnRoute() {
-        const statusContainer = document.getElementById('status-container');
-        statusContainer.innerHTML = `<div class="text-center"><div class="status-badge status-onroute mb-4">🚗 Técnico en Camino</div><p class="text-gray-300">Mira el mapa para ver su ubicación en tiempo real.</p></div>`;
-    }
-
-    function startArrivalCheck(techLat, techLng) {
-        // Si ya hay un intervalo de verificación, limpiarlo
-        if (locationCheckInterval) {
-            clearInterval(locationCheckInterval);
-        }
-        
-        // Coordenadas del cliente (deberían obtenerse de la dirección)
-        const customerCoords = [14.0723, -87.1921];
-        
-        // Verificar cada 5 segundos si el técnico está cerca
-        locationCheckInterval = setInterval(() => {
-            const distance = calculateDistance(techLat, techLng, customerCoords[0], customerCoords[1]);
-            
-            // Si el técnico está a menos de 100 metros, notificar llegada
-            if (distance < 0.1) {
-                notifyArrival();
-                clearInterval(locationCheckInterval);
-            }
-        }, 5000);
-    }
-
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        // Fórmula de Haversine para calcular la distancia entre dos puntos
-        const R = 6371; // Radio de la Tierra en km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        const distance = R * c;
-        return distance; // Distancia en km
-    }
-
-    function notifyArrival() {
-        const arrivalNotification = document.getElementById('arrival-notification');
-        arrivalNotification.classList.add('show');
-        
-        // Enviar notificación al administrador
-        sendArrivalNotification();
-        
-        // Actualizar el estado de la orden a "tecnico_llego"
-        updateOrderStatus('tecnico_llego');
-    }
-
-    async function sendArrivalNotification() {
-        try {
-            // Aquí podrías implementar una función para enviar notificaciones al administrador
-            // Por ejemplo, usando un servicio de notificaciones push o enviando un correo electrónico
-            console.log('Enviando notificación de llegada al administrador');
-            
-            // También podrías guardar un registro en la base de datos
-            await supabaseClient.from('notificaciones').insert({
-                tipo: 'llegada_tecnico',
-                orden_id: orderData.id,
-                tecnico_id: technicianData.id,
-                mensaje: `El técnico ${technicianData.nombre} ha llegado a la ubicación del cliente.`,
-                leida: false,
-                created_at: new Date()
-            });
-        } catch (error) {
-            console.error('Error al enviar notificación de llegada:', error);
-        }
-    }
-
-    async function updateOrderStatus(newStatus) {
-        try {
-            const { error } = await supabaseClient
-                .from('clientes')
-                .update({ status: newStatus })
-                .eq('id', orderData.id);
-                
-            if (error) throw error;
-            console.log(`Estado de la orden actualizado a: ${newStatus}`);
-        } catch (error) {
-            console.error('Error al actualizar el estado de la orden:', error);
-        }
-    }
-
-    function showNotification(message, type) {
-        const notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.className = `notification ${type}`;
-        notification.classList.add('show');
-        
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 5000);
-    }
 </script>
 </body>
 </html>
