@@ -48,7 +48,7 @@
             cursor: pointer;
             font-weight: 600;
         }
-        .input {
+        .input, select, textarea {
             width: 100%;
             padding: 14px;
             margin-bottom: 1rem;
@@ -58,7 +58,7 @@
             color: #fff;
             font-size: 1rem;
         }
-        .input:focus {
+        .input:focus, select:focus, textarea:focus {
             border-color: #007bff;
             outline: none;
         }
@@ -120,13 +120,15 @@
 <div class="card">
     <img src="logo.png" alt="TechUIT" class="logo">
     <div class="login-link" id="loginLink">Login</div>
-   
+    
     <h1 class="title">Solicitar Técnico</h1>
-    <div id="welcome" class="text-center text-green-400 font-bold mb-3" style="display:none;"></div>
+    <div id="welcome" style="display:none; text-align:center; color:#34d399; font-weight:bold; margin-bottom:0.75rem;"></div>
+    
     <form id="form">
         <input type="text" id="nombre" class="input" placeholder="Nombre completo" required>
         <input type="tel" id="telefono" class="input" placeholder="Teléfono" required>
         <input type="text" id="direccion" class="input" placeholder="Dirección exacta" required>
+        
         <select id="ciudadManual" class="input hidden">
             <option value="">Elige ciudad</option>
             <option>San Pedro Sula</option>
@@ -141,7 +143,9 @@
             <option>Siguatepeque</option>
             <option>Roatán</option>
         </select>
+        
         <p id="status" class="status">Buscando ubicación...</p>
+        
         <select id="servicio" class="input" required>
             <option value="" disabled selected>Tipo de servicio</option>
             <option>Reparar PC</option>
@@ -150,26 +154,32 @@
             <option>Virus</option>
             <option>Otro</option>
         </select>
-        <textarea id="problema" class="input" rows="3" placeholder="Describe tu problema" required></textarea>
+        
+        <textarea id="problema" rows="3" placeholder="Describe tu problema" required></textarea>
+        
         <input type="hidden" id="ciudad">
         <button type="submit" id="btn" class="btn">Solicitar Técnico</button>
     </form>
+    
     <div id="msg" class="message"></div>
 </div>
+
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3 class="text-xl font-bold text-center mb-4">Iniciar Sesión</h3>
+        <h3 style="font-size:1.25rem; font-weight:bold; text-align:center; margin-bottom:1rem;">Iniciar Sesión</h3>
         <input type="email" id="email" class="input" placeholder="Correo">
         <input type="password" id="pass" class="input" placeholder="Contraseña">
-        <button id="loginBtn" class="btn mt-3">Entrar</button>
-        <button id="close" class="text-sm text-gray-400 text-center w-full mt-2">Cerrar</button>
+        <button id="loginBtn" class="btn" style="margin-top:0.75rem;">Entrar</button>
+        <button id="close" style="color:#9ca3af; font-size:0.875rem; text-align:center; width:100%; margin-top:0.5rem; background:none; border:none; cursor:pointer;">Cerrar</button>
     </div>
 </div>
+
 <script type="module">
     const supabase = window.supabase.createClient(
         'https://hsdhsgyzxalhjdihpuvo.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'
     );
+
     const form = document.getElementById('form');
     const btn = document.getElementById('btn');
     const status = document.getElementById('status');
@@ -177,16 +187,21 @@
     const ciudadManual = document.getElementById('ciudadManual');
     const modal = document.getElementById('modal');
     const loginLink = document.getElementById('loginLink');
-    const close = document.getElementById('close');
+    const closeBtn = document.getElementById('close');
     const loginBtn = document.getElementById('loginBtn');
     const msg = document.getElementById('msg');
     const welcome = document.getElementById('welcome');
+
     let ciudad = null;
+
+    // Modal
     loginLink.onclick = () => modal.style.display = 'flex';
-    close.onclick = () => modal.style.display = 'none';
+    closeBtn.onclick = () => modal.style.display = 'none';
     window.onclick = e => { if (e.target === modal) modal.style.display = 'none'; };
+
+    // Login
     loginBtn.onclick = async () => {
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('pass').value;
         if (!email || !pass) return show('Faltan datos', 'error');
         const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
@@ -199,6 +214,8 @@
         modal.style.display = 'none';
         location.reload();
     };
+
+    // Autorelleno
     const saved = localStorage.getItem('user');
     if (saved) {
         const u = JSON.parse(saved);
@@ -207,6 +224,8 @@
         welcome.textContent = `¡Hola, ${u.nombre}!`;
         welcome.style.display = 'block';
     }
+
+    // GPS
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             async pos => {
@@ -223,6 +242,7 @@
             { timeout: 8000 }
         );
     } else fallback();
+
     function fallback() {
         status.textContent = 'Elige ciudad:';
         ciudadManual.classList.remove('hidden');
@@ -231,6 +251,7 @@
             ciudadInput.value = ciudad;
         };
     }
+
     function normalize(c) {
         const map = {
             'san pedro sula': 'San Pedro Sula',
@@ -249,11 +270,15 @@
         for (const [k, v] of Object.entries(map)) if (l.includes(k)) return v;
         return c;
     }
+
+    // Envío
     form.onsubmit = async e => {
         e.preventDefault();
         if (!ciudad && !ciudadManual.value) return show('Elige ciudad', 'error');
+
         btn.disabled = true;
         btn.textContent = 'Enviando...';
+
         const data = {
             nombre: document.getElementById('nombre').value,
             telefono: document.getElementById('telefono').value,
@@ -263,6 +288,7 @@
             ciudad: ciudad || ciudadManual.value,
             status: 'Pendiente'
         };
+
         try {
             const { data: ins, error } = await supabase.from('clientes').insert([data]).select('id');
             if (error) throw error;
@@ -276,6 +302,7 @@
             btn.textContent = 'Solicitar Técnico';
         }
     };
+
     function show(text, type) {
         msg.textContent = text;
         msg.className = `message bg-${type === 'error' ? 'red' : 'green'}-600 text-white`;
