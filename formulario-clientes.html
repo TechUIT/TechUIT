@@ -1,246 +1,341 @@
-<html lang="es"><head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Clientes (Servicios Informáticos)</title>
-    <!-- Carga de Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carga de Supabase SDK para la base de datos -->
+    <title>Solicitud de Servicio | TechUIT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        
-        /* Estilos generales oscuros */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #000;
+            background: #000;
             color: #fff;
-            padding: 20px 10px;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            min-height: 100vh;
+            align-items: center;
+            padding: 1rem;
         }
-        .form-container {
+        .container {
             width: 100%;
-            max-width: 450px;
-            background-color: #1a1a1a;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 123, 255, 0.3);
+            max-width: 500px;
+            background: #1a1a1a;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.2);
         }
-        /* Corregida la clase form-input para que aplique a todos los elementos del formulario */
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 12px;
-            margin-top: 5px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background-color: #2a2a2a;
+        .logo {
+            display: block;
+            margin: 0 auto 1.5rem;
+            width: 70px;
+            height: 70px;
+            filter: brightness(0) invert(1);
+        }
+        .title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 0.5rem;
             color: #fff;
-            font-size: 16px;
-            transition: border-color 0.3s;
         }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+        .login-link {
+            color: #60a5fa;
+            font-size: 0.9rem;
+            text-align: right;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .input, .select, .textarea {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 1rem;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .input:focus, .select:focus, .textarea:focus {
             border-color: #007bff;
             outline: none;
         }
-        .submit-button {
+        .btn {
             width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            background-color: #007bff;
-            color: #fff;
-            font-size: 18px;
+            padding: 16px;
+            background: #007bff;
+            color: white;
             font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            font-size: 1.1rem;
             border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .submit-button:hover:not(:disabled) {
-            background-color: #0056b3;
+        .btn:hover:not(:disabled) {
+            background: #0056b3;
             transform: translateY(-1px);
         }
-        .submit-button:disabled {
-            background-color: #4b5563;
+        .btn:disabled {
+            background: #4b5563;
             cursor: not-allowed;
         }
-        .message-box {
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+        .status {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #60a5fa;
+            margin: 0.5rem 0 1rem;
+        }
+        .hidden { display: none; }
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: #1a1a1a;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+        }
+        .message {
+            padding: 1rem;
+            border-radius: 10px;
             text-align: center;
             font-weight: 600;
-            display: none; /* Oculto por defecto */
+            margin-top: 1rem;
+            display: none;
         }
-        .message-box.success {
-            background-color: #10B981; /* Verde esmeralda */
-            color: #064E3B;
-        }
-        .message-box.error {
-            background-color: #F87171; /* Rojo */
-            color: #7F1D1D;
+        .welcome {
+            text-align: center;
+            color: #34d399;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
         }
     </style>
-<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mb-2{margin-bottom:0.5rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-4{margin-top:1rem}.block{display:block}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}</style></head>
+</head>
 <body>
+<div class="container">
+    <img src="Logo.png" alt="TechUIT" class="logo">
+    <div class="login-link" id="loginLink">Login</div>
+   
+    <h1 class="title">Solicitud de Servicio Técnico</h1>
+    <p class="subtitle">Ingresa tus datos para que un experto pueda contactarte.</p>
+    <div id="welcome" class="welcome" style="display:none;"></div>
+    <form id="form">
+        <input type="text" id="nombre" class="input" placeholder="Tu Nombre Completo" required>
+        <input type="tel" id="telefono" class="input" placeholder="Teléfono de Contacto" required>
+        <input type="text" id="direccion" class="input" placeholder="Tu Dirección Exacta (Residencia/Trabajo)" required>
+        
+        <!-- SELECT MANUAL CON TODAS LAS CIUDADES -->
+        <select id="ciudadManual" class="select hidden">
+            <option value="">Elige tu ciudad</option>
+            <option>San Pedro Sula</option>
+            <option>Tegucigalpa</option>
+            <option>La Ceiba</option>
+            <option>Choluteca</option>
+            <option>El Progreso</option>
+            <option>La Lima</option>
+            <option>Puerto Cortés</option>
+            <option>Comayagua</option>
+            <option>Danlí</option>
+            <option>Santa Bárbara</option>
+            <option>Juticalpa</option>
+            <option>Siguatepeque</option>
+            <option>Roatán</option>
+        </select>
 
-    <div class="form-container">
-        <h1 class="text-2xl font-bold text-center mb-6">Solicitud de Servicio Técnico</h1>
-        <p class="text-gray-400 text-center mb-8">Ingresa tus datos para que un experto pueda contactarte.</p>
+        <p id="status" class="status">Detectando ubicación...</p>
 
-        <form id="clientForm">
-            <!-- CAMPO 1: NOMBRE (Columna: nombre) -->
-            <label for="nombre" class="block mb-2 font-medium">Tu Nombre Completo</label>
-            <input type="text" id="nombre" name="nombre" class="form-input" placeholder="Ej. Enrique Bon" required="">
+        <select id="servicio" class="select" required>
+            <option value="" disabled selected>Tipo de Servicio Requerido</option>
+            <option>Reparación de Hardware</option>
+            <option>Mantenimiento de Software</option>
+            <option>Configuración de Redes</option>
+            <option>Eliminación de Virus/Malware</option>
+            <option>Soporte Remoto/Consultoría</option>
+            <option>Otro (Especificar en Problema)</option>
+        </select>
 
-            <!-- CAMPO 2: TELÉFONO (Columna: telefono) -->
-            <label for="telefono" class="block mb-2 font-medium">Teléfono de Contacto</label>
-            <input type="tel" id="telefono" name="telefono" class="form-input" placeholder="Ej. +5555 99xxxxxx" required="">
+        <textarea id="problema" class="textarea" rows="4" placeholder="Describe tu Problema (Máximo 200 palabras)" maxlength="400" required></textarea>
+        <input type="hidden" id="ciudad">
+        <button type="submit" id="btn" class="btn">Solicitar Técnico Ahora</button>
+    </form>
+    <div id="msg" class="message"></div>
+</div>
 
-            <!-- CAMPO 3: DIRECCIÓN (Columna: direccion) -->
-            <label for="direccion" class="block mb-2 font-medium">Tu Dirección Exacta (Residencia/Trabajo)</label>
-            <input type="text" id="direccion" name="direccion" class="form-input" placeholder="Ej. Colonia El Dorado, Casa #25" required="">
-
-            <!-- CAMPO 4: TIPO DE SERVICIO (Columna: tipo_servicio) -->
-            <label for="tipo_servicio" class="block mb-2 font-medium">Tipo de Servicio Requerido</label>
-            <select id="tipo_servicio" name="tipo_servicio" class="form-select" required="">
-                <option value="" disabled="" selected="">Selecciona una opción</option>
-                <option value="Reparación de Hardware">Reparación de Hardware</option>
-                <option value="Mantenimiento de Software">Mantenimiento de Software</option>
-                <option value="Configuración de Redes">Configuración de Redes</option>
-                <option value="Eliminación de Virus/Malware">Eliminación de Virus/Malware</option>
-                <option value="Soporte Remoto/Consultoría">Soporte Remoto/Consultoría</option>
-                <option value="Otro">Otro (Especificar en Problema)</option>
-            </select>
-
-            <!-- CAMPO 5: PROBLEMA (Columna: problema) -->
-            <label for="problema" class="block mb-2 font-medium">Describe tu Problema (Máximo 200 palabras)</label>
-            <textarea id="problema" name="problema" class="form-textarea" rows="4" placeholder="Mi pc esta poseida..." maxlength="1000" required=""></textarea>
-
-            <button type="submit" id="submitButton" class="submit-button mt-4">Solicitar Técnico Ahora</button>
-        </form>
-
-        <div id="message" class="message-box"></div>
+<!-- MODAL DE LOGIN -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h3 style="font-size:1.25rem; font-weight:bold; text-align:center; margin-bottom:1rem;">Iniciar Sesión</h3>
+        <input type="email" id="email" class="input" placeholder="Correo Electrónico">
+        <input type="password" id="pass" class="input" placeholder="Contraseña">
+        <button id="loginBtn" class="btn" style="margin-top:0.75rem;">Entrar</button>
+        <button id="close" style="color:#9ca3af; font-size:0.875rem; text-align:center; width:100%; margin-top:0.5rem; background:none; border:none; cursor:pointer;">Cerrar</button>
     </div>
+</div>
 
-<script>
-    // Configuración de Supabase (Debes reemplazar estas variables con tus propias credenciales)
-    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; // REEMPLAZA CON TU URL
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; // REEMPLAZA CON TU CLAVE ANON
-    
-    // Inicialización del cliente Supabase
-    let supabaseClient;
-    try {
-        // SOLUCIÓN AL ERROR: La variable global es 'supabase' (minúscula)
-        if (typeof supabase !== 'undefined') {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log("Supabase inicializado correctamente.");
-        } else {
-            console.error("El SDK de Supabase no se cargó. Verifica la etiqueta <script>.");
-            showMessage("🔴 ERROR: El SDK de Supabase no se ha cargado correctamente.", 'error');
+<script type="module">
+    const supabase = window.supabase.createClient(
+        'https://hsdhsgyzxalhjdihpuvo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'
+    );
+
+    // LISTA COMPLETA DE CIUDADES VÁLIDAS
+    const CIUDADES_VALIDAS = [
+        'San Pedro Sula', 'Tegucigalpa', 'La Ceiba', 'Choluteca', 'El Progreso',
+        'La Lima', 'Puerto Cortés', 'Comayagua', 'Danlí', 'Santa Bárbara',
+        'Juticalpa', 'Siguatepeque', 'Roatán'
+    ];
+
+    let ciudad = null;
+
+    const form = document.getElementById('form');
+    const btn = document.getElementById('btn');
+    const status = document.getElementById('status');
+    const ciudadInput = document.getElementById('ciudad');
+    const ciudadManual = document.getElementById('ciudadManual');
+    const modal = document.getElementById('modal');
+    const loginLink = document.getElementById('loginLink');
+    const close = document.getElementById('close');
+    const loginBtn = document.getElementById('loginBtn');
+    const msg = document.getElementById('msg');
+    const welcome = document.getElementById('welcome');
+
+    // --- LOGIN MODAL ---
+    loginLink.onclick = () => modal.style.display = 'flex';
+    close.onclick = () => modal.style.display = 'none';
+    window.onclick = e => { if (e.target === modal) modal.style.display = 'none'; };
+
+    loginBtn.onclick = async () => {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        if (!email || !pass) return show('Faltan datos', 'error');
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+        if (error) return show(error.message, 'error');
+        const user = data.user;
+        localStorage.setItem('user', JSON.stringify({
+            nombre: user.user_metadata?.nombre || email.split('@')[0],
+            telefono: user.user_metadata?.telefono || ''
+        }));
+        modal.style.display = 'none';
+        location.reload();
+    };
+
+    // --- AUTORELLENO SI HAY LOGIN ---
+    const saved = localStorage.getItem('user');
+    if (saved) {
+        const u = JSON.parse(saved);
+        document.getElementById('nombre').value = u.nombre;
+        document.getElementById('telefono').value = u.telefono;
+        welcome.textContent = `¡Hola, ${u.nombre}!`;
+        welcome.style.display = 'block';
+    }
+
+    // --- GPS DETECCIÓN ---
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async pos => {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&zoom=10`);
+                const data = await res.json();
+                const c = data.address?.city || data.address?.town || data.address?.state;
+                if (c) {
+                    ciudad = normalize(c);
+                    if (CIUDADES_VALIDAS.includes(ciudad)) {
+                        ciudadInput.value = ciudad;
+                        status.innerHTML = `<strong>${ciudad}</strong>`;
+                    } else {
+                        fallback();
+                    }
+                } else fallback();
+            },
+            fallback,
+            { timeout: 8000 }
+        );
+    } else fallback();
+
+    function fallback() {
+        status.textContent = 'Elige ciudad:';
+        ciudadManual.classList.remove('hidden');
+        ciudadManual.onchange = () => {
+            ciudad = ciudadManual.value;
+            ciudadInput.value = ciudad;
+        };
+    }
+
+    function normalize(c) {
+        const map = {
+            'san pedro sula': 'San Pedro Sula',
+            'tegucigalpa': 'Tegucigalpa',
+            'la ceiba': 'La Ceiba',
+            'choluteca': 'Choluteca',
+            'el progreso': 'El Progreso',
+            'la lima': 'La Lima',
+            'puerto cortes': 'Puerto Cortés',
+            'comayagua': 'Comayagua',
+            'danli': 'Danlí',
+            'santa barbara': 'Santa Bárbara',
+            'juticalpa': 'Juticalpa',
+            'siguatepeque': 'Siguatepeque',
+            'roatan': 'Roatán'
+        };
+        const l = c.toLowerCase().trim();
+        for (const [k, v] of Object.entries(map)) {
+            if (l.includes(k)) return v;
         }
-    } catch (e) {
-        console.error("Error al crear cliente Supabase:", e);
-        showMessage("🔴 ERROR: Fallo al crear el cliente Supabase. Revisa las URL/Keys.", 'error');
+        return c;
     }
 
-    // Nombre de tu tabla, confirmado como 'clientes'
-    const TABLE_NAME = 'clientes'; 
+    // --- ENVÍO ---
+    form.onsubmit = async e => {
+        e.preventDefault();
+        if (!ciudad && !ciudadManual.value) return show('Elige ciudad', 'error');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+        const data = {
+            nombre: document.getElementById('nombre').value,
+            telefono: document.getElementById('telefono').value,
+            direccion: document.getElementById('direccion').value,
+            tipo_servicio: document.getElementById('servicio').value,
+            problema: document.getElementById('problema').value,
+            ciudad: ciudad || ciudadManual.value,
+            status: 'Pendiente'
+        };
+        try {
+            const { data: ins, error } = await supabase.from('clientes').insert([data]).select('id');
+            if (error) throw error;
+            const id = ins[0].id;
+            show(`¡Solicitud #${id} enviada!`, 'success');
+            setTimeout(() => location.href = `confirmacion-pago.html?solicitud=${id}`, 1500);
+        } catch (err) {
+            show('Error. Intenta de nuevo.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Solicitar Técnico Ahora';
+        }
+    };
 
-    const form = document.getElementById('clientForm');
-    const submitButton = document.getElementById('submitButton');
-    const messageBox = document.getElementById('message');
-
-    /**
-     * Muestra un mensaje en la interfaz.
-     * @param {string} msg - El mensaje a mostrar.
-     * @param {('success'|'error')} type - El tipo de mensaje.
-     */
-    function showMessage(msg, type) {
-        messageBox.textContent = msg;
-        messageBox.className = `message-box ${type}`;
-        messageBox.style.display = 'block';
-        // Ocultar después de 4 segundos
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 4000);
+    function show(text, type) {
+        msg.textContent = text;
+        msg.className = `message bg-${type === 'error' ? 'red' : 'green'}-600 text-white`;
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 4000);
     }
-
-    // Lógica de Envío del Formulario
-    if (form && supabaseClient) {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            showMessage("", 'success'); // Limpiar mensajes
-            messageBox.style.display = 'none';
-
-            submitButton.disabled = true;
-            submitButton.textContent = "Enviando Solicitud...";
-
-            try {
-                // 1. OBTENER VALORES DEL FORMULARIO USANDO LOS NOMBRES EXACTOS DE LAS COLUMNAS EN TU TABLA
-                const data = {
-                    nombre: document.getElementById('nombre').value,
-                    telefono: document.getElementById('telefono').value,
-                    direccion: document.getElementById('direccion').value,
-                    tipo_servicio: document.getElementById('tipo_servicio').value,
-                    problema: document.getElementById('problema').value,
-                    // 'fecha_solicitud' y 'status' tienen valores por defecto en la tabla, no se envían
-                };
-
-                // 2. INSERCIÓN DE DATOS en la tabla 'clientes'
-                const { error, data: insertedData } = await supabaseClient
-                    .from(TABLE_NAME)
-                    .insert([data])
-                    .select(); // Devolvemos los datos insertados, incluyendo el ID
-
-                if (error) {
-                    let errorMessage = `🔴 FALLO: Código Supabase: ${error.code}.`;
-                    
-                    if (error.code === '23502') {
-                        errorMessage = "🔴 ¡ERROR DE COLUMNA! Le falta un campo obligatorio (NOT NULL) o los datos no coinciden con los tipos.";
-                    } else if (error.code === '42501') {
-                         errorMessage = "🔴 ¡ERROR RLS! Se deniega el permiso. Verifique las políticas de seguridad (RLS) de su tabla 'clientes'.";
-                    } else {
-                        errorMessage = `🔴 ¡FALLO DESCONOCIDO! Revise la consola (F12) para ver el mensaje completo: ${error.message}`;
-                    }
-
-                    showMessage(errorMessage, 'error');
-                    console.error("Supabase Error Completo:", error);
-
-                } else {
-                    // ÉXITO: Redirigir a la página de confirmación de pago.
-                    const id = insertedData && insertedData.length > 0 ? insertedData[0].id : 'N/A';
-                    
-                    if (id !== 'N/A') {
-                        showMessage(`✅ ¡Solicitud #${id} registrada! Redirigiendo a pago...`, 'success');
-                        // Redirección con el ID del registro
-                        setTimeout(() => {
-                            window.location.href = 'confirmacion-pago.html?solicitud=' + id;
-                        }, 1000);
-                    } else {
-                        showMessage("✅ Solicitud registrada, pero no se recibió el ID. Recarga la página.", 'success');
-                        form.reset();
-                    }
-                }
-
-            } catch (error) {
-                showMessage("ERROR DE CONEXIÓN DE RED: Fallo al contactar a Supabase.", 'error');
-                console.error("Error de Fetch o Desconocido:", error);
-            } finally {
-                // Si la redirección falla o hay un error, el botón se reestablece.
-                submitButton.disabled = false;
-                submitButton.textContent = "Solicitar Técnico Ahora";
-            }
-        });
-    }
-
 </script>
-<p style="color: yellow; font-size: 12px; text-align: center; margin-top: 20px;">
-    VERSIÓN ACTUALIZADA: 2025-11-12 - TEST
-</p>
-<p style="color: yellow; font-size: 12px; text-align: center; margin-top: 20px;">
-    VERSIÓN ACTUALIZADA: 2025-11-12 - TEST
-</p>
-
-</body></html>
-
+</body>
+</html>
