@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+<html lang="es"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Clientes (Servicios Informáticos)</title>
@@ -10,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-       
+        
         /* Estilos generales oscuros */
         body {
             font-family: 'Inter', sans-serif;
@@ -83,54 +81,162 @@
             color: #7F1D1D;
         }
     </style>
-</head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mb-2{margin-bottom:0.5rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-4{margin-top:1rem}.block{display:block}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}</style></head>
 <body>
 
-<div class="form-container">
-    <h1 class="text-2xl font-bold text-center mb-6">Solicitud de Servicio Técnico</h1>
-    <p class="text-gray-400 text-center mb-8">Ingresa tus datos para que un experto pueda contactarte.</p>
+    <div class="form-container">
+        <h1 class="text-2xl font-bold text-center mb-6">Solicitud de Servicio Técnico</h1>
+        <p class="text-gray-400 text-center mb-8">Ingresa tus datos para que un experto pueda contactarte.</p>
 
-    <form id="clientForm">
-        <!-- NOMBRE -->
-        <label for="nombre" class="block mb-2 font-medium">Tu Nombre Completo</label>
-        <input type="text" id="nombre" name="nombre" class="form-input" placeholder="Ej. Enrique Bon" required>
+        <form id="clientForm">
+            <!-- CAMPO 1: NOMBRE (Columna: nombre) -->
+            <label for="nombre" class="block mb-2 font-medium">Tu Nombre Completo</label>
+            <input type="text" id="nombre" name="nombre" class="form-input" placeholder="Ej. Enrique Bon" required="">
 
-        <!-- TELÉFONO -->
-        <label for="telefono" class="block mb-2 font-medium">Teléfono de Contacto</label>
-        <input type="tel" id="telefono" name="telefono" class="form-input" placeholder="Ej. +504 9999-9999" required>
+            <!-- CAMPO 2: TELÉFONO (Columna: telefono) -->
+            <label for="telefono" class="block mb-2 font-medium">Teléfono de Contacto</label>
+            <input type="tel" id="telefono" name="telefono" class="form-input" placeholder="Ej. +5555 99xxxxxx" required="">
 
-        <!-- DIRECCIÓN -->
-        <label for="direccion" class="block mb-2 font-medium">Tu Dirección Exacta</label>
-        <input type="text" id="direccion" name="direccion" class="form-input" placeholder="Ej. Colonia El Dorado, Casa #25" required>
+            <!-- CAMPO 3: DIRECCIÓN (Columna: direccion) -->
+            <label for="direccion" class="block mb-2 font-medium">Tu Dirección Exacta (Residencia/Trabajo)</label>
+            <input type="text" id="direccion" name="direccion" class="form-input" placeholder="Ej. Colonia El Dorado, Casa #25" required="">
 
-        <!-- TIPO DE SERVICIO -->
-        <label for="tipo_servicio" class="block mb-2 font-medium">Tipo de Servicio Requerido</label>
-        <select id="tipo_servicio" name="tipo_servicio" class="form-select" required>
-            <option value="" disabled selected>Selecciona una opción</option>
-            <option value="Reparación de Hardware">Reparación de Hardware</option>
-            <option value="Mantenimiento de Software">Mantenimiento de Software</option>
-            <option value="Configuración de Redes">Configuración de Redes</option>
-            <option value="Eliminación de Virus/Malware">Eliminación de Virus/Malware</option>
-            <option value="Soporte Remoto/Consultoría">Soporte Remoto/Consultoría</option>
-            <option value="Otro">Otro (Especificar en Problema)</option>
-        </select>
+            <!-- CAMPO 4: TIPO DE SERVICIO (Columna: tipo_servicio) -->
+            <label for="tipo_servicio" class="block mb-2 font-medium">Tipo de Servicio Requerido</label>
+            <select id="tipo_servicio" name="tipo_servicio" class="form-select" required="">
+                <option value="" disabled="" selected="">Selecciona una opción</option>
+                <option value="Reparación de Hardware">Reparación de Hardware</option>
+                <option value="Mantenimiento de Software">Mantenimiento de Software</option>
+                <option value="Configuración de Redes">Configuración de Redes</option>
+                <option value="Eliminación de Virus/Malware">Eliminación de Virus/Malware</option>
+                <option value="Soporte Remoto/Consultoría">Soporte Remoto/Consultoría</option>
+                <option value="Otro">Otro (Especificar en Problema)</option>
+            </select>
 
-        <!-- PROBLEMA -->
-        <label for="problema" class="block mb-2 font-medium">Describe tu Problema (Máximo 200 palabras)</label>
-        <textarea id="problema" name="problema" class="form-textarea" rows="4" placeholder="soy ARA Y ME GUSTA SEXO ANAL..." maxlength="1000" required></textarea>
+            <!-- CAMPO 5: PROBLEMA (Columna: problema) -->
+            <label for="problema" class="block mb-2 font-medium">Describe tu Problema (Máximo 200 palabras)</label>
+            <textarea id="problema" name="problema" class="form-textarea" rows="4" placeholder="Mi pc esta poseida..." maxlength="1000" required=""></textarea>
 
-        <button type="submit" id="submitButton" class="submit-button mt-4">Solicitar Técnico Ahora</button>
-    </form>
+            <button type="submit" id="submitButton" class="submit-button mt-4">Solicitar Técnico Ahora</button>
+        </form>
 
-    <div id="message" class="message-box"></div>
-</div>
+        <div id="message" class="message-box"></div>
+    </div>
 
-<script type="module">
-    // Importación directa del cliente de Supabase
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+<script>
+    // Configuración de Supabase (Debes reemplazar estas variables con tus propias credenciales)
+    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co"; // REEMPLAZA CON TU URL
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc"; // REEMPLAZA CON TU CLAVE ANON
+    
+    // Inicialización del cliente Supabase
+    let supabaseClient;
+    try {
+        // SOLUCIÓN AL ERROR: La variable global es 'supabase' (minúscula)
+        if (typeof supabase !== 'undefined') {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Supabase inicializado correctamente.");
+        } else {
+            console.error("El SDK de Supabase no se cargó. Verifica la etiqueta <script>.");
+            showMessage("🔴 ERROR: El SDK de Supabase no se ha cargado correctamente.", 'error');
+        }
+    } catch (e) {
+        console.error("Error al crear cliente Supabase:", e);
+        showMessage("🔴 ERROR: Fallo al crear el cliente Supabase. Revisa las URL/Keys.", 'error');
+    }
 
-    // ------------------------------------------------------------------
-    //  CONFIGURACIÓN DE SUPABASE (VERIFICAR ESTAS TRES LÍNEAS)
-    // ------------------------------------------------------------------
-    const SUPABASE_URL = "https://hsdhsgyzxalhjdihpuvo.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0
+    // Nombre de tu tabla, confirmado como 'clientes'
+    const TABLE_NAME = 'clientes'; 
+
+    const form = document.getElementById('clientForm');
+    const submitButton = document.getElementById('submitButton');
+    const messageBox = document.getElementById('message');
+
+    /**
+     * Muestra un mensaje en la interfaz.
+     * @param {string} msg - El mensaje a mostrar.
+     * @param {('success'|'error')} type - El tipo de mensaje.
+     */
+    function showMessage(msg, type) {
+        messageBox.textContent = msg;
+        messageBox.className = `message-box ${type}`;
+        messageBox.style.display = 'block';
+        // Ocultar después de 4 segundos
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 4000);
+    }
+
+    // Lógica de Envío del Formulario
+    if (form && supabaseClient) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showMessage("", 'success'); // Limpiar mensajes
+            messageBox.style.display = 'none';
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Enviando Solicitud...";
+
+            try {
+                // 1. OBTENER VALORES DEL FORMULARIO USANDO LOS NOMBRES EXACTOS DE LAS COLUMNAS EN TU TABLA
+                const data = {
+                    nombre: document.getElementById('nombre').value,
+                    telefono: document.getElementById('telefono').value,
+                    direccion: document.getElementById('direccion').value,
+                    tipo_servicio: document.getElementById('tipo_servicio').value,
+                    problema: document.getElementById('problema').value,
+                    // 'fecha_solicitud' y 'status' tienen valores por defecto en la tabla, no se envían
+                };
+
+                // 2. INSERCIÓN DE DATOS en la tabla 'clientes'
+                const { error, data: insertedData } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .insert([data])
+                    .select(); // Devolvemos los datos insertados, incluyendo el ID
+
+                if (error) {
+                    let errorMessage = `🔴 FALLO: Código Supabase: ${error.code}.`;
+                    
+                    if (error.code === '23502') {
+                        errorMessage = "🔴 ¡ERROR DE COLUMNA! Le falta un campo obligatorio (NOT NULL) o los datos no coinciden con los tipos.";
+                    } else if (error.code === '42501') {
+                         errorMessage = "🔴 ¡ERROR RLS! Se deniega el permiso. Verifique las políticas de seguridad (RLS) de su tabla 'clientes'.";
+                    } else {
+                        errorMessage = `🔴 ¡FALLO DESCONOCIDO! Revise la consola (F12) para ver el mensaje completo: ${error.message}`;
+                    }
+
+                    showMessage(errorMessage, 'error');
+                    console.error("Supabase Error Completo:", error);
+
+                } else {
+                    // ÉXITO: Redirigir a la página de confirmación de pago.
+                    const id = insertedData && insertedData.length > 0 ? insertedData[0].id : 'N/A';
+                    
+                    if (id !== 'N/A') {
+                        showMessage(`✅ ¡Solicitud #${id} registrada! Redirigiendo a pago...`, 'success');
+                        // Redirección con el ID del registro
+                        setTimeout(() => {
+                            window.location.href = 'confirmacion-pago.html?solicitud=' + id;
+                        }, 1000);
+                    } else {
+                        showMessage("✅ Solicitud registrada, pero no se recibió el ID. Recarga la página.", 'success');
+                        form.reset();
+                    }
+                }
+
+            } catch (error) {
+                showMessage("ERROR DE CONEXIÓN DE RED: Fallo al contactar a Supabase.", 'error');
+                console.error("Error de Fetch o Desconocido:", error);
+            } finally {
+                // Si la redirección falla o hay un error, el botón se reestablece.
+                submitButton.disabled = false;
+                submitButton.textContent = "Solicitar Técnico Ahora";
+            }
+        });
+    }
+
+</script>
+<p style="color: yellow; font-size: 12px; text-align: center; margin-top: 20px;">
+    VERSIÓN ACTUALIZADA: 2025-11-12 - TEST
+</p>
+
+</body></html>
