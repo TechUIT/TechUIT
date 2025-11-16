@@ -5,105 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitud de Servicio | TechUIT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #0a0a0a;
-            --card: #111111;
-            --border: #222222;
-            --primary: #007bff;
-            --text: #ffffff;
-            --muted: #aaaaaa;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
-            background: radial-gradient(circle at top left, #1a1a2e, #0f0f1e);
-        }
-        .container {
-            width: 100%;
-            max-width: 420px;
-            background: var(--card);
-            padding: 2.8rem 2rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 123, 255, 0.15);
-            border: 1px solid var(--border);
-        }
-        .logo { width: 80px; margin: 0 auto 1.5rem; display: block; filter: brightness(0) invert(1); }
-        .title {
-            font-size: 1.9rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(90deg, #007bff, #00d4ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .subtitle { text-align: center; color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
-        .login-link { text-align: right; color: #60a5fa; font-size: 0.9rem; cursor: pointer; margin-bottom: 1rem; font-weight: 500; }
-        .input, .select, .textarea {
-            width: 100%;
-            padding: 14px 16px;
-            margin-bottom: 1rem;
-            background: #1a1a1a;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        .input:focus, .select:focus, .textarea:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
-        }
-        .btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 0.5rem;
-        }
-        .btn:hover { background: #0056b3; transform: translateY(-2px); }
-        .btn:disabled { background: #444; cursor: not-allowed; }
-        .status { text-align: center; color: #60a5fa; font-size: 0.95rem; margin: 0.5rem 0 1rem; }
-        .hidden { display: none; }
-        .message { padding: 1rem; border-radius: 12px; text-align: center; margin-top: 1rem; font-weight: 600; display: none; }
-        .welcome { text-align: center; color: #34d399; font-weight: 600; margin-bottom: 1rem; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; }
-        .modal-content { background: var(--card); padding: 2rem; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid var(--border); }
-        /* CACHE BUSTER INVISIBLE – rompe el CDN sin que nadie lo vea */
-        .cache-buster { position: absolute; left: -9999px; opacity: 0; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#000;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:1rem}
+        .c{width:100%;max-width:460px;background:#111;padding:2.5rem;border-radius:16px;box-shadow:0 10px 40px rgba(0,100,255,0.2)}
+        img{width:70px;margin:0 auto 1.5rem;display:block;filter:invert(1)}
+        h1{font-size:1.8rem;font-weight:700;text-align:center;margin-bottom:.5rem}
+        p{text-align:center;color:#aaa;font-size:.95rem;margin-bottom:1.5rem}
+        input,select,textarea{width:100%;padding:14px;margin-bottom:1rem;background:#222;border:1px solid #333;border-radius:10px;color:#fff;font-size:1rem}
+        input:focus,select:focus,textarea:focus{border-color:#007bff;outline:none}
+        button{width:100%;padding:16px;background:#007bff;color:#fff;font-weight:600;border:none;border-radius:10px;cursor:pointer;font-size:1.1rem}
+        button:hover{background:#0056b3}
+        button:disabled{background:#444;cursor:not-allowed}
+        .status{text-align:center;color:#60a5fa;margin:1rem 0}
+        .hidden{display:none}
+        .msg{margin-top:1rem;padding:1rem;border-radius:10px;text-align:center;display:none}
     </style>
 </head>
 <body>
-<div class="container">
-    <img src="Logo.png" alt="TechUIT" class="logo">
-    <div class="login-link" id="loginLink">¿Ya eres cliente? Inicia sesión</div>
-    <h1 class="title">Solicitud de Servicio</h1>
-    <p class="subtitle">Un técnico experto te contactará en minutos</p>
-    <div id="welcome" class="welcome" style="display:none;"></div>
+<div class="c">
+    <img src="Logo.png" alt="TechUIT">
+    <h1>Solicitud de Servicio Técnico</h1>
+    <p>Llená el formulario y un técnico te contacta rápido</p>
 
     <form id="form">
-        <input type="text" id="nombre" class="input" placeholder="Nombre Completo" required>
-        <input type="tel" id="telefono" class="input" placeholder="Teléfono de Contacto" required>
-        <input type="text" id="direccion" class="input" placeholder="Dirección Exacta" required>
+        <input type="text" id="nombre" placeholder="Nombre completo" required>
+        <input type="tel" id="telefono" placeholder="Teléfono" required>
+        <input type="text" id="direccion" placeholder="Dirección exacta" required>
 
-        <select id="ciudadManual" class="select hidden">
-            <option value="">Selecciona tu ciudad</option>
+        <select id="ciudadManual" class="hidden">
+            <option value="">– Elige tu ciudad –</option>
             <option>San Pedro Sula</option><option>Tegucigalpa</option><option>La Ceiba</option>
             <option>Choluteca</option><option>El Progreso</option><option>La Lima</option>
             <option>Puerto Cortés</option><option>Comayagua</option><option>Danlí</option>
@@ -113,36 +45,89 @@
 
         <p id="status" class="status">Detectando ubicación...</p>
 
-        <select id="servicio" class="select" required>
-            <option value="" disabled selected>Tipo de Servicio</option>
-            <option>Reparación de Hardware</option><option>Mantenimiento de Software</option>
-            <option>Configuración de Redes</option><option>Eliminación de Virus</option>
-            <option>Soporte Remoto</option><option>Otro</option>
+        <select id="servicio" required>
+            <option value="" disabled selected>Tipo de servicio</option>
+            <option>Reparación de Hardware</option>
+            <option>Mantenimiento de Software</option>
+            <option>Configuración de Redes</option>
+            <option>Eliminación de Virus/Malware</option>
+            <option>Soporte Remoto</option>
+            <option>Otro</option>
         </select>
 
-        <textarea id="problema" class="textarea" rows="4" placeholder="Describe tu problema..." maxlength="400" required></textarea>
+        <textarea id="problema" rows="4" placeholder="Describe el problema" maxlength="400" required></textarea>
         <input type="hidden" id="ciudad">
-        <button type="submit" id="btn" class="btn">Solicitar Técnico Ahora</button>
+
+        <button type="submit" id="btn">Solicitar Técnico Ahora</button>
     </form>
-    <div id="msg" class="message"></div>
+    <div id="msg" class="msg"></div>
 </div>
-
-<!-- CACHE BUSTER INVISIBLE (rompe el CDN sin que se vea) -->
-<div class="cache-buster" data-version="2025-11-15-v9-luxury"></div>
-
-<!-- MODAL LOGIN -->
-<div id="modal" class="modal">...</div>
 
 <script type="module">
-    const supabase = window.supabase.createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc');
-    const CIUDADES_VALIDAS = ['San Pedro Sula','Tegucigalpa','La Ceiba','Choluteca','El Progreso','La Lima','Puerto Cortés','Comayagua','Danlí','Santa Bárbara','Juticalpa','Siguatepeque','Roatán'];
+    const supabase = window.supabase.createClient(
+        'https://hsdhsgyzxalhjdihpuvo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'
+    );
+
+    const CIUDADES = ['San Pedro Sula','Tegucigalpa','La Ceiba','Choluteca','El Progreso','La Lima','Puerto Cortés','Comayagua','Danlí','Santa Bárbara','Juticalpa','Siguatepeque','Roatán'];
     let ciudad = null;
-    // ... (todo el script anterior que ya tenías – igualito, solo más limpio)
-    // Te lo pego completo si querés, pero para no alargar, confía: es el mismo que funcionaba + diseño luxury
+
+    const status = document.getElementById('status');
+    const ciudadManual = document.getElementById('ciudadManual');
+    const ciudadInput = document.getElementById('ciudad');
+
+    // GPS
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async pos => {
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
+            const d = await r.json();
+            const c = d.address?.city || d.address?.town || d.address?.state || '';
+            const norm = c.toLowerCase();
+            const encontrada = CIUDADES.find(ci => norm.includes(ci.toLowerCase().replace('á','a').replace('í','i')));
+            if (encontrada) {
+                ciudad = encontrada;
+                ciudadInput.value = ciudad;
+                status.innerHTML = `<strong>${ciudad}</strong>`;
+            } else fallback();
+        }, fallback, {timeout:10000});
+    } else fallback();
+
+    function fallback() {
+        status.textContent = 'Elige tu ciudad:';
+        ciudadManual.classList.remove('hidden');
+        ciudadManual.onchange = () => {
+            ciudad = ciudadManual.value;
+            ciudadInput.value = ciudad;
+        };
+    }
+
+    // ENVÍO
+    document.getElementById('form').onsubmit = async e => {
+        e.preventDefault();
+        if (!ciudad && !ciudadManual.value) return alert('Elige ciudad');
+        document.getElementById('btn').disabled = true;
+        document.getElementById('btn').textContent = 'Enviando...';
+
+        const data = {
+            nombre: document.getElementById('nombre').value,
+            telefono: document.getElementById('telefono').value,
+            direccion: document.getElementById('direccion').value,
+            tipo_servicio: document.getElementById('servicio').value,
+            problema: document.getElementById('problema').value,
+            ciudad: ciudad || ciudadManual.value,
+            status: 'Pendiente'
+        };
+
+        const {error} = await supabase.from('clientes').insert([data]);
+        if (error) {
+            alert('Error: '+error.message);
+        } else {
+            alert('¡Solicitud enviada! Te contactamos pronto');
+            window.location.href = 'confirmacion-pago.html?solicitud=nuevo';
+        }
+        document.getElementById('btn').disabled = false;
+        document.getElementById('btn').textContent = 'Solicitar Técnico Ahora';
+    };
 </script>
-<!-- DEBUG: Versión exacta cargada -->
-<div style="position:fixed;bottom:5px;right:5px;background:#000;color:#0f0;font-size:10px;padding:2px 6px;border:1px solid #0f0;opacity:0.7;z-index:9999;">
-    Live: 2025-11-15 16:09 HN
-</div>
 </body>
 </html>
