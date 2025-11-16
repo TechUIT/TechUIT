@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>Solicitud de Servicio | TechUIT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -13,23 +10,22 @@
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Inter',sans-serif;background:#000;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:1rem}
         .c{max-width:460px;width:100%;background:#111;padding:2.5rem;border-radius:16px;box-shadow:0 10px 40px rgba(0,100,255,.2)}
-        .logo{width:80px;margin:0 auto 1.8rem;display:block;filter:invert(1)}
+        .logo{width:80px;margin:0 auto 1.5rem;display:block}
         h1{font-size:1.9rem;font-weight:700;text-align:center;margin-bottom:.5rem}
         p{text-align:center;color:#aaa;font-size:.95rem;margin-bottom:1.8rem}
         input,select,textarea{width:100%;padding:14px;margin-bottom:1rem;background:#222;border:1px solid #333;border-radius:10px;color:#fff;font-size:1rem}
         input:focus,select:focus,textarea:focus{border-color:#007bff;outline:none}
-        button{width:100%;padding:16px;background:#007bff;color:#fff;font-weight:600;border:none;border-radius:10px;cursor:pointer;font-size:1.1rem;transition:.3s}
+        button{width:100%;padding:16px;background:#007bff;color:#fff;font-weight:600;border:none;border-radius:10px;cursor:pointer;font-size:1.1rem}
         button:hover{background:#0056b3}
         button:disabled{background:#444;cursor:not-allowed}
-        .status{text-align:center;color:#60a5fa;margin:1rem 0;font-size:0.95rem}
+        .status{text-align:center;color:#60a5fa;margin:1rem 0}
         .hidden{display:none}
+        .msg{margin-top:1rem;padding:1rem;background:#0a3d0a;border-radius:10px;text-align:center;color:#90ee90}
     </style>
 </head>
 <body>
 <div class="c">
-    <!-- MISMO LOGO QUE EN index.html -->
     <img src="Logo.png" alt="TechUIT" class="logo">
-
     <h1>Solicitud de Servicio Técnico</h1>
     <p>Llena el formulario y un técnico te contactará en minutos</p>
 
@@ -63,6 +59,8 @@
         <input type="hidden" id="ciudad">
         <button type="submit" id="btn">Solicitar Técnico Ahora</button>
     </form>
+
+    <div id="msg" class="msg" style="display:none;"></div>
 </div>
 
 <script type="module">
@@ -76,39 +74,35 @@
     const status = document.getElementById('status');
     const ciudadManual = document.getElementById('ciudadManual');
     const ciudadInput = document.getElementById('ciudad');
+    const msg = document.getElementById('msg');
 
+    // GPS (igual que antes)
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async pos => {
-            try {
-                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&zoom=10`);
-                const d = await r.json();
-                const c = d.address?.city || d.address?.town || d.address?.village || '';
-                const norm = c.toLowerCase();
-                const encontrada = CIUDADES.find(ci => norm.includes(ci.toLowerCase().replace(/á/g,'a')));
-                if (encontrada) {
-                    ciudad = encontrada;
-                    ciudadInput.value = ciudad;
-                    status.innerHTML = `<strong>${ciudad}</strong>`;
-                    return;
-                }
-            } catch(e) {}
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&zoom=10`);
+            const d = await r.json();
+            const c = d.address?.city || d.address?.town || '';
+            const encontrada = CIUDADES.find(x => c.toLowerCase().includes(x.toLowerCase()));
+            if (encontrada) {
+                ciudad = encontrada;
+                ciudadInput.value = ciudad;
+                status.innerHTML = `<strong>${ciudad}</strong>`;
+                return;
+            }
             fallback();
         }, fallback);
     } else fallback();
 
     function fallback() {
-        status.textContent = 'Selecciona tu ciudad:';
+        status.textContent = 'Elige tu ciudad:';
         ciudadManual.classList.remove('hidden');
-        ciudadManual.onchange = () => {
-            ciudad = ciudadManual.value;
-            ciudadInput.value = ciudad;
-        };
+        ciudadManual.onchange = () => { ciudad = ciudadManual.value; ciudadInput.value = ciudad; };
     }
 
     document.getElementById('form').onsubmit = async e => {
         e.preventDefault();
-        if (!ciudad && !ciudadManual.value) return alert('Selecciona una ciudad');
-        
+        if (!ciudad && !ciudadManual.value) return;
+
         const btn = document.getElementById('btn');
         btn.disabled = true;
         btn.textContent = 'Enviando...';
@@ -123,20 +117,23 @@
             status: 'Pendiente'
         };
 
-        const { data, error } = await supabase
-            .from('clientes')
-            .insert([payload])
-            .select();
-
-        if (error) {
-            alert('Error: ' + error.message);
-        } else {
-            const id = data[0].id;
-            alert(`¡Solicitud enviada! Tu número: #${id}`);
-            location.href = `confirmacion-pago.html?solicitud=${id}`;
-        }
+        const { data, error } = await supabase.from('clientes').insert([payload]).select();
         btn.disabled = false;
         btn.textContent = 'Solicitar Técnico Ahora';
+
+        if (error) {
+            msg.style.display = 'block';
+            msg.style.background = '#3d0a0a';
+            msg.style.color = '#ee9090';
+            msg.textContent = 'Error: ' + error.message;
+        } else {
+            const id = data[0].id;
+            msg.style.display = 'block';
+            msg.textContent = `¡Solicitud enviada con éxito! Tu número de solicitud: #${id}`;
+            setTimeout(() => {
+                location.href = `confirmacion-pago.html?solicitud=${id}`;
+            }, 2000);
+        }
     };
 </script>
 </body>
