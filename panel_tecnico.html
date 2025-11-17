@@ -3,51 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Técnico</title>
+  <title>Panel Técnico | TechUIT</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+    }
+  </script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    :root { --color-primary:#007bff; --color-dark-bg:#0d1117; --color-card-bg:#161b22; --color-text-light:#f3f4f6; --color-border:#30363d; }
+    body { font-family:'Inter',sans-serif; background:var(--color-dark-bg); color:var(--color-text-light); margin:0; padding:20px; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+    .card { max-width:440px; width:100%; background:var(--color-card-bg); border:1px solid var(--color-border); padding:2rem; border-radius:1.5rem; box-shadow:0 10px 40px rgba(0,123,255,.15); }
+    input { background:#0d1117; border:1px solid #30363d; padding:12px; border-radius:8px; color:white; width:100%; margin-bottom:1rem; }
+    button { background:#007bff; color:white; padding:12px; border:none; border-radius:8px; width:100%; font-weight:600; cursor:pointer; }
+    button:hover { background:#0056b3; }
+    .btn-green { background:#28a745; }
+    .btn-green:hover { background:#218838; }
+    .btn-yellow { background:#ffc107; color:#212529; }
+    .btn-yellow:hover { background:#e0a800; }
+    #map { height:300px; border-radius:12px; margin:1rem 0; border:1px solid var(--color-border); }
+    .order { background:#1e242a; padding:1rem; border-radius:8px; margin:1rem 0; border-left:4px solid #007bff; }
+  </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4">
-  <div class="max-w-md mx-auto bg-gray-800 rounded-xl p-6">
-    <input type="email" id="email" placeholder="email técnico" class="w-full p-3 rounded bg-gray-700 mb-4">
-    <button onclick="login()" class="w-full bg-blue-600 p-3 rounded font-bold">Entrar</button>
+<body>
 
-    <div id="panel" class="hidden mt-6">
-      <h2 class="text-2xl font-bold mb-4">Hola <span id="nombre"></span></h2>
-      <button onclick="gps()" id="gpsbtn" class="w-full bg-green-600 p-3 rounded font-bold mb-4">Iniciar GPS</button>
-      <div id="map" class="h-80 rounded-xl mb-4"></div>
-      <div id="ordenes"></div>
-    </div>
+<div class="card">
+  <h1 class="text-3xl font-bold text-center mb-8">Panel Técnico</h1>
+
+  <input type="email" id="email" placeholder="tuemail@techuit.hn" required>
+  <button onclick="login()">Iniciar sesión</button>
+
+  <div id="panel" class="hidden mt-8">
+    <h2 class="text-2xl font-bold mb-4">¡Hola, <span id="nombre"></span>!</h2>
+    <button onclick="toggleGPS()" id="gpsbtn" class="btn-green mb-4">Iniciar GPS</button>
+    <div id="map"></div>
+
+    <h3 class="text-xl font-bold mt-8 mb-4">Órdenes disponibles</h3>
+    <div id="disponibles"></div>
+
+    <h3 class="text-xl font-bold mt-8 mb-4">Mis órdenes</h3>
+    <div id="mias"></div>
   </div>
+</div>
 
 <script>
-  const { createClient } = supabase
-  const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE4MDk0NCwiZXhwIjoyMDc0NzU2OTQ0fQ.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc')
+  // Cliente creado PRIMERO (fix del error)
+  const supabase = supabase.createClient(
+    'https://hsdhsgyzxalhjdihpuvo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE4MDk0NCwiZXhwIjoyMDc0NzU2OTQ0fQ.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'
+  )
 
-  let watchId = null, tecnicoId
+  let watchId = null
+  let tecnicoId = null
+  let map = null
 
   async function login() {
     const email = document.getElementById('email').value.trim()
-    const { data } = await supabase.from('tecnicos').select('id,nombre').eq('email', email).single()
-    if (!data) return alert('Técnico no encontrado')
+    const { data, error } = await supabase.from('tecnicos').select('id,nombre').eq('email', email).single()
+    if (error || !data) return alert('Técnico no encontrado')
+
     tecnicoId = data.id
     document.getElementById('nombre').textContent = data.nombre
     document.getElementById('email').remove()
     document.querySelector('button[onclick="login()"]').remove()
     document.getElementById('panel').classList.remove('hidden')
+
     initMap()
     cargarOrdenes()
   }
 
   function initMap() {
-    const map = L.map('map').setView([15.5, -88], 8)
+    map = L.map('map').setView([15.5, -88], 8)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
-    window.map = map
   }
 
-  function gps() {
+  function toggleGPS() {
     if (watchId) {
       navigator.geolocation.clearWatch(watchId)
       watchId = null
@@ -63,22 +97,24 @@
 
   async function cargarOrdenes() {
     const { data: disp } = await supabase.from('clientes').select('id,nombre,ciudad').eq('status','pagado_verificado').is('tecnico_asignado_id',null)
-    const { data: mios } = await supabase.from('clientes').select('id,status').eq('tecnico_asignado_id',tecnicoId)
+    const { data: mis } = await supabase.from('clientes').select('id,status').eq('tecnico_asignado_id',tecnicoId)
 
-    document.getElementById('ordenes').innerHTML = `
-      <h3 class="font-bold text-lg mb-2">Disponibles</h3>
-      ${disp?.map(o => `<div class="bg-gray-700 p-3 rounded mb-2">${o.nombre} - ${o.ciudad} <button onclick="aceptar(${o.id})" class="bg-green-600 px-3 py-1 rounded text-sm">Aceptar</button></div>`).join('') || '<p class="text-gray-400">Ninguna</p>'}
-      <h3 class="font-bold text-lg mb-2 mt-6">Mis órdenes</h3>
-      ${mios?.map(o => `<div class="bg-gray-700 p-3 rounded mb-2">ID ${o.id} - ${o.status} 
-        ${o.status==='tecnico_asignado' ? `<button onclick="enCamino(${o.id})" class="bg-yellow-600 px-3 py-1 rounded text-sm">En camino</button>` : ''}
-        ${o.status==='tecnico_en_camino' ? `<button onclick="llegue(${o.id})" class="bg-yellow-600 px-3 py-1 rounded text-sm">Llegué</button>` : ''}
-      </div>`).join('') || '<p class="text-gray-400">Ninguna</p>'}
-    `
+    document.getElementById('disponibles').innerHTML = disp?.length
+      ? disp.map(o => `<div class="order">${o.nombre} - ${o.ciudad} <button onclick="aceptar(${o.id})" class="btn-green inline-block mt-2 text-sm">Aceptar</button></div>`).join('')
+      : '<p class="text-gray-500">No hay órdenes disponibles</p>'
+
+    document.getElementById('mias').innerHTML = mis?.length
+      ? mis.map(o => `<div class="order">ID ${o.id} → ${o.status}
+          ${o.status==='tecnico_asignado' ? `<button onclick="enCamino(${o.id})" class="btn-yellow inline-block mt-2 text-sm">En camino</button>` : ''}
+          ${o.status==='tecnico_en_camino' ? `<button onclick="llegue(${o.id})" class="btn-yellow inline-block mt-2 text-sm">Llegué</button>` : ''}
+        </div>`).join('')
+      : '<p class="text-gray-500">No tienes órdenes asignadas</p>'
   }
 
   async function aceptar(id) { await supabase.from('clientes').update({tecnico_asignado_id: tecnicoId, status:'tecnico_asignado'}).eq('id',id); cargarOrdenes() }
   async function enCamino(id) { await supabase.from('clientes').update({status:'tecnico_en_camino'}).eq('id',id); cargarOrdenes() }
   async function llegue(id) { await supabase.from('clientes').update({status:'tecnico_llego'}).eq('id',id); cargarOrdenes() }
 </script>
+
 </body>
 </html>
