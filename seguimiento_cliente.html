@@ -6,7 +6,7 @@
     <title>Seguimiento en Vivo | TechUIT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}} </script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -63,15 +63,18 @@
     const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc');
 
     let map, technicianMarker, customerMarker, channel;
+
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('id') || params.get('solicitud');
-    if (!orderId) document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">ID no válido</p>';
-    document.getElementById('order-id').textContent = orderId;
+    if (!orderId) {
+        document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">ID no válido</p>';
+    }
+    document.getElementById('order-id').textContent = orderId || '—';
 
     async function loadOrder() {
         const { data: order, error } = await supabase
             .from('clientes')
-            .select('*, tecnico(nombre, especialidad, foto_selfie_url)')
+            .select('*, tecnicos(nombre, especialidad, foto_selfie_url)')  // ← 100% CORRECTO: tecnicos (plural)
             .eq('id', orderId)
             .single();
 
@@ -81,50 +84,42 @@
         }
 
         renderStatus(order);
-        if (order.tecnico_asignado_id) showTechnician(order.tecnico);
+        if (order.tecnico_asignado_id && order.tecnicos) {
+            showTechnician(order.tecnicos);
+        }
 
         if (order.lat_cliente && order.lng_cliente) {
             initMap(order.lat_cliente, order.lng_cliente);
             document.getElementById('map-container').classList.remove('hidden');
-            if (['tecnico_en_camino','tecnico_llego'].includes(order.status)) {
+            if (['tecnico_en_camino', 'tecnico_llego'].includes(order.status)) {
                 startRealtimeTracking(order.tecnico_asignado_id);
             }
         }
-        setInterval(refreshOrder, 8000);
-    }
 
-    async function refreshOrder() {
-        const { data } = await supabase.from('clientes').select('status').eq('id', orderId).single();
-        if (data) renderStatus(data);
+        setInterval(() => {
+            supabase.from('clientes').select('status').eq('id', orderId).single().then(r => {
+                if (r.data) renderStatus(r.data);
+            });
+        }, 8000);
     }
 
     function renderStatus(o) {
-        const s = {
-            'pagado_verificado':{c:'status-searching',t:'Buscando técnico...'},
-            'tecnico_asignado':{c:'status-assigned',t:'Técnico asignado'},
-            'tecnico_en_camino':{c:'status-onroute',t:'En camino'},
-            'tecnico_llego':{c:'status-arrived',t:'¡Técnico llegó!',b:true},
-            'servicio_completado':{c:'status-arrived',t:'Servicio completado',b:true}
-        }[o.status] || {c:'status-waiting',t:o.status};
-
-        document.getElementById('status-container').innerHTML = `<div class="status-badge ${s.c} mb-3">${s.t}</div><p class="text-sm text-gray-400">${detalle(o.status)}</p>`;
-        if (s.b) document.getElementById('arrival-banner').classList.add('show');
-        else document.getElementById('arrival-banner').classList.remove('show');
-    }
-
-    function detalle(st) {
-        const d = {
-            'pagado_verificado':'Estamos asignando al mejor técnico.',
-            'tecnico_asignado':'El técnico se prepara para salir.',
-            'tecnico_en_camino':'Sigue su ubicación en tiempo real.',
-            'tecnico_llego':'El técnico está en tu ubicación.',
-            'servicio_completado':'¡Gracias por usar TechUIT!'
+        const estados = {
+            'pagado_verificado': {c:'status-searching', t:'Buscando técnico...'},
+            'tecnico_asignado': {c:'status-assigned', t:'Técnico asignado'},
+            'tecnico_en_camino': {c:'status-onroute', t:'En camino'},
+            'tecnico_llego': {c:'status-arrived', t:'¡Técnico llegó!', b:true},
+            'servicio_completado': {c:'status-arrived', t:'Servicio completado', b:true}
         };
-        return d[st] || '';
+        const s = estados[o.status] || {c:'status-waiting', t:o.status};
+        document.getElementById('status-container').innerHTML = `
+            <div class="status-badge ${s.c} mb-3">${s.t}</div>
+            <p class="text-sm text-gray-400">${s.b ? '¡Ya casi!' : 'Estamos trabajando en tu solicitud'}</p>
+        `;
+        document.getElementById('arrival-banner').classList.toggle('show', !!s.b);
     }
 
     function showTechnician(t) {
-        if (!t) return;
         document.getElementById('tech-name').textContent = t.nombre || 'Técnico';
         document.getElementById('tech-specialty').textContent = t.especialidad || 'General';
         document.getElementById('tech-avatar').src = t.foto_selfie_url 
@@ -133,28 +128,32 @@
         document.getElementById('technician-card').classList.remove('hidden');
     }
 
-    function initMap(lat,lng) {
-        map = L.map('map').setView([lat,lng],15);
+    function initMap(lat, lng) {
+        map = L.map('map').setView([lat, lng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        customerMarker = L.marker([lat,lng],{icon:L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',iconSize:[25,41],iconAnchor:[12,41]})})
-            .addTo(map).bindPopup('Tu ubicación').openPopup();
+        customerMarker = L.marker([lat, lng], {
+            icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', iconSize:[25,41], iconAnchor:[12,41]})
+        }).addTo(map).bindPopup('Tu ubicación').openPopup();
     }
 
-    function startRealtimeTracking(id) {
+    function startRealtimeTracking(tecId) {
         document.getElementById('tracking-status').textContent = 'Técnico en movimiento';
-        channel = supabase.channel('tecnico-location')
-            .on('postgres_changes', {event:'*',schema:'public',table:'tecnico_ubicacion',filter:`tecnico_id=eq.${id}`}, p => {
-                const {lat,lng} = p.new;
+        channel = supabase.channel('tech-location')
+            .on('postgres_changes', {event:'*', schema:'public', table:'tecnico_ubicacion', filter:`tecnico_id=eq.${tecId}`}, payload => {
+                const {lat, lng} = payload.new;
                 if (!technicianMarker) {
-                    technicianMarker = L.marker([lat,lng],{icon:L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',iconSize:[25,41],iconAnchor:[12,41]})})
-                        .addTo(map).bindPopup('Tu técnico');
-                } else technicianMarker.setLatLng([lat,lng]);
-                map.fitBounds(L.featureGroup([technicianMarker,customerMarker]).getBounds().pad(0.3));
+                    technicianMarker = L.marker([lat, lng], {
+                        icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', iconSize:[25,41], iconAnchor:[12,41]})
+                    }).addTo(map).bindPopup('Tu técnico');
+                } else {
+                    technicianMarker.setLatLng([lat, lng]);
+                }
+                map.fitBounds(L.featureGroup([technicianMarker, customerMarker]).getBounds().pad(0.3));
             })
             .subscribe();
     }
 
-    window.addEventListener('beforeunload', () => { if(channel) supabase.removeChannel(channel); });
+    window.addEventListener('beforeunload', () => { if (channel) supabase.removeChannel(channel); });
     loadOrder();
 </script>
 </body>
