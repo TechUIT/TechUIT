@@ -10,92 +10,23 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        :root {
-            --color-primary: #007bff;
-            --color-dark-bg: #0d1117;
-            --color-card-bg: #161b22;
-            --color-text-light: #f3f4f6;
-            --color-border: #30363d;
-            --color-success: #28a745;
-            --color-warning: #ffc107;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 16px;
-            background-color: var(--color-dark-bg);
-            color: var(--color-text-light);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .main-card {
-            max-width: 440px;
-            width: 100%;
-            background-color: var(--color-card-bg);
-            border: 1px solid var(--color-border);
-            padding: 2rem 1.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
-        }
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin: 0 auto;
-        }
-        .status-waiting { background: rgba(255,193,7,0.2); color: var(--color-warning); border: 1px solid var(--color-warning); }
-        .status-searching { background: rgba(0,123,255,0.2); color: var(--color-primary); border: 1px solid var(--color-primary); }
-        .status-assigned { background: rgba(40,167,69,0.2); color: var(--color-success); border: 1px solid var(--color-success); }
-        .status-onroute { background: rgba(255,193,7,0.2); color: var(--color-warning); border: 1px solid var(--color-warning); }
-        .status-arrived { background: rgba(40,167,69,0.2); color: var(--color-success); border: 1px solid var(--color-success); }
-        #map {
-            height: 280px;
-            border-radius: 12px;
-            margin-top: 1rem;
-            border: 1px solid var(--color-border);
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--color-primary);
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .technician-card {
-            background: #1e242a;
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .arrival-banner {
-            background: var(--color-success);
-            color: white;
-            padding: 1rem;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 700;
-            margin-top: 1rem;
-            display: none;
-        }
-        .arrival-banner.show { display: block; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        :root{--color-primary:#007bff;--color-dark-bg:#0d1117;--color-card-bg:#161b22;--color-text-light:#f3f4f6;--color-border:#30363d;--color-success:#28a745;--color-warning:#ffc107}
+        body{font-family:'Inter',sans-serif;margin:0;padding:16px;background-color:var(--color-dark-bg);color:var(--color-text-light);min-height:100vh;display:flex;justify-content:center;align-items:center}
+        .main-card{max-width:440px;width:100%;background-color:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem 1.5rem;border-radius:1.5rem;box-shadow:0 10px 40px rgba(0,123,255,.15)}
+        .status-badge{display:inline-flex;align-items:center;padding:8px 16px;border-radius:50px;font-weight:700;font-size:.9rem;margin:0 auto}
+        .status-waiting{background:rgba(255,193,7,.2);color:var(--color-warning);border:1px solid var(--color-warning)}
+        .status-searching{background:rgba(0,123,255,.2);color:var(--color-primary);border:1px solid var(--color-primary)}
+        .status-assigned{background:rgba(40,167,69,.2);color:var(--color-success);border:1px solid var(--color-success)}
+        .status-onroute{background:rgba(255,193,7,.2);color:var(--color-warning);border:1px solid var(--color-warning)}
+        .status-arrived{background:rgba(40,167,69,.2);color:var(--color-success);border:1px solid var(--color-success)}
+        #map{height:280px;border-radius:12px;margin-top:1rem;border:1px solid var(--color-border)}
+        .loader{border:4px solid #f3f3f3;border-top:4px solid var(--color-primary);border-radius:50%;width:32px;height:32px;animation:spin 1s linear infinite;margin:20px auto}
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .technician-card{background:#1e242a;border-radius:12px;padding:1rem;margin-top:1rem;display:flex;align-items:center;gap:1rem}
+        .avatar{width:60px;height:60px;border-radius:50%;object-fit:cover}
+        .arrival-banner{background:var(--color-success);color:white;padding:1rem;border-radius:12px;text-align:center;font-weight:700;margin-top:1rem;display:none}
+        .arrival-banner.show{display:block;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.8}}
     </style>
 </head>
 <body>
@@ -105,12 +36,10 @@
             <h1 class="text-3xl font-extrabold text-white mb-2">Seguimiento en Vivo</h1>
             <p class="text-sm text-gray-400">ID: <span id="order-id" class="font-bold text-yellow-400">—</span></p>
         </header>
-
         <div id="status-container" class="text-center">
             <div class="loader"></div>
             <p class="text-gray-400">Cargando tu servicio...</p>
         </div>
-
         <div id="technician-card" class="technician-card hidden">
             <img id="tech-avatar" src="" alt="Técnico" class="avatar">
             <div>
@@ -118,165 +47,35 @@
                 <p id="tech-specialty" class="text-sm text-gray-400"></p>
             </div>
         </div>
-
         <div id="map-container" class="hidden">
             <div id="map"></div>
             <p class="text-xs text-gray-400 text-center mt-2" id="tracking-status">Conectando con el técnico...</p>
         </div>
-
         <div id="arrival-banner" class="arrival-banner">
-            El técnico ha llegado a tu ubicación
+            ¡El técnico ha llegado a tu ubicación!
         </div>
     </div>
 </div>
 
 <script>
-    const supabaseUrl = 'https://hsdhsgyzxalhjdihpuvo.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc';
     const { createClient } = window.supabase;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc');
 
     let map, technicianMarker, customerMarker;
-    let channel;
-
     const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get('id'); // CAMBIADO: ?id=88
-
-    if (!orderId) {
-        document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">ID no válido</p>';
-        throw new Error('No ID');
-    }
+    const orderId = urlParams.get('id');
+    if (!orderId) { document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">ID no válido</p>'; }
 
     document.getElementById('order-id').textContent = orderId;
 
     async function loadOrder() {
-        const { data: order, error } = await supabase
-            .from('clientes')
-            .select('*, tecnicos(nombre, especialidad, foto_selfie_url)')
-            .eq('id', orderId)
-            .single();
-
-        if (error || !order) {
-            document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">Orden no encontrada</p>';
-            return;
-        }
+        const { data: order } = await supabase.from('clientes').select('*, tecnicos(nombre, especialidad, foto_selfie_url)').eq('id', orderId).single();
+        if (!order) { document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">Orden no encontrada</p>'; return; }
 
         renderStatus(order);
-        if (order.tecnico_asignado_id && ['tecnico_en_camino', 'tecnico_llego'].includes(order.status)) {
-            showTechnician(order.tecnicos);
-            initMap(order.ciudad);
-            startTracking(order.tecnico_asignado_id);
-            document.getElementById('map-container').classList.remove('hidden');
-        }
-    }
+        if (order.tecnico_asignado_id) showTechnician(order.tecnicos);
 
-    function renderStatus(order) {
-        const container = document.getElementById('status-container');
-        const map = {
-            'pagado_verificado': { badge: 'status-searching', text: 'Buscando técnico...' },
-            'tecnico_asignado': { badge: 'status-assigned', text: 'Técnico asignado' },
-            'tecnico_en_camino': { badge: 'status-onroute', text: 'En camino' },
-            'tecnico_llego': { badge: 'status-arrived', text: 'Técnico llegó', showBanner: true },
-            'servicio_completado': { badge: 'status-arrived', text: 'Servicio completado', showBanner: true }
-        };
-
-        const s = map[order.status] || { badge: 'status-waiting', text: order.status };
-        container.innerHTML = `
-            <div class="status-badge ${s.badge} mb-3">${s.text}</div>
-            <p class="text-sm text-gray-400">${getDetail(order.status)}</p>
-        `;
-
-        if (s.showBanner) {
-            document.getElementById('arrival-banner').classList.add('show');
-        }
-    }
-
-    function getDetail(status) {
-        const details = {
-            'pagado_verificado': 'Estamos asignando al mejor técnico disponible.',
-            'tecnico_asignado': 'El técnico se prepara para salir.',
-            'tecnico_en_camino': 'Sigue su ubicación en el mapa.',
-            'tecnico_llego': 'El técnico está en tu ubicación.',
-            'servicio_completado': '¡Gracias por usar TechUIT!'
-        };
-        return details[status] || '';
-    }
-
-    function showTechnician(tech) {
-        if (!tech) return;
-        document.getElementById('tech-name').textContent = tech.nombre;
-        document.getElementById('tech-specialty').textContent = tech.especialidad || 'Técnico General';
-        const avatar = document.getElementById('tech-avatar');
-        avatar.src = tech.foto_selfie_url ? 
-            `${supabaseUrl}/storage/v1/object/public/technician-avatars/${tech.foto_selfie_url}` : 
-            'https://i.pravatar.cc/60?u=tech';
-        document.getElementById('technician-card').classList.remove('hidden');
-    }
-
-    function initMap(city) {
-        const coords = getCityCoordinates(city) || [14.0723, -87.1921];
-        map = L.map('map').setView(coords, 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-        customerMarker = L.marker(coords, {
-            icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', iconSize: [25,41], iconAnchor: [12,41] })
-        }).addTo(map).bindPopup("Tu ubicación");
-    }
-
-    function startTracking(tecnicoId) {
-        document.getElementById('tracking-status').textContent = "Buscando al técnico...";
-
-        channel = supabase.channel(`tecnico-${tecnicoId}`)
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'tecnico_ubicacion', filter: `tecnico_id=eq.${tecnicoId}` }, payload => {
-                const { lat, lng } = payload.new;
-                updateMarker(lat, lng);
-            })
-            .subscribe();
-
-        supabase.from('tecnico_ubicacion').select('lat,lng').eq('tecnico_id', tecnicoId).single()
-            .then(({ data }) => { if (data) updateMarker(data.lat, data.lng); });
-    }
-
-    function updateMarker(lat, lng) {
-        const pos = [lat, lng];
-        if (!technicianMarker) {
-            technicianMarker = L.marker(pos, {
-                icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', iconSize: [25,41], iconAnchor: [12,41] })
-            }).addTo(map).bindPopup("Técnico");
-            document.getElementById('tracking-status').textContent = "Técnico en movimiento";
-        } else {
-            technicianMarker.setLatLng(pos);
-        }
-        if (customerMarker) map.fitBounds(L.featureGroup([technicianMarker, customerMarker]).getBounds().pad(0.2));
-    }
-
-    function getCityCoordinates(city) {
-        if (!city) return null;
-        const c = city.toLowerCase().trim();
-        const cities = {
-            'san pedro sula': [15.5042, -88.0250], 'sps': [15.5042, -88.0250],
-            'tegucigalpa': [14.0723, -87.1921], 'tgu': [14.0723, -87.1921],
-            'la ceiba': [15.7891, -86.7914],
-            'choluteca': [13.6097, -87.2614],
-            'el progreso': [15.4400, -87.8200],
-            'puerto cortes': [15.8583, -87.9306],
-            'comayagua': [14.4492, -87.6407],
-            'danli': [14.0600, -86.9800], 'danlí': [14.0600, -86.9800],
-            'juticalpa': [14.6667, -86.0500],
-            'siguatepeque': [14.6000, -87.9333],
-            'roatan': [16.3000, -86.5333], 'roatán': [16.3000, -86.5333]
-        };
-        for (const [key, coords] of Object.entries(cities)) {
-            if (c.includes(key)) return coords;
-        }
-        return null;
-    }
-
-    loadOrder();
-
-    window.addEventListener('beforeunload', () => {
-        if (channel) supabase.removeChannel(channel);
-    });
-</script>
-</body>
-</html>
+        if (order.lat_cliente && order.lng_cliente) {
+            initMap(order.lat_cliente, order.lng_cliente);
+            if (['tecnico_en_camino','tecnico_llego'].includes(order.status)) {
+                document
