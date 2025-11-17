@@ -8,65 +8,61 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    body{font-family: system-ui, sans-serif;background:#111827;color:#f3f4f6;margin:0;padding:1rem;display:grid;place-items:center;min-height:100vh}
-    .card{max-width:420px;width:100%;background:#1f2937;border-radius:1rem;padding:2rem;box-shadow:0 10px 30px rgba(0,0,0,.5);text-align:center}
-    #map{height:320px;border-radius:1rem;margin-top:1rem}
-  </style>
 </head>
-<body>
-<div class="card">
-  <h1 class="text-3xl font-bold mb-4">Seguimiento en vivo</h1>
-  <p>ID: <strong id="id" class="text-yellow-400">—</strong></p>
-  <div id="status" class="my-6 text-xl font-semibold">Cargando…</div>
-  <div id="tecnico" class="hidden flex items-center justify-center gap-4 my-6">
-    <img id="foto" src="" class="w-16 h-16 rounded-full object-cover">
-    <div class="text-left">
-      <div id="nombre" class="font-bold"></div>
-      <div id="esp" class="text-sm text-gray-400"></div>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+  <div class="bg-gray-800 rounded-xl p-8 max-w-md w-full text-center">
+    <h1 class="text-3xl font-bold mb-4">Seguimiento en vivo</h1>
+    <p>ID: <strong id="id" class="text-yellow-400">—</strong></p>
+    <div id="status" class="my-6 text-xl font-bold">Cargando…</div>
+    <div id="tecnico" class="hidden flex items-center justify-center gap-4 my-6">
+      <img id="foto" src="" class="w-16 h-16 rounded-full">
+      <div class="text-left">
+        <div id="nombre" class="font-bold"></div>
+        <div id="esp" class="text-sm text-gray-400"></div>
+      </div>
     </div>
+    <div id="map" class="h-80 rounded-xl"></div>
   </div>
-  <div id="map"></div>
-</div>
 
 <script>
-  const supabase = supabase.createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc');
-  
-  const urlParams = new URLSearchParams(location.search);
-  const id = urlParams.get('id') || urlParams.get('solicitud');
-  document.getElementById('id').textContent = id;
+  const { createClient } = supabase
+  const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc')
 
-  async function load() {
-    const {data: orden} = await supabase.from('clientes').select('*, tecnicos(nombre, especialidad, foto_selfie_url)').eq('id', id).single();
-    if (!orden) return document.getElementById('status').textContent = 'Orden no encontrada';
+  const urlParams = new URLSearchParams(location.search)
+  const id = urlParams.get('id') || urlParams.get('solicitud')
+  document.getElementById('id').textContent = id
 
-    const estados = {pagado_verificado:'Buscando técnico…',tecnico_asignado:'Técnico asignado',tecnico_en_camino:'En camino',tecnico_llego:'¡Técnico llegó!',servicio_completado:'Servicio completado'};
-    document.getElementById('status').textContent = estados[orden.status] || orden.status;
+  async function cargar() {
+    const { data: o } = await supabase.from('clientes').select('*, tecnicos(nombre, especialidad, foto_selfie_url)').eq('id', id).single()
+    if (!o) return document.getElementById('status').textContent = 'No encontrada'
 
-    if (orden.tecnicos) {
-      document.getElementById('nombre').textContent = orden.tecnicos.nombre;
-      document.getElementById('esp').textContent = orden.tecnicos.especialidad;
-      document.getElementById('foto').src = orden.tecnicos.foto_selfie_url ? `https://hsdhsgyzxalhjdihpuvo.supabase.co/storage/v1/object/public/technician-avatars/${orden.tecnicos.foto_selfie_url}` : 'https://i.pravatar.cc/150';
-      document.getElementById('tecnico').classList.remove('hidden');
+    const estados = {pagado_verificado:'Buscando técnico…',tecnico_asignado:'Técnico asignado',tecnico_en_camino:'En camino',tecnico_llego:'¡Técnico llegó!',servicio_completado:'Completado'}
+    document.getElementById('status').textContent = estados[o.status] || o.status
+
+    if (o.tecnicos) {
+      document.getElementById('nombre').textContent = o.tecnicos.nombre
+      document.getElementById('esp').textContent = o.tecnicos.especialidad || ''
+      document.getElementById('foto').src = o.tecnicos.foto_selfie_url ? `https://hsdhsgyzxalhjdihpuvo.supabase.co/storage/v1/object/public/technician-avatars/${o.tecnicos.foto_selfie_url}` : 'https://i.pravatar.cc/150'
+      document.getElementById('tecnico').classList.remove('hidden')
     }
 
-    if (orden.lat_cliente && orden.lng_cliente) {
-      const map = L.map('map').setView([orden.lat_cliente, orden.lng_cliente], 15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-      L.marker([orden.lat_cliente, orden.lng_cliente], {icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',iconSize:[25,41],iconAnchor:[12,41]})}).addTo(map).bindPopup('Tú').openPopup();
+    if (o.lat_cliente && o.lng_cliente) {
+      const map = L.map('map').setView([o.lat_cliente, o.lng_cliente], 15)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+      L.marker([o.lat_cliente, o.lng_cliente], {icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',iconSize:[25,41],iconAnchor:[12,41]})}).addTo(map).bindPopup('Tú').openPopup()
 
-      if (['tecnico_en_camino','tecnico_llego'].includes(orden.status)) {
+      if (['tecnico_en_camino','tecnico_llego'].includes(o.status)) {
         supabase.channel('track')
-          .on('postgres_changes', {event:'*', schema:'public', table:'tecnico_ubicacion', filter:`tecnico_id=eq.${orden.tecnico_asignado_id}`}, p => {
-            const {lat,lng} = p.new;
-            if (window.tecMarker) window.tecMarker.setLatLng([lat,lng]);
-            else window.tecMarker = L.marker([lat,lng], {icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',iconSize:[25,41],iconAnchor:[12,41]})}).addTo(map).bindPopup('Técnico');
+          .on('postgres_changes', {event:'*', schema:'public', table:'tecnico_ubicacion', filter:`tecnico_id=eq.${o.tecnico_asignado_id}`}, p => {
+            const {lat,lng} = p.new
+            if (window.tMarker) window.tMarker.setLatLng([lat,lng])
+            else window.tMarker = L.marker([lat,lng], {icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',iconSize:[25,41],iconAnchor:[12,41]})}).addTo(map).bindPopup('Técnico')
           })
-          .subscribe();
+          .subscribe()
       }
     }
   }
-  load();
+  cargar()
 </script>
 </body>
 </html>
