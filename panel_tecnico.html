@@ -1,57 +1,135 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panel Técnico | TechUIT</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={extend:{fontFamily:{sans:['Inter','sans-serif']}}}</script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-body{background:#0d1117;color:#f0f6fc;font-family:Inter,sans-serif;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.card{max-width:420px;width:100%;background:#161b22;border:1px solid #30363d;border-radius:16px;padding:2rem}</style></head><body>
-<div class="card"><h1 class="text-2xl font-bold mb-6 text-center">Panel Técnico</h1>
-<input type="email" id="email" placeholder="tuemail@techuit.hn" class="w-full p-3 rounded bg-gray-800 border border-gray-700 mb-4">
-<button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded">Entrar con Magic Link</button>
-<div id="dash" class="hidden mt-6"><h2>Hola <span id="nom"></span></h2>
-<button onclick="gps()" id="gpsbtn" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded my-4">Iniciar GPS</button>
-<div id="map" style="height:300px;border-radius:12px"></div>
-<div id="orders" class="mt-6"></div></div></div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Técnico | TechUIT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body{font-family:'Inter',sans-serif;background:#0d1117;color:#f3f4f6;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh}
+        .card{max-width:440px;width:100%;background:#161b22;border:1px solid #30363d;padding:2rem;border-radius:1.5rem}
+        .input{padding:12px;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:white;width:100%;margin-bottom:1rem}
+        .btn{background:#007bff;color:white;padding:12px;border:none;border-radius:8px;width:100%;font-weight:600;cursor:pointer}
+        .btn-red{background:#dc3545}
+        #map{height:250px;border-radius:12px;margin:1rem 0;border:1px solid #30363d}
+        .order{background:#1e242a;padding:1rem;border-radius:8px;margin:1rem 0;border-left:4px solid #007bff}
+    </style>
+</head>
+<body>
+
+<div class="card" id="login">
+    <h1 class="text-3xl font-bold text-center mb-8">Panel Técnico</h1>
+    <input type="email" id="email" class="input" placeholder="tuemail@techuit.hn" required>
+    <button onclick="login()" class="btn">Iniciar Sesión</button>
+</div>
+
+<div class="card hidden" id="dashboard">
+    <h1 class="text-2xl font-bold mb-4">¡Hola, <span id="nombre"></span>!</h1>
+    <button onclick="supabase.auth.signOut().then(()=>location.reload())" class="btn btn-red mb-4">Cerrar Sesión</button>
+    
+    <button id="gps-btn" class="btn mb-4">Iniciar GPS</button>
+    <div id="map"></div>
+    <p class="text-sm">Coordenadas: <span id="coords">-</span></p>
+    
+    <h2 class="text-xl font-bold mt-6 mb-3">Órdenes Disponibles</h2>
+    <div id="available"></div>
+    
+    <h2 class="text-xl font-bold mt-6 mb-3">Mis Órdenes</h2>
+    <div id="accepted"></div>
+</div>
 
 <script>
-const supabase = Supabase.createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE4MDk0NCwiZXhwIjoyMDc0NzU2OTQ0fQ.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc');
-let watchId, map, marker, tecnicoId;
+    const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE4MDk0NCwiZXhwIjoyMDc0NzU2OTQ0fQ.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc');
 
-async function login(){
-  const {error} = await supabase.auth.signInWithOtp({email:document.getElementById('email').value});
-  if(error) alert(error.message); else alert('Revisa tu correo y entra con el enlace');
-}
-supabase.auth.onAuthStateChange(async(e,session)=>{
-  if(e==='SIGNED_IN'){
-    tecnicoId=session.user.id;
-    const {data}=await supabase.from('tecnicos').select('nombre').eq('id',tecnicoId).single();
-    document.getElementById('nom').textContent=data.nombre;
-    document.querySelector('[onclick="login()"]').parentNode.classList.add('hidden');
-    document.getElementById('dash').classList.remove('hidden');
-    initMap(); loadOrders();
-  }
-});
-function initMap(){map=L.map('map').setView([15.5,-88],8);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);}
-function gps(){
-  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;document.getElementById('gpsbtn').textContent='Iniciar GPS';return;}
-  watchId=navigator.geolocation.watchPosition(p=>{
-    const {latitude:lat,longitude:lng}=p.coords;
-    supabase.from('tecnico_ubicacion').upsert({tecnico_id:tecnicoId,lat,lng});
-    if(marker) marker.setLatLng([lat,lng]); else marker=L.marker([lat,lng]).addTo(map);
-    map.setView([lat,lng],15);
-  },null,{enableHighAccuracy:true});
-  document.getElementById('gpsbtn').textContent='Detener GPS';
-}
-async function loadOrders(){
-  const {data:avail}=await supabase.from('clientes').select('*').eq('status','pagado_verificado').is('tecnico_asignado_id',null);
-  const {data:mine}=await supabase.from('clientes').select('*').eq('tecnico_asignado_id',tecnicoId);
-  document.getElementById('orders').innerHTML='<h3 class="font-bold">Disponibles</h3>'+ (avail?.map(o=>`<div class="bg-gray-800 p-3 rounded mb-2">${o.nombre} - ${o.ciudad} <button onclick="aceptar(${o.id})" class="bg-green-600 px-3 py-1 rounded">Aceptar</button></div>`).join('')||'Ninguna') +
-  '<h3 class="font-bold mt-4">Mis órdenes</h3>'+ (mine?.map(o=>`<div class="bg-gray-800 p-3 rounded mb-2">ID ${o.id} - ${o.status} ${o.status==='tecnico_asignado'?`<button onclick="enCamino(${o.id})" class="bg-yellow-600 px-3 py-1 rounded">En camino</button>`:''} ${o.status==='tecnico_en_camino'?`<button onclick="llegue(${o.id})" class="bg-yellow-600 px-3 py-1 rounded">Llegué</button>`:''}</div>`).join('')||'Ninguna');
-}
-async function aceptar(id){await supabase.from('clientes').update({tecnico_asignado_id:tecnicoId,status:'tecnico_asignado'}).eq('id',id);loadOrders();}
-async function enCamino(id){await supabase.from('clientes').update({status:'tecnico_en_camino'}).eq('id',id);loadOrders();}
-async function llegue(id){await supabase.from('clientes').update({status:'tecnico_llego'}).eq('id',id);loadOrders();}
+    let map, marker, watchId, tecnicoId;
+
+    async function login() {
+        const email = document.getElementById('email').value.trim();
+        const { data, error } = await supabase.auth.signInWithOtp({ email });
+        if (error) alert(error.message);
+        else alert('Revisa tu correo y haz clic en el enlace para entrar');
+    }
+
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN') {
+            tecnicoId = session.user.id;
+            const { data: tec } = await supabase.from('tecnicos').select('nombre').eq('id', tecnicoId).single();
+            document.getElementById('nombre').textContent = tec.nombre;
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            initMap();
+            loadOrders();
+        }
+    });
+
+    document.getElementById('gps-btn').onclick = () => {
+        if (watchId) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+            document.getElementById('gps-btn').textContent = 'Iniciar GPS';
+        } else {
+            watchId = navigator.geolocation.watchPosition(pos => {
+                const { latitude: lat, longitude: lng } = pos.coords;
+                document.getElementById('coords').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                supabase.from('tecnico_ubicacion').upsert({ tecnico_id: tecnicoId, lat, lng });
+                if (marker) marker.setLatLng([lat, lng]);
+                else marker = L.marker([lat, lng], {icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',iconSize:[25,41]})}).addTo(map);
+                map.setView([lat, lng], 15);
+            }, null, { enableHighAccuracy: true });
+            document.getElementById('gps-btn').textContent = 'Detener GPS';
+        }
+    };
+
+    function initMap() {
+        map = L.map('map').setView([15.5, -88], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    }
+
+    async function loadOrders() {
+        const { data: available } = await supabase.from('clientes').select('*').eq('status', 'pagado_verificado').is('tecnico_asignado_id', null);
+        const { data: accepted } = await supabase.from('clientes').select('*').eq('tecnico_asignado_id', tecnicoId);
+
+        document.getElementById('available').innerHTML = available?.map(o => `
+            <div class="order">
+                <strong>ID ${o.id}</strong> - ${o.nombre}<br>
+                ${o.ciudad} ≈ ? km
+                <button onclick="accept(${o.id})" class="btn" style="background:#28a745;margin-top:8px">Aceptar</button>
+            </div>
+        `).join('') || 'No hay disponibles';
+
+        document.getElementById('accepted').innerHTML = accepted?.map(o => `
+            <div class="order">
+                <strong>ID ${o.id}</strong> - ${o.nombre}<br>
+                Estado: ${o.status}
+                ${o.status === 'tecnico_asignado' ? `<button onclick="enCamino(${o.id})" class="btn" style="background:#ffc107">En Camino</button>` : ''}
+                ${o.status === 'tecnico_en_camino' ? `<button onclick="llegue(${o.id})" class="btn" style="background:#ffc107">Llegué</button>` : ''}
+                ${o.status === 'tecnico_llego' ? `<button onclick="completar(${o.id})" class="btn" style="background:#28a745">Completar</button>` : ''}
+            </div>
+        `).join('') || 'No tienes órdenes';
+    }
+
+    async function accept(id) { await supabase.from('clientes').update({tecnico_asignado_id: tecnicoId, status: 'tecnico_asignado'}).eq('id', id); loadOrders(); }
+    async function enCamino(id) { await supabase.from('clientes').update({status: 'tecnico_en_camino'}).eq('id', id); loadOrders(); }
+    async function llegue(id) { await supabase.from('clientes').update({status: 'tecnico_llego'}).eq('id', id); loadOrders(); }
+    async function completar(id) { await supabase.from('clientes').update({status: 'servicio_completado'}).eq('id', id); loadOrders(); }
+
+    // Auto login si ya tiene sesión
+    if (supabase.auth.session()) {
+        const session = supabase.auth.session();
+        tecnicoId = session.user.id;
+        supabase.from('tecnicos').select('nombre').eq('id', tecnicoId).single().then(r => {
+            document.getElementById('nombre').textContent = r.data.nombre;
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            initMap();
+            loadOrders();
+        });
+    }
 </script>
-</body></html>
+</body>
+</html>
