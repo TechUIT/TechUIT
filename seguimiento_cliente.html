@@ -12,8 +12,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         :root{--color-primary:#007bff;--color-dark-bg:#0d1117;--color-card-bg:#161b22;--color-text-light:#f3f4f6;--color-border:#30363d;--color-success:#28a745;--color-warning:#ffc107}
-        body{font-family:'Inter',sans-serif;margin:0;padding:16px;background-color:var(--color-dark-bg);color:var(--color-text-light);min-height:100vh;display:flex;justify-content:center;align-items:center}
-        .main-card{max-width:440px;width:100%;background-color:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem 1.5rem;border-radius:1.5rem;box-shadow:0 10px 40px rgba(0,123,255,.15)}
+        body{font-family:'Inter',sans-serif;margin:0;padding:16px;background:var(--color-dark-bg);color:var(--color-text-light);min-height:100vh;display:flex;justify-content:center;align-items:center}
+        .main-card{max-width:440px;width:100%;background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem 1.5rem;border-radius:1.5rem;box-shadow:0 10px 40px rgba(0,123,255,.15)}
         .status-badge{display:inline-flex;align-items:center;padding:8px 16px;border-radius:50px;font-weight:700;font-size:.9rem;margin:0 auto}
         .status-waiting{background:rgba(255,193,7,.2);color:var(--color-warning);border:1px solid var(--color-warning)}
         .status-searching{background:rgba(0,123,255,.2);color:var(--color-primary);border:1px solid var(--color-primary)}
@@ -50,7 +50,7 @@
         </div>
         <div id="map-container" class="hidden">
             <div id="map"></div>
-            <p class="text-xs text-gray-400 text-center mt-2" id="tracking-status">Conectando con el técnico...</p>
+            <p class="text-xs text-gray-400 text-center mt-2" id="tracking-status">Conectando...</p>
         </div>
         <div id="arrival-banner" class="arrival-banner">
             ¡El técnico ha llegado a tu ubicación!
@@ -62,19 +62,16 @@
     const { createClient } = window.supabase;
     const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc');
 
-    let map, technicianMarker, customerMarker, channel;
+    let map, technicianMarker, customerMarker;
 
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('id') || params.get('solicitud');
-    if (!orderId) {
-        document.getElementById('status-container').innerHTML = '<p class="text-red-400 text-center">ID no válido</p>';
-    }
     document.getElementById('order-id').textContent = orderId || '—';
 
     async function loadOrder() {
         const { data: order, error } = await supabase
             .from('clientes')
-            .select('*, tecnicos(nombre, especialidad, foto_selfie_url)')  // ← 100% CORRECTO: tecnicos (plural)
+            .select('id,status,tecnico_asignado_id,lat_cliente,lng_cliente,tecnicos!tecnico_asignado_id(nombre,especialidad,foto_selfie_url)')
             .eq('id', orderId)
             .single();
 
@@ -83,77 +80,54 @@
             return;
         }
 
-        renderStatus(order);
-        if (order.tecnico_asignado_id && order.tecnicos) {
-            showTechnician(order.tecnicos);
+        // Mostrar estado
+        const estados = {'pagado_verificado':'Buscando técnico...','tecnico_asignado':'Técnico asignado','tecnico_en_camino':'En camino','tecnico_llego':'¡Técnico llegó!','servicio_completado':'Completado'};
+        document.getElementById('status-container').innerHTML = `<div class="status-badge status-assigned mb-3">${estados[order.status] || order.status}</div>`;
+        if (order.status === 'tecnico_llego' || order.status === 'servicio_completado') {
+            document.getElementById('arrival-banner').classList.add('show');
         }
 
+        // Mostrar técnico
+        if (order.tecnicos) {
+            document.getElementById('tech-name').textContent = order.tecnicos.nombre;
+            document.getElementById('tech-specialty').textContent = order.tecnicos.especialidad;
+            document.getElementById('tech-avatar').src = order.tecnicos.foto_selfie_url 
+                ? `https://hsdhsgyzxalhjdihpuvo.supabase.co/storage/v1/object/public/technician-avatars/${order.tecnicos.foto_selfie_url}`
+                : 'https://i.pravatar.cc/150';
+            document.getElementById('technician-card').classList.remove('hidden');
+        }
+
+        // Mapa
         if (order.lat_cliente && order.lng_cliente) {
             initMap(order.lat_cliente, order.lng_cliente);
             document.getElementById('map-container').classList.remove('hidden');
-            if (['tecnico_en_camino', 'tecnico_llego'].includes(order.status)) {
-                startRealtimeTracking(order.tecnico_asignado_id);
+            if (order.status === 'tecnico_en_camino' || order.status === 'tecnico_llego') {
+                startTracking(order.tecnico_asignado_id);
             }
         }
-
-        setInterval(() => {
-            supabase.from('clientes').select('status').eq('id', orderId).single().then(r => {
-                if (r.data) renderStatus(r.data);
-            });
-        }, 8000);
-    }
-
-    function renderStatus(o) {
-        const estados = {
-            'pagado_verificado': {c:'status-searching', t:'Buscando técnico...'},
-            'tecnico_asignado': {c:'status-assigned', t:'Técnico asignado'},
-            'tecnico_en_camino': {c:'status-onroute', t:'En camino'},
-            'tecnico_llego': {c:'status-arrived', t:'¡Técnico llegó!', b:true},
-            'servicio_completado': {c:'status-arrived', t:'Servicio completado', b:true}
-        };
-        const s = estados[o.status] || {c:'status-waiting', t:o.status};
-        document.getElementById('status-container').innerHTML = `
-            <div class="status-badge ${s.c} mb-3">${s.t}</div>
-            <p class="text-sm text-gray-400">${s.b ? '¡Ya casi!' : 'Estamos trabajando en tu solicitud'}</p>
-        `;
-        document.getElementById('arrival-banner').classList.toggle('show', !!s.b);
-    }
-
-    function showTechnician(t) {
-        document.getElementById('tech-name').textContent = t.nombre || 'Técnico';
-        document.getElementById('tech-specialty').textContent = t.especialidad || 'General';
-        document.getElementById('tech-avatar').src = t.foto_selfie_url 
-            ? `https://hsdhsgyzxalhjdihpuvo.supabase.co/storage/v1/object/public/technician-avatars/${t.foto_selfie_url}`
-            : 'https://i.pravatar.cc/150?u=tech';
-        document.getElementById('technician-card').classList.remove('hidden');
     }
 
     function initMap(lat, lng) {
         map = L.map('map').setView([lat, lng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        customerMarker = L.marker([lat, lng], {
-            icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', iconSize:[25,41], iconAnchor:[12,41]})
-        }).addTo(map).bindPopup('Tu ubicación').openPopup();
+        L.marker([lat, lng], {icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', iconSize:[25,41], iconAnchor:[12,41]})})
+            .addTo(map).bindPopup('Tu ubicación').openPopup();
     }
 
-    function startRealtimeTracking(tecId) {
-        document.getElementById('tracking-status').textContent = 'Técnico en movimiento';
-        channel = supabase.channel('tech-location')
+    function startTracking(tecId) {
+        supabase.channel('tracking')
             .on('postgres_changes', {event:'*', schema:'public', table:'tecnico_ubicacion', filter:`tecnico_id=eq.${tecId}`}, payload => {
                 const {lat, lng} = payload.new;
                 if (!technicianMarker) {
-                    technicianMarker = L.marker([lat, lng], {
-                        icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', iconSize:[25,41], iconAnchor:[12,41]})
-                    }).addTo(map).bindPopup('Tu técnico');
+                    technicianMarker = L.marker([lat, lng], {icon: L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', iconSize:[25,41], iconAnchor:[12,41]})})
+                        .addTo(map).bindPopup('Técnico');
                 } else {
                     technicianMarker.setLatLng([lat, lng]);
                 }
-                map.fitBounds(L.featureGroup([technicianMarker, customerMarker]).getBounds().pad(0.3));
             })
             .subscribe();
     }
 
-    window.addEventListener('beforeunload', () => { if (channel) supabase.removeChannel(channel); });
     loadOrder();
 </script>
 </body>
