@@ -5,32 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel del Técnico | TechUIT</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Tailwind estable para producción -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        :root {
-            --color-primary: #007bff;
-            --color-dark-bg: #0d1117;
-            --color-card-bg: #161b22;
-            --color-text-light: #f3f4f6;
-            --color-border: #30363d;
-            --color-accent: #ffc107;
-            --color-success: #25D366;
-        }
+        :root{--color-primary:#007bff;--color-dark-bg:#0d1117;--color-card-bg:#161b22;--color-text-light:#f3f4f6;--color-border:#30363d;--color-accent:#ffc107;--color-success:#25D366}
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body{font-family:'Inter',sans-serif;margin:0;padding:20px;background-color:var(--color-dark-bg);color:var(--color-text-light);min-height:100vh;display:flex;justify-content:center;align-items:center}
         .main-card{max-width:440px;width:100%;background-color:var(--color-card-bg);border:1px solid var(--color-border);padding:3rem 1.5rem;border-radius:1.5rem;box-shadow:0 10px 40px rgba(0,123,255,.15);position:relative;overflow:hidden}
-        .main-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(0,123,255,.1) 0%,rgba(0,123,255,0) 70%);z-index:0}
+        .main-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(0,123,255,.1)0%,rgba(0,123,255,0)70%);z-index:0}
         .content-wrapper{position:relative;z-index:1}
         .form-input{width:100%;padding:.75rem;background-color:#0d1117;border:1px solid var(--color-border);border-radius:.5rem;color:var(--color-text-light);font-size:1rem;transition:border-color .2s}
         .form-input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,123,255,.1)}
-        .btn-primary{background-color:var(--color-primary);color:var(--color-text-light);padding:.75rem 1.5rem;border-radius:.5rem;font-weight:600;transition:background-color .2s,transform .1s;border:none;cursor:pointer;width:100%}
-        .btn-primary:hover{background-color:#0069d9}
-        .btn-primary:active{transform:scale(.98)}
-        .btn-success{background-color:#28a745;color:white}
-        .btn-danger{background-color:#dc3545;color:white}
-        .btn-warning{background-color:#ffc107;color:#212529}
+        .btn-primary{background-color:var(--color-primary);color:var(--color-text-light);padding:.75rem 1.5rem;border-radius:.5rem;font-weight:600;transition:background .2s,transform .1s;border:none;cursor:pointer;width:100%}
+        .btn-primary:hover{background-color:#0069d9}.btn-primary:active{transform:scale(.98)}
+        .btn-success{background-color:#28a745;color:white}.btn-danger{background-color:#dc3545;color:white}.btn-warning{background-color:#ffc107;color:#212529}
         .status-container{display:flex;align-items:center;justify-content:center;padding:.5rem 1rem;border-radius:.75rem;font-weight:700;transition:all .3s}
         .status-active{background-color:rgba(40,167,69,.2);color:#28a745;border:1px solid #28a745}
         .status-inactive{background-color:rgba(220,53,69,.2);color:#dc3545;border:1px solid #dc3545}
@@ -42,13 +35,11 @@
         .order-item h3{font-size:1.1rem;font-weight:700;color:white}
         .notification{position:fixed;top:20px;right:20px;padding:15px 20px;border-radius:8px;color:white;font-weight:600;z-index:1000;transform:translateX(150%);transition:transform .3s ease-out}
         .notification.show{transform:translateX(0)}
-        .notification.success{background-color:#28a745}
-        .notification.error{background-color:#dc3545}
+        .notification.success{background-color:#28a745}.notification.error{background-color:#dc3545}
         .tab-container{display:flex;margin-bottom:1rem;border-bottom:1px solid var(--color-border)}
-        .tab-button{flex:1;padding:.75rem;background-color:transparent;border:none;color:var(--color-text-light);font-weight:600;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent}
+        .tab-button{flex:1;padding:.75rem;background:transparent;border:none;color:var(--color-text-light);font-weight:600;cursor:pointer;transition:all .2s;border-bottom:2px solid transparent}
         .tab-button.active{color:var(--color-primary);border-bottom-color:var(--color-primary)}
-        .tab-content{display:none}
-        .tab-content.active{display:block}
+        .tab-content{display:none}.tab-content.active{display:block}
         .arrival-button{background-color:#ffc107;color:#212529;margin-top:1rem}
         .status-badge{padding:4px 8px;border-radius:4px;font-size:.75rem;font-weight:700;display:inline-block;margin-top:.5rem}
         .status-onroute{background-color:rgba(255,193,7,.2);color:#ffc107}
@@ -66,19 +57,19 @@
             <form id="login-form">
                 <div class="mb-4">
                     <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Correo Electrónico</label>
-                    <input type="email" id="email" name="email" required class="form-input">
+                    <input type="email" id="email" required class="form-input">
                 </div>
                 <button type="submit" class="btn-primary">Iniciar Sesión</button>
             </form>
             <p id="login-error" class="text-center text-red-400 mt-4 hidden">Correo no encontrado.</p>
         </div>
-     
+
         <div id="dashboard-view" class="hidden">
             <header class="text-center mb-8">
                 <h1 class="text-2xl font-extrabold text-white mb-2">¡Hola, <span id="tecnico-nombre">Técnico</span>!</h1>
                 <p class="text-sm text-gray-400">Aquí están tus órdenes.</p>
             </header>
-         
+
             <div class="space-y-4 mb-6">
                 <div class="p-3 rounded-lg border" style="border-color:var(--color-border);background-color:#1e242a">
                     <p class="text-sm text-gray-400 mb-1">ID de Técnico:</p>
@@ -89,30 +80,22 @@
                     <span id="trackingStatusText" class="font-bold text-white">Rastreo Desactivado</span>
                 </div>
             </div>
-         
+
             <div class="tab-container">
                 <button class="tab-button active" onclick="switchTab('available')">Órdenes Disponibles</button>
                 <button class="tab-button" onclick="switchTab('accepted')">Mis Órdenes</button>
             </div>
-         
+
             <div id="available-tab" class="tab-content active">
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold mb-3" style="color:var(--color-primary)">Órdenes Disponibles (15 km)</h2>
-                    <div id="orders-container">
-                        <p class="text-center text-gray-500 py-4">Activa tu GPS para ver órdenes cercanas.</p>
-                    </div>
-                </div>
+                <h2 class="text-xl font-semibold mb-3" style="color:var(--color-primary)">Órdenes Disponibles (15 km)</h2>
+                <div id="orders-container" class="text-center text-gray-500 py-10">Activa tu GPS para ver órdenes cercanas.</div>
             </div>
-         
+
             <div id="accepted-tab" class="tab-content">
-                <div class="mb-6">
-                    <h2 class="text-xl font-semibold mb-3" style="color:var(--color-primary)">Mis Órdenes</h2>
-                    <div id="accepted-orders-container">
-                        <p class="text-center text-gray-500 py-4">Cargando órdenes...</p>
-                    </div>
-                </div>
+                <h2 class="text-xl font-semibold mb-3" style="color:var(--color-primary)">Mis Órdenes</h2>
+                <div id="accepted-orders-container" class="text-center text-gray-500 py-10">Cargando órdenes...</div>
             </div>
-         
+
             <div class="space-y-4">
                 <button id="gps-toggle-btn" class="btn-primary" disabled>Inicializando...</button>
                 <div id="map"></div>
@@ -135,11 +118,38 @@
     let watchId = null;
     let technicianLocation = null;
 
+    // === LISTA COMPLETA DE CIUDADES (tu original) ===
+    const cityCoords = {
+        'tegucigalpa': [14.0723,-87.1921],'tg':[14.0723,-87.1921],'tgu':[14.0723,-87.1921],'tegus':[14.0723,-87.1921],
+        'san pedro sula':[15.5042,-88.0250],'sps':[15.5042,-88.0250],
+        'la ceiba':[15.7891,-86.7914],'ceiba':[15.7891,-86.7914],
+        'choluteca':[13.6097,-87.2614],'cholu':[13.6097,-87.2614],
+        'el progreso':[15.4400,-87.8200],'progreso':[15.4400,-87.8200],
+        'puerto cortes':[15.8583,-87.9306],'cortes':[15.8583,-87.9306],'puerto cortés':[15.8583,-87.9306],
+        'comayagua':[14.4492,-87.6407],'comay':[14.4492,-87.6407],
+        'danli':[14.0600,-86.9800],'danlí':[14.0600,-86.9800],
+        'juticalpa':[14.6667,-86.0500],'juti':[14.6667,-86.0500],
+        'siguatepeque':[14.6000,-87.9333],'sigua':[14.6000,-87.9333],
+        'santa barbara':[15.0000,-88.2333],'santabarbara':[15.0000,-88.2333],
+        'la esperanza':[14.3000,-88.1833],'esperanza':[14.3000,-88.1833],
+        'roatan':[16.3000,-86.5333],'roatán':[16.3000,-86.5333],'islas de la bahia':[16.3000,-86.5333],
+        'yoro':[15.2667,-87.5000],'gracias':[14.1000,-88.5833],'ocotepeque':[14.4333,-89.2667],'ocote':[14.4333,-89.2667]
+    };
+    function getCityCoord(city) {
+        if (!city) return null;
+        const c = city.toLowerCase().trim();
+        for (const [key, coord] of Object.entries(cityCoords)) {
+            if (c.includes(key)) return {lat: coord[0], lng: coord[1]};
+        }
+        return null;
+    }
+
+    // === LOGIN ===
     document.getElementById('login-form').addEventListener('submit', async e => {
         e.preventDefault();
         const email = document.getElementById('email').value.trim();
-        const { data: tec } = await supabase.from('tecnicos').select('*').eq('email', email).single();
-        if (!tec) { document.getElementById('login-error').classList.remove('hidden'); return; }
+        const { data: tec, error } = await supabase.from('tecnicos').select('*').eq('email', email).single();
+        if (error || !tec) return document.getElementById('login-error').classList.remove('hidden');
         currentTechnician = tec;
         document.getElementById('tecnico-nombre').textContent = tec.nombre;
         document.getElementById('technicianIdDisplay').textContent = tec.id;
@@ -154,29 +164,20 @@
     function switchTab(t) {
         document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
         document.querySelectorAll('.tab-button').forEach(x => x.classList.remove('active'));
-        document.getElementById(t+'-tab').classList.add('active');
+        document.getElementById(t + '-tab').classList.add('active');
         event.target.classList.add('active');
         if (t === 'available') loadAvailableOrders();
     }
 
-    function haversine(lat1,lon1,lat2,lon2) {
+    function haversine(lat1, lon1, lat2, lon2) {
         const R = 6371;
-        const dLat = (lat2-lat1)*Math.PI/180;
-        const dLon = (lon2-lon1)*Math.PI/180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-        return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    function getCityCoordinates(city) {
-        if (!city) return null;
-        const c = city.toLowerCase().trim();
-        const cities = { /* TU LISTA COMPLETA DE CIUDADES (la que ya tenías) */ };
-        for (const [key, coords] of Object.entries(cities)) {
-            if (c.includes(key)) return { lat: coords[0], lng: coords[1] };
-        }
-        return null;
-    }
-
+    // === ÓRDENES DISPONIBLES ===
     async function loadAvailableOrders() {
         const container = document.getElementById('orders-container');
         if (!technicianLocation) {
@@ -184,12 +185,12 @@
             return;
         }
 
-        // VERIFICAR SI YA TIENE ORDEN ACTIVA
-        const { data: activeOrders } = await supabase.from('clientes')
+        // Bloqueo si ya tiene orden activa
+        const { data: active } = await supabase.from('clientes')
             .select('id').eq('tecnico_asignado_id', currentTechnician.id)
             .in('status', ['tecnico_asignado','tecnico_en_camino','tecnico_llego']);
-        if (activeOrders?.length > 0) {
-            container.innerHTML = '<p class="text-center text-green-400 py-10">Ya tienes una orden activa. Termínala para ver más.</p>';
+        if (active?.length > 0) {
+            container.innerHTML = '<p class="text-center text-green-400 font-bold py-10">Ya tienes una orden activa.<br>Termínala para ver más.</p>';
             return;
         }
 
@@ -202,8 +203,8 @@
         }
 
         const nearby = orders.filter(o => {
-            const lat = o.lat_cliente || getCityCoordinates(o.ciudad)?.lat;
-            const lng = o.lng_cliente || getCityCoordinates(o.ciudad)?.lng;
+            const lat = o.lat_cliente || getCityCoord(o.ciudad)?.lat;
+            const lng = o.lng_cliente || getCityCoord(o.ciudad)?.lng;
             if (!lat || !lng) return false;
             return haversine(technicianLocation.lat, technicianLocation.lng, lat, lng) <= 15;
         });
@@ -214,59 +215,71 @@
         }
 
         container.innerHTML = nearby.map(o => {
-            const dist = haversine(technicianLocation.lat, technicianLocation.lng, o.lat_cliente || getCityCoordinates(o.ciudad)?.lat, o.lng_cliente || getCityCoordinates(o.ciudad)?.lng);
+            const dist = haversine(technicianLocation.lat, technicianLocation.lng,
+                o.lat_cliente || getCityCoord(o.ciudad)?.lat,
+                o.lng_cliente || getCityCoord(o.ciudad)?.lng);
             return `<div class="order-item">
                 <h3 class="text-lg font-bold text-white">ID: ${o.id}</h3>
                 <p class="text-sm text-gray-400">Cliente: ${o.nombre}</p>
                 <p class="text-sm text-gray-400">Ciudad: ${o.ciudad}</p>
                 <div class="distance-badge">Distancia: ${dist.toFixed(1)} km</div>
-                <button class="btn-success mt-3" onclick="acceptOrder(${o.id})">Aceptar</button>
+                <button class="btn-success mt-3 w-full" onclick="acceptOrder(${o.id})">Aceptar Orden</button>
             </div>`;
         }).join('');
     }
 
     async function acceptOrder(id) {
         await supabase.from('clientes').update({ tecnico_asignado_id: currentTechnician.id, status: 'tecnico_asignado' }).eq('id', id);
-        showNotification('Orden aceptada', 'success');
+        showNotification('¡Orden aceptada!', 'success');
         loadAvailableOrders();
         loadAcceptedOrders();
     }
 
+    // === MIS ÓRDENES + PIN VERDE DEL CLIENTE ===
     async function loadAcceptedOrders() {
         const { data: orders } = await supabase.from('clientes').select('*').eq('tecnico_asignado_id', currentTechnician.id);
         const container = document.getElementById('accepted-orders-container');
         if (!orders || orders.length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-500 py-10">No tienes órdenes.</p>';
+            container.innerHTML = '<p class="text-center text-gray-500 py-10">No tienes órdenes activas.</p>';
             if (customerMarker) { customerMarker.remove(); customerMarker = null; }
             return;
         }
 
         container.innerHTML = orders.map(o => {
             let btn = '';
-            if (o.status === 'tecnico_asignado') btn = `<button class="btn-warning mt-3" onclick="startNavigation(${o.id})">Iniciar Ruta</button>`;
-            if (o.status === 'tecnico_en_camino') btn = `<button class="btn-warning arrival-button mt-3" onclick="notifyArrival(${o.id})">Llegué</button>`;
-            if (o.status === 'tecnico_llego') btn = `<button class="btn-success mt-3" onclick="completeOrder(${o.id})">Completar</button>`;
-            return `<div class="order-item"><h3>ID: ${o.id}</h3><p>${o.nombre} - ${o.direccion}</p><span class="status-badge ${o.status.includes('camino')?'status-onroute':''}">${o.status}</span>${btn}</div>`;
+            if (o.status === 'tecnico_asignado') btn = `<button class="btn-warning mt-3 w-full" onclick="startNavigation(${o.id})">Iniciar Ruta</button>`;
+            if (o.status === 'tecnico_en_camino') btn = `<button class="btn-warning arrival-button mt-3 w-full" onclick="notifyArrival(${o.id})">Llegué</button>`;
+            if (o.status === 'tecnico_llego') btn = `<button class="btn-success mt-3 w-full" onclick="completeOrder(${o.id})">Completar Servicio</button>`;
+            return `<div class="order-item">
+                <h3>ID: ${o.id}</h3>
+                <p>${o.nombre} - ${o.direccion}</p>
+                <span class="status-badge ${o.status.includes('camino') ? 'status-onroute' : ''}">${o.status}</span>
+                ${btn}
+            </div>`;
         }).join('');
 
-        // PINTAR CLIENTE ACTIVO EN MAPA
+        // Mostrar pin verde del cliente activo
         const active = orders.find(o => ['tecnico_asignado','tecnico_en_camino','tecnico_llego'].includes(o.status));
         if (active && active.lat_cliente && active.lng_cliente) {
-            const lat = active.lat_cliente;
-            const lng = active.lng_cliente;
+            const lat = active.lat_cliente, lng = active.lng_cliente;
             if (!customerMarker) {
                 customerMarker = L.marker([lat, lng], { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', iconSize: [25,41], iconAnchor: [12,41] }) })
-                    .addTo(map).bindPopup(`Cliente: ${active.nombre}`);
-            } else customerMarker.setLatLng([lat, lng]);
+                    .addTo(map).bindPopup(`Cliente: ${active.nombre}`).openPopup();
+            } else {
+                customerMarker.setLatLng([lat, lng]);
+            }
             map.setView([lat, lng], 15);
         }
     }
 
     async function startNavigation(id) { await supabase.from('clientes').update({status:'tecnico_en_camino'}).eq('id',id); showNotification('En camino','success'); loadAcceptedOrders(); }
     async function notifyArrival(id) { await supabase.from('clientes').update({status:'tecnico_llego'}).eq('id',id); showNotification('Llegada notificada','success'); loadAcceptedOrders(); }
-    async function completeOrder(id) { await supabase.from('clientes').update({status:'servicio_completado'}).eq('id',id); showNotification('¡Completado!','success'); loadAcceptedOrders(); setTimeout(loadAvailableOrders,2000); }
+    async function completeOrder(id) { await supabase.from('clientes').update({status:'servicio_completado'}).eq('id',id); showNotification('¡Servicio completado!','success'); loadAcceptedOrders(); setTimeout(loadAvailableOrders,1500); }
 
-    function initMap() { map = L.map('map').setView([15.5, -88], 8); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); }
+    function initMap() {
+        map = L.map('map').setView([15.5, -88], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    }
 
     document.getElementById('gps-toggle-btn').addEventListener('click', () => watchId ? stopTracking() : startTracking());
 
@@ -275,7 +288,7 @@
         const btn = document.getElementById('gps-toggle-btn');
         btn.textContent = 'Deteniendo...'; btn.disabled = true;
         watchId = navigator.geolocation.watchPosition(pos => updateLocation(pos.coords.latitude, pos.coords.longitude),
-            err => { showNotification('Error GPS','error'); stopTracking(); }, { enableHighAccuracy: true });
+            () => { showNotification('Error GPS','error'); stopTracking(); }, { enableHighAccuracy: true });
     }
 
     async function updateLocation(lat, lng) {
@@ -285,9 +298,11 @@
         btn.textContent = 'Detener GPS'; btn.classList.replace('btn-primary','btn-danger'); btn.disabled = false;
         document.getElementById('trackingStatusText').textContent = 'Rastreo Activado';
         document.getElementById('statusMessageContainer').classList.replace('status-inactive','status-active');
+
         if (!technicianMarker) {
             technicianMarker = L.marker([lat,lng], { icon: L.icon({ iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', iconSize:[25,41], iconAnchor:[12,41] }) }).addTo(map);
         } else technicianMarker.setLatLng([lat,lng]);
+
         map.setView([lat,lng], 15);
         await supabase.from('tecnico_ubicacion').upsert({ tecnico_id: currentTechnician.id, lat, lng });
         loadAvailableOrders();
@@ -303,7 +318,11 @@
         document.getElementById('statusMessageContainer').classList.replace('status-active','status-inactive');
     }
 
-    function showNotification(m,t){ const n=document.getElementById('notification'); n.textContent=m; n.className=`notification ${t} show`; setTimeout(()=>n.classList.remove('show'),3000); }
+    function showNotification(m,t) {
+        const n = document.getElementById('notification');
+        n.textContent = m; n.className = `notification ${t} show`;
+        setTimeout(() => n.classList.remove('show'), 3000);
+    }
 </script>
 </body>
 </html>
