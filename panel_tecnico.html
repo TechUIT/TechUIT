@@ -52,10 +52,10 @@
 
 <script>
   // Cliente creado PRIMERO (fix del error)
-  const supabase = supabase.createClient(
-    'https://hsdhsgyzxalhjdihpuvo.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE4MDk0NCwiZXhwIjoyMDc0NzU2OTQ0fQ.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'
-  )
+  // CONFIG - no pongas la service_role en un HTML público
+const SUPABASE_URL = 'REPLACE_SUPABASE_URL'; // ej: https://xxxx.supabase.co
+const SUPABASE_SERVICE_ROLE_KEY = 'REPLACE_SUPABASE_SERVICE_ROLE_KEY';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   let watchId = null
   let tecnicoId = null
