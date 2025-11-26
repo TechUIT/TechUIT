@@ -1,50 +1,19 @@
-
 {
     "name": "TechUIT | Servicios a Domicilio",
     "short_name": "TechUIT",
     "description": "Plataforma de servicios técnicos a domicilio.",
-    "start_url": ".",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#0d1117",
     "theme_color": "#007bff",
     "icons": [
         {
-            "src": "Logo.png",
-            "sizes": "72x72",
-            "type": "image/png"
-        },
-        {
-            "src": "Logo.png",
-            "sizes": "96x96",
-            "type": "image/png"
-        },
-        {
-            "src": "Logo.png",
-            "sizes": "128x128",
-            "type": "image/png"
-        },
-        {
-            "src": "Logo.png",
-            "sizes": "144x144",
-            "type": "image/png"
-        },
-        {
-            "src": "Logo.png",
-            "sizes": "152x152",
-            "type": "image/png"
-        },
-        {
-            "src": "Logo.png",
+            "src": "Logo-192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "Logo.png",
-            "sizes": "384x384",
-            "type": "image/png"
-        },
-        {
-            "src": "Logo.png",
+            "src": "Logo-512.png",
             "sizes": "512x512",
             "type": "image/png"
         }
