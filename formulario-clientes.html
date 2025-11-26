@@ -1,173 +1,336 @@
-// archivo: seguimiento_cliente.html (COMPLETO + RESPLANDOR AZUL + FUNCIONA)
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Seguimiento - TechUIT</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    body{
-      font-family:'Inter',sans-serif;margin:0;padding:20px;background:#000;color:#fff;
-      min-height:100vh;display:flex;justify-content:center;align-items:flex-start;
-    }
-    .main-card{
-      max-width:440px;width:100%;background:#1a1a1a;padding:2rem 1.5rem;
-      border-radius:1.5rem;box-shadow:0 8px 30px rgba(0,123,255,.2);
-    }
-    .back-btn{display:inline-flex;align-items:center;color:#aaa;text-decoration:none;margin-bottom:1rem;font-size:.95rem;}
-    .back-btn:hover{color:#fff;}
-    #map{height:66vh;border-radius:12px;overflow:hidden;margin:1.5rem 0;}
-    .info{background:#2a2a2a;padding:1rem;border-radius:12px;font-size:.95rem;}
-    .label{font-weight:600;color:#60a5fa;}
-    .btn{background:#007bff;color:white;padding:.8rem;border-radius:50px;font-weight:700;
-         box-shadow:0 6px 20px rgba(0,123,255,.6);width:100%;margin-top:1rem;}
-    @media (max-width:768px){#map{height:50vh}}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Servicio Técnico | TechUIT</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: #1a1a1a;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.2);
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 1.5rem;
+            width: 70px;
+            height: 70px;
+            filter: brightness(0) invert(1);
+        }
+        .title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+        .login-link {
+            color: #60a5fa;
+            font-size: 0.9rem;
+            text-align: right;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .input, .select, .textarea {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 1rem;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .input:focus, .select:focus, .textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn:hover:not(:disabled) {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        .btn:disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+        }
+        .status {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #60a5fa;
+            margin: 0.5rem 0 1rem;
+        }
+        .hidden { display: none; }
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: #1a1a1a;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+        }
+        .message {
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: none;
+        }
+        .welcome {
+            text-align: center;
+            color: #34d399;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+    </style>
 </head>
 <body>
-  <div class="main-card">
-    <a href="index.html" class="back-btn">← Volver</a>
-    <h1 class="text-2xl font-bold text-center mb-2">Seguimiento en vivo</h1>
-    <p class="text-center text-gray-400 text-sm mb-6">Cuando el técnico esté en camino lo verás aquí</p>
 
-    <div id="map"></div>
+<div class="container">
+    <img src="Logo.png" alt="TechUIT" class="logo">
+    <div class="login-link" id="loginLink">¿Ya eres cliente? Inicia sesión</div>
+    
+    <h1 class="title">Solicitud de Servicio Técnico</h1>
+    <p class="subtitle">Ingresa tus datos para que un experto pueda contactarte.</p>
 
-    <div class="info">
-      <div><span class="label">Cliente:</span> <span id="cliente-nombre">—</span></div>
-      <div><span class="label">Estado:</span> <span id="pedido-status">—</span></div>
-      <div><span class="label">Técnico:</span> <span id="tecnico-nombre">—</span></div>
-      <div><span class="label">Distancia:</span> <span id="distancia">—</span></div>
-      <div><span class="label">Actualizado:</span> <span id="ultima">—</span></div>
-      <button id="btn-refresh" class="btn">Refrescar ubicación</button>
+    <div id="welcome" class="welcome" style="display:none;"></div>
+
+    <form id="form">
+        <input type="text" id="nombre" class="input" placeholder="Tu Nombre Completo" required>
+        <input type="tel" id="telefono" class="input" placeholder="Teléfono de Contacto" required>
+        <input type="text" id="direccion" class="input" placeholder="Tu Dirección Exacta (Residencia/Trabajo)" required>
+
+        <select id="ciudadManual" class="select hidden">
+            <option value="">Elige tu ciudad</option>
+            <option>San Pedro Sula</option>
+            <option>Tegucigalpa</option>
+            <option>La Ceiba</option>
+            <option>Choluteca</option>
+            <option>El Progreso</option>
+            <option>Puerto Cortés</option>
+            <option>Comayagua</option>
+            <option>Danlí</option>
+            <option>Juticalpa</option>
+            <option>Siguatepeque</option>
+            <option>Roatán</option>
+        </select>
+
+        <p id="status" class="status">Detectando ubicación...</p>
+
+        <select id="servicio" class="select" required>
+            <option value="" disabled selected>Tipo de Servicio Requerido</option>
+            <option>Reparación de Hardware</option>
+            <option>Mantenimiento de Software</option>
+            <option>Configuración de Redes</option>
+            <option>Eliminación de Virus/Malware</option>
+            <option>Soporte Remoto/Consultoría</option>
+            <option>Otro (Especificar en Problema)</option>
+        </select>
+
+        <textarea id="problema" class="textarea" rows="4" placeholder="Describe tu Problema (Máximo 200 palabras)" maxlength="400" required></textarea>
+
+        <input type="hidden" id="ciudad">
+
+        <button type="submit" id="btn" class="btn">Solicitar Técnico Ahora</button>
+    </form>
+
+    <div id="msg" class="message"></div>
+</div>
+
+<!-- Modal de Login -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h3 style="font-size:1.25rem; font-weight:bold; text-align:center; margin-bottom:1rem;">Iniciar Sesión</h3>
+        <input type="email" id="email" class="input" placeholder="Correo Electrónico">
+        <input type="password" id="pass" class="input" placeholder="Contraseña">
+        <button id="loginBtn" class="btn" style="margin-top:0.75rem;">Entrar</button>
+        <button id="close" style="color:#9ca3af; font-size:0.875rem; text-align:center; width:100%; margin-top:0.5rem; background:none; border:none; cursor:pointer;">Cerrar</button>
     </div>
-  </div>
+</div>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+<script type="module">
+    const supabase = window.supabase.createClient(
+        'https://hsdhsgyzxalhjdihpuvo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxODA5NDQsImV4cCI6MjA3NDc1Njk0NH0.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'
+    );
 
-    const SUPABASE_URL = 'https://hsdhsgyzxalhjdihpuvo.supabase.co'
-    const SUPABASE_ANON_KEY = 'TU_ANON_KEY_PÚBLICA_AQUÍ'   // ← placeholder seguro
+    const form = document.getElementById('form');
+    const btn = document.getElementById('btn');
+    const status = document.getElementById('status');
+    const ciudadInput = document.getElementById('ciudad');
+    const ciudadManual = document.getElementById('ciudadManual');
+    const modal = document.getElementById('modal');
+    const loginLink = document.getElementById('loginLink');
+    const closeBtn = document.getElementById('close');
+    const loginBtn = document.getElementById('loginBtn');
+    const msg = document.getElementById('msg');
+    const welcome = document.getElementById('welcome');
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      realtime: { params: { eventsPerSecond: 10 } }
-    });
+    let ciudad = null;
 
-    // === TU CÓDIGO ORIGINAL DEL MAPA (100 % completo) ===
-    function getClientIdFromQuery() {
-      const url = new URL(window.location.href);
-      const q = url.searchParams.get('client_id') || url.searchParams.get('cliente_id') || url.searchParams.get('id');
-      if (q) return q;
-      const stored = localStorage.getItem('techuit_client_id');
-      if (stored) return stored;
-      return null;
-    }
-    async function promptForClientId() {
-      const id = prompt('Introduce tu ID de solicitud:');
-      if (id) localStorage.setItem('techuit_client_id', id);
-      return id || null;
-    }
+    // === MODAL ===
+    loginLink.onclick = () => modal.style.display = 'flex';
+    closeBtn.onclick = () => modal.style.display = 'none';
+    window.onclick = e => { if (e.target === modal) modal.style.display = 'none'; };
 
-    let clientId = getClientIdFromQuery();
-    (async () => {
-      if (!clientId) clientId = await promptForClientId();
-      if (!clientId) return alert('ID requerido');
-      init();
-    })();
+    // === LOGIN ===
+    loginBtn.onclick = async () => {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('pass').value;
+        if (!email || !pass) return show('Faltan datos', 'error');
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+        if (error) return show(error.message, 'error');
+        const user = data.user;
+        localStorage.setItem('user', JSON.stringify({
+            nombre: user.user_metadata?.nombre || email.split('@')[0],
+            telefono: user.user_metadata?.telefono || ''
+        }));
+        modal.style.display = 'none';
+        location.reload();
+    };
 
-    const map = L.map('map').setView([14.6, -87.8], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
-
-    let clienteMarker = null, tecnicoMarker = null;
-    function setClienteMarker(lat,lng){
-      if(!clienteMarker) clienteMarker = L.marker([lat,lng],{icon:L.divIcon({html:`<svg width="18" height="18"><circle cx="9" cy="9" r="8" fill="#06b6d4"/></svg>`})}).addTo(map);
-      else clienteMarker.setLatLng([lat,lng]);
-    }
-    function setTecnicoMarker(lat,lng){
-      if(!tecnicoMarker) tecnicoMarker = L.marker([lat,lng],{icon:L.divIcon({html:`<svg width="22" height="22"><circle cx="11" cy="11" r="10" fill="#7c3aed"/></svg>`})}).addTo(map);
-      else tecnicoMarker.setLatLng([lat,lng]);
-    }
-
-    function computeDistanceKm(lat1,lon1,lat2,lon2){
-      const toRad=v=>v*Math.PI/180,R=6371,dLat=toRad(lat2-lat1),dLon=toRad(lon2-lon1);
-      const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-      return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    // === AUTORELLENO ===
+    const saved = localStorage.getItem('user');
+    if (saved) {
+        const u = JSON.parse(saved);
+        document.getElementById('nombre').value = u.nombre;
+        document.getElementById('telefono').value = u.telefono;
+        welcome.textContent = `¡Hola, ${u.nombre}!`;
+        welcome.style.display = 'block';
     }
 
-    let assignedTecnico=null, currentStatus=null;
+    // === GPS ===
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            async pos => {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&zoom=10`);
+                const data = await res.json();
+                const c = data.address?.city || data.address?.town || data.address?.state;
+                if (c) {
+                    ciudad = normalize(c);
+                    ciudadInput.value = ciudad;
+                    status.innerHTML = `<strong>${ciudad}</strong>`;
+                } else fallback();
+            },
+            fallback,
+            { timeout: 10000 }
+        );
+    } else fallback();
 
-    async function loadInitialClient(){
-      const {data,error}=await supabase.from('clientes').select('*, tecnicos(*)').eq('id',clientId).maybeSingle();
-      if(error||!data){alert('Cliente no encontrado');return;}
-      document.getElementById('cliente-nombre').innerText=data.nombre||`Cliente ${data.id}`;
-      currentStatus=data.status||'—';
-      document.getElementById('pedido-status').innerText=currentStatus;
+    function fallback() {
+        status.textContent = 'Elige tu ciudad:';
+        ciudadManual.classList.remove('hidden');
+        ciudadManual.onchange = () => {
+            ciudad = ciudadManual.value;
+            ciudadInput.value = ciudad;
+        };
+    }
 
-      if(data.lat_cliente && data.lng_cliente){
-        const lat=+data.lat_cliente,lng=+data.lng_cliente;
-        if(isFinite(lat)&&isFinite(lng)){setClienteMarker(lat,lng);map.setView([lat,lng],14);}
-      }
+    function normalize(c) {
+        const map = {
+            'san pedro sula': 'San Pedro Sula',
+            'tegucigalpa': 'Tegucigalpa',
+            'la ceiba': 'La Ceiba',
+            'choluteca': 'Choluteca',
+            'el progreso': 'El Progreso',
+            'puerto cortes': 'Puerto Cortés',
+            'comayagua': 'Comayagua',
+            'danli': 'Danlí',
+            'juticalpa': 'Juticalpa',
+            'siguatepeque': 'Siguatepeque',
+            'roatan': 'Roatán'
+        };
+        const l = c.toLowerCase().trim();
+        for (const [k, v] of Object.entries(map)) if (l.includes(k)) return v;
+        return c;
+    }
 
-      if(data.tecnico_asignado_id){
-        assignedTecnico = data.tecnicos?.[0] || (await supabase.from('tecnicos').select('*').eq('id',data.tecnico_asignado_id).maybeSingle()).data;
-        document.getElementById('tecnico-nombre').innerText = assignedTecnico?.nombre || 'Técnico asignado';
-      }
+    // === ENVÍO ===
+    form.onsubmit = async e => {
+        e.preventDefault();
+        if (!ciudad && !ciudadManual.value) return show('Elige una ciudad', 'error');
 
-      if(assignedTecnico && ['tecnico_en_camino','tecnico_llego'].includes(currentStatus)){
-        const {data:loc}=await supabase.from('tecnico_ubicacion').select('lat_cliente,lng_cliente,updated_at').eq('tecnico_id',assignedTecnico.id).order('updated_at',{ascending:false}).limit(1).maybeSingle();
-        if(loc?.lat_cliente && loc?.lng_cliente){
-          const lat=+loc.lat_cliente,lng=+loc.lng_cliente;
-          setTecnicoMarker(lat,lng);
-          if(clienteMarker){
-            const c=clienteMarker.getLatLng();
-            document.getElementById('distancia').innerText=`${computeDistanceKm(c.lat,c.lng,lat,lng).toFixed(2)} km`;
-          }
-          document.getElementById('ultima').innerText=loc.updated_at||'—';
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        const data = {
+            nombre: document.getElementById('nombre').value.trim(),
+            telefono: document.getElementById('telefono').value.trim(),
+            direccion: document.getElementById('direccion').value.trim(),
+            tipo_servicio: document.getElementById('servicio').value,
+            problema: document.getElementById('problema').value.trim(),
+            ciudad: ciudad || ciudadManual.value,
+            status: 'Pendiente',
+            creado_en: new Date().toISOString()
+        };
+
+        try {
+            const { data: ins, error } = await supabase.from('clientes').insert([data]).select('id');
+            if (error) throw error;
+            const id = ins[0].id;
+            show(`¡Solicitud #${id} enviada con éxito!`, 'success');
+            setTimeout(() => location.href = `confirmacion-pago.html?solicitud=${id}`, 1800);
+        } catch (err) {
+            show('Error al enviar. Intenta de nuevo.', 'error');
+            console.error(err);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Solicitar Técnico Ahora';
         }
-      }
+    };
+
+    function show(text, type) {
+        msg.textContent = text;
+        msg.className = `message bg-${type === 'error' ? 'red' : 'green'}-600 text-white`;
+        msg.style.display = 'block';
+        setTimeout(() => msg.style.display = 'none', 4000);
     }
+</script>
 
-    function subscribeRealtime(){
-      supabase.channel('tecnico_ubicacion').on('postgres_changes',{event:'*',schema:'public',table:'tecnico_ubicacion'},payload=>{
-        const row=payload.new;
-        if(!row||!assignedTecnico||String(row.tecnico_id)!==String(assignedTecnico.id))return;
-        if(row.lat_cliente && row.lng_cliente){
-          const lat=+row.lat_cliente,lng=+row.lng_cliente;
-          setTecnicoMarker(lat,lng);
-          if(clienteMarker){
-            const c=clienteMarker.getLatLng();
-            document.getElementById('distancia').innerText=`${computeDistanceKm(c.lat,c.lng,lat,lng).toFixed(2)} km`;
-          }
-          if(row.updated_at)document.getElementById('ultima').innerText=row.updated_at;
-        }
-      }).subscribe();
-
-      supabase.channel('clientes').on('postgres_changes',{event:'*',schema:'public',table:'clientes',filter:`id=eq.${clientId}`},payload=>{
-        const r=payload.new;
-        if(!r)return;
-        currentStatus=r.status||currentStatus;
-        document.getElementById('pedido-status').innerText=currentStatus;
-        if(r.lat_cliente&&r.lng_cliente){setClienteMarker(+r.lat_cliente,+r.lng_cliente);}
-      }).subscribe();
-    }
-
-    document.getElementById('btn-refresh').addEventListener('click',loadInitialClient);
-
-    async function init(){
-      await loadInitialClient();
-      subscribeRealtime();
-    }
-  </script>
-
-  <script>
-    if('serviceWorker' in navigator){
-      window.addEventListener('load',()=>navigator.serviceWorker.register('/TechUIT/service-worker.js').catch(()=>{ }));
-    }
-  </script>
 </body>
 </html>
