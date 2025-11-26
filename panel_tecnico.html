@@ -3,118 +3,227 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Técnico | TechUIT</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <title>Panel Técnico - TechUIT</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
     }
   </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-    :root { --color-primary:#007bff; --color-dark-bg:#0d1117; --color-card-bg:#161b22; --color-text-light:#f3f4f6; --color-border:#30363d; }
-    body { font-family:'Inter',sans-serif; background:var(--color-dark-bg); color:var(--color-text-light); margin:0; padding:20px; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-    .card { max-width:440px; width:100%; background:var(--color-card-bg); border:1px solid var(--color-border); padding:2rem; border-radius:1.5rem; box-shadow:0 10px 40px rgba(0,123,255,.15); }
-    input { background:#0d1117; border:1px solid #30363d; padding:12px; border-radius:8px; color:white; width:100%; margin-bottom:1rem; }
-    button { background:#007bff; color:white; padding:12px; border:none; border-radius:8px; width:100%; font-weight:600; cursor:pointer; }
-    button:hover { background:#0056b3; }
-    .btn-green { background:#28a745; }
-    .btn-green:hover { background:#218838; }
-    .btn-yellow { background:#ffc107; color:#212529; }
-    .btn-yellow:hover { background:#e0a800; }
-    #map { height:300px; border-radius:12px; margin:1rem 0; border:1px solid var(--color-border); }
-    .order { background:#1e242a; padding:1rem; border-radius:8px; margin:1rem 0; border-left:4px solid #007bff; }
+    body { background:#0d1117; color:#f3f4f6; margin:0; }
+    .gradient-blue { background: linear-gradient(90deg, #007bff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .active-tab { background:#007bff !important; color:white !important; }
+    .offline { background: #450a0a; border: 1px solid #7f1d1d; padding: 12px; border-radius: 12px; text-align: center; margin: 12px; }
   </style>
 </head>
-<body>
+<body class="min-h-screen">
+  <div class="max-w-lg mx-auto p-4">
+    <div class="bg-[#161b22] border border-[#30363d] rounded-3xl p-6 mb-6 shadow-2xl shadow-blue-500/20 text-center">
+      <h1 class="text-3xl font-black gradient-blue" id="nombre">Cargando...</h1>
+      <a href="login_tecnico.html" onclick="localStorage.clear()" class="text-cyan-400 text-sm underline">Cerrar sesión</a>
+    </div>
+    <div id="offline-banner" class="offline hidden mb-4">
+      <p class="text-red-400 font-bold">Sin conexión → reintentando...</p>
+    </div>
 
-<div class="card">
-  <h1 class="text-3xl font-bold text-center mb-8">Panel Técnico</h1>
+    <!-- CAFECITO TÉCNICO -->
+    <div id="support-card" class="bg-gradient-to-br from-cyan-900 via-blue-900 to-black rounded-3xl p-10 text-center shadow-2xl border border-cyan-700 mb-6" style="display:none">
+      <h3 class="text-4xl font-black gradient-blue mb-6">¡Gran trabajo, crack!</h3>
+      <p class="text-xl text-gray-200 mb-8 leading-relaxed">
+        Gracias a técnicos como vos TechUIT existe y mejora todos los días.<br>
+        ¿Querés apoyar a <strong>TechUIT</strong> con un cafecito?
+      </p>
+      <div class="flex justify-center gap-6">
+        <button id="btn-cafecito" class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white font-bold text-xl py-6 px-14 rounded-full shadow-2xl transform hover:scale-110 transition">
+          Sí, invitar un café
+        </button>
+        <button onclick="document.getElementById('support-card').style.display='none'" class="text-gray-400 hover:text-white underline text-lg">
+          Ahora no, gracias
+        </button>
+      </div>
+      <div id="kofi-container" class="mt-10 hidden rounded-2xl overflow-hidden shadow-2xl">
+        <iframe src='https://ko-fi.com/techuit/?hidefeed=true&widget=true&embed=true&preview=true' style='border:none;width:100%;padding:4px;background:#f9f9f9;' height='712' title='techuit'></iframe>
+      </div>
+    </div>
 
-  <input type="email" id="email" placeholder="tuemail@techuit.hn" required>
-  <button onclick="login()">Iniciar sesión</button>
-
-  <div id="panel" class="hidden mt-8">
-    <h2 class="text-2xl font-bold mb-4">¡Hola, <span id="nombre"></span>!</h2>
-    <button onclick="toggleGPS()" id="gpsbtn" class="btn-green mb-4">Iniciar GPS</button>
-    <div id="map"></div>
-
-    <h3 class="text-xl font-bold mt-8 mb-4">Órdenes disponibles</h3>
-    <div id="disponibles"></div>
-
-    <h3 class="text-xl font-bold mt-8 mb-4">Mis órdenes</h3>
-    <div id="mias"></div>
+    <div id="map" class="h-96 rounded-3xl overflow-hidden shadow-2xl shadow-blue-500/40 mb-6"></div>
+    <div class="flex mb-6">
+      <button id="tab-disp" class="flex-1 py-4 rounded-l-3xl font-bold bg-[#161b22] border border-[#30363d] text-white">Disponibles</button>
+      <button id="tab-act" class="flex-1 py-4 rounded-r-3xl font-bold bg-[#161b22] border border-[#30363d] text-white">Cliente Actual</button>
+    </div>
+    <div id="lista" class="space-y-4"></div>
   </div>
-</div>
 
-<script>
-  // Cliente creado PRIMERO (fix del error)
-  const supabase = supabase.createClient(
-    'https://hsdhsgyzxalhjdihpuvo.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhzZGhzZ3l6eGFsaGpkaWhwdXZvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE4MDk0NCwiZXhwIjoyMDc0NzU2OTQ0fQ.0KDQV2032sxJZ0y2srvQi4hLe496uhLman9Nb3aqhJc'
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co', 'sb_publishable_HmIKr5aaqK-zxdNM5yiWNQ_G7lSH8XT')
+
+const tecnicoId = Number(localStorage.getItem('tecnico_id'))
+if (!tecnicoId) location.href = 'login_tecnico.html'
+document.getElementById('nombre').textContent = localStorage.getItem('tecnico_nombre') || 'Técnico'
+
+const map = L.map('map').setView([15.507, -88.025], 14)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+
+let miMarker = null
+let clienteMarker = null
+let tab = 0
+let estaOffline = false
+
+window.addEventListener('online', () => {
+  document.getElementById('offline-banner').classList.add('hidden')
+  estaOffline = false
+})
+window.addEventListener('offline', () => {
+  document.getElementById('offline-banner').classList.remove('hidden')
+  estaOffline = true
+})
+
+// GPS DEL TÉCNICO
+function actualizarMiGPS() {
+  if (estaOffline) return
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude, longitude } = pos.coords
+      supabase.from('tecnico_ubicacion').upsert({
+        tecnico_id: tecnicoId,
+        lat: latitude,
+        lng: longitude,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'tecnico_id' })
+
+      if (!miMarker) {
+        miMarker = L.circleMarker([latitude, longitude], {
+          color: '#00ffff', weight: 7, fillColor: '#00ffff', fillOpacity: 0.3, radius: 32
+        }).addTo(map).bindPopup('TÚ (Técnico)').openPopup()
+      }
+      miMarker.setLatLng([latitude, longitude])
+      if (!clienteMarker) map.setView([latitude, longitude], 16)
+    },
+    () => {},
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   )
+}
+setInterval(actualizarMiGPS, 8000)
+actualizarMiGPS()
 
-  let watchId = null
-  let tecnicoId = null
-  let map = null
+async function refresh() {
+  if (estaOffline) return
 
-  async function login() {
-    const email = document.getElementById('email').value.trim()
-    const { data, error } = await supabase.from('tecnicos').select('id,nombre').eq('email', email).single()
-    if (error || !data) return alert('Técnico no encontrado')
+  // Tabs
+  document.getElementById('tab-disp').className = tab === 0 ? 'flex-1 py-4 rounded-l-3xl font-bold active-tab' : 'flex-1 py-4 rounded-l-3xl font-bold bg-[#161b22] border border-[#30363d] text-white'
+  document.getElementById('tab-act').className = tab === 1 ? 'flex-1 py-4 rounded-r-3xl font-bold active-tab' : 'flex-1 py-4 rounded-r-3xl font-bold bg-[#161b22] border border-[#30363d] text-white'
 
-    tecnicoId = data.id
-    document.getElementById('nombre').textContent = data.nombre
-    document.getElementById('email').remove()
-    document.querySelector('button[onclick="login()"]').remove()
-    document.getElementById('panel').classList.remove('hidden')
+  const { data: clienteActivo } = await supabase.from('clientes')
+    .select('*')
+    .eq('tecnico_asignado_id', tecnicoId)
+    .not('status', 'ilike', '%Completado%')
+    .maybeSingle()
 
-    initMap()
-    cargarOrdenes()
-  }
+  // MARCADOR DEL CLIENTE — NUNCA MÁS DESAPARECE
+  if (clienteActivo) {
+    const latCliente = clienteActivo.lat_cliente ?? clienteActivo.lat ?? 15.507
+    const lngCliente = clienteActivo.lng_cliente ?? clienteActivo.lng ?? -88.025
 
-  function initMap() {
-    map = L.map('map').setView([15.5, -88], 8)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
-  }
-
-  function toggleGPS() {
-    if (watchId) {
-      navigator.geolocation.clearWatch(watchId)
-      watchId = null
-      document.getElementById('gpsbtn').textContent = 'Iniciar GPS'
-      return
+    if (!clienteMarker) {
+      clienteMarker = L.circleMarker([latCliente, lngCliente], {
+        color: '#00ff00', weight: 8, fillColor: '#00ff00', fillOpacity: 0.3, radius: 50
+      }).addTo(map).bindPopup(`${clienteActivo.nombre} (Cliente)`)
     }
-    watchId = navigator.geolocation.watchPosition(pos => {
-      const { latitude: lat, longitude: lng } = pos.coords
-      supabase.from('tecnico_ubicacion').upsert({ tecnico_id: tecnicoId, lat, lng })
-    }, null, { enableHighAccuracy: true })
-    document.getElementById('gpsbtn').textContent = 'Detener GPS'
+    clienteMarker.setLatLng([latCliente, lngCliente])
+
+    // SI YA LLEGASTE → CLIENTE ENCIMA TUYO
+    if (clienteActivo.status?.includes('llegad') || clienteActivo.status?.includes('llegado')) {
+      if (miMarker) {
+        const miPos = miMarker.getLatLng()
+        clienteMarker.setLatLng(miPos)
+        map.setView(miPos, 17)
+      }
+    }
+    // EN CAMINO → CENTRAR AMBOS
+    else if (tab === 1 && miMarker) {
+      const bounds = L.latLngBounds([miMarker.getLatLng(), clienteMarker.getLatLng()])
+      map.fitBounds(bounds, { padding: [50, 50] })
+    }
+  } else if (clienteMarker) {
+    map.removeLayer(clienteMarker)
+    clienteMarker = null
   }
 
-  async function cargarOrdenes() {
-    const { data: disp } = await supabase.from('clientes').select('id,nombre,ciudad').eq('status','pagado_verificado').is('tecnico_asignado_id',null)
-    const { data: mis } = await supabase.from('clientes').select('id,status').eq('tecnico_asignado_id',tecnicoId)
+  // LISTA DE CLIENTES
+  const lista = document.getElementById('lista')
+  lista.innerHTML = ''
 
-    document.getElementById('disponibles').innerHTML = disp?.length
-      ? disp.map(o => `<div class="order">${o.nombre} - ${o.ciudad} <button onclick="aceptar(${o.id})" class="btn-green inline-block mt-2 text-sm">Aceptar</button></div>`).join('')
-      : '<p class="text-gray-500">No hay órdenes disponibles</p>'
+  if (tab === 0 && !clienteActivo) {
+    const { data: disponibles } = await supabase.from('clientes')
+      .select('*')
+      .or('status.ilike.%verificado%,status.ilike.%pagado%')
+      .is('tecnico_asignado_id', null)
+      .limit(20)
 
-    document.getElementById('mias').innerHTML = mis?.length
-      ? mis.map(o => `<div class="order">ID ${o.id} → ${o.status}
-          ${o.status==='tecnico_asignado' ? `<button onclick="enCamino(${o.id})" class="btn-yellow inline-block mt-2 text-sm">En camino</button>` : ''}
-          ${o.status==='tecnico_en_camino' ? `<button onclick="llegue(${o.id})" class="btn-yellow inline-block mt-2 text-sm">Llegué</button>` : ''}
-        </div>`).join('')
-      : '<p class="text-gray-500">No tienes órdenes asignadas</p>'
+    if (!disponibles || disponibles.length === 0) {
+      lista.innerHTML = '<p class="text-center text-gray-500 py-16 text-xl">No hay clientes disponibles</p>'
+    } else {
+      disponibles.forEach(c => {
+        lista.innerHTML += `
+          <div class="bg-[#161b22] border border-[#30363d] rounded-3xl p-6 shadow-xl">
+            <h3 class="text-2xl font-bold text-green-400">${c.nombre}</h3>
+            <p class="text-gray-400">${c.ciudad || 'Sin ciudad'}</p>
+            <button onclick="aceptar(${c.id})" class="w-full mt-4 py-5 bg-green-600 hover:bg-green-500 text-white font-bold text-xl rounded-2xl shadow-lg">
+              ACEPTAR TRABAJO
+            </button>
+          </div>`
+      })
+    }
   }
 
-  async function aceptar(id) { await supabase.from('clientes').update({tecnico_asignado_id: tecnicoId, status:'tecnico_asignado'}).eq('id',id); cargarOrdenes() }
-  async function enCamino(id) { await supabase.from('clientes').update({status:'tecnico_en_camino'}).eq('id',id); cargarOrdenes() }
-  async function llegue(id) { await supabase.from('clientes').update({status:'tecnico_llego'}).eq('id',id); cargarOrdenes() }
+  if (clienteActivo) {
+    if (tab === 0) {
+      lista.innerHTML = '<div class="text-center py-12 bg-orange-900/50 border border-orange-600 rounded-3xl"><h3 class="text-orange-400 text-2xl font-bold">Estás ocupado</h3><p class="text-gray-300 mt-2">Ve a "Cliente Actual"</p></div>'
+    }
+    if (tab === 1) {
+      lista.innerHTML = `
+        <div class="bg-[#161b22] border border-[#30363d] rounded-3xl p-8 shadow-2xl">
+          <h2 class="text-3xl font-bold text-green-400 mb-6">${clienteActivo.nombre} (#${clienteActivo.id})</h2>
+          <div class="space-y-4 text-gray-300 text-lg">
+            <p><strong>Dirección:</strong> ${clienteActivo.direccion || '—'}</p>
+            <p><strong>Teléfono:</strong> ${clienteActivo.telefono || '—'}</p>
+            <p><strong>Problema:</strong> ${clienteActivo.problema || '—'}</p>
+          </div>
+          ${!clienteActivo.status?.includes('llegad') ? `<button onclick="llegada(${clienteActivo.id})" class="w-full mt-8 py-6 bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold text-2xl rounded-2xl shadow-lg">HE LLEGADO AL LUGAR</button>` : ''}
+          <button onclick="finalizar(${clienteActivo.id})" class="w-full mt-4 py-6 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-2xl rounded-2xl shadow-lg">
+            FINALIZAR SERVICIO
+          </button>
+        </div>`
+    }
+  } else if (tab === 1) {
+    lista.innerHTML = '<p class="text-center text-gray-500 py-20 text-xl">No tienes cliente asignado</p>'
+  }
+}
+
+document.getElementById('tab-disp').onclick = () => { tab = 0; refresh() }
+document.getElementById('tab-act').onclick = () => { tab = 1; refresh() }
+
+window.aceptar = id => supabase.from('clientes').update({ tecnico_asignado_id: tecnicoId, status: 'En camino' }).eq('id', id).then(() => { tab = 1; refresh() })
+window.llegada = id => supabase.from('clientes').update({ status: 'He llegado - En diagnóstico' }).eq('id', id).then(refresh)
+window.finalizar = id => supabase.from('clientes').update({ status: 'Completado', tecnico_asignado_id: null }).eq('id', id).then(() => {
+  document.getElementById('support-card').style.display = 'block'
+  if (clienteMarker) { map.removeLayer(clienteMarker); clienteMarker = null }
+  tab = 0; refresh()
+})
+
+document.getElementById('btn-cafecito').onclick = () => {
+  document.getElementById('kofi-container').classList.remove('hidden')
+  document.getElementById('kofi-container').scrollIntoView({ behavior: 'smooth' })
+}
+
+setInterval(() => { if (!estaOffline) refresh() }, 4000)
+refresh()
 </script>
-
 </body>
 </html>
