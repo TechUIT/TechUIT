@@ -185,7 +185,7 @@ function iniciarActualizacion() {
   intervalId = setInterval(actualizar, 5000)
   actualizar()
 }
-// === CALIFICACIÓN + CAFECITO (AQUÍ ESTÁ EL FIX) ===
+// === CALIFICACIÓN + CAFECITO (FIX SIN ROMPER NADA) ===
 function mostrarGracias(cliente) {
   document.getElementById('map').style.display = 'none'
   document.getElementById('titulo').innerHTML = '<span class="text-6xl font-black gradient-blue">¡Servicio completado!</span>'
@@ -207,7 +207,6 @@ function mostrarGracias(cliente) {
     setTimeout(() => document.getElementById('support-card-cliente').style.display = 'block', 1200)
   }
 
-  // FIX 1: SI CALIFICA → BORRA EL BOTÓN FLOTANTE
   window.enviarCalificacion = async () => {
     const comentario = document.getElementById('comentario').value
     if (window.calificacionSeleccionada > 0) {
@@ -218,18 +217,17 @@ function mostrarGracias(cliente) {
         comentario: comentario || null
       })
     }
-    // === AQUÍ BORRAMOS EL ID PARA QUE DESAPAREZCA EL BOTÓN FLOTANTE ===
+    // BORRA EL BOTÓN FLOTANTE
     const openDB = indexedDB.open('TechUIT', 1)
     openDB.onsuccess = e => {
       const db = e.target.result
       const tx = db.transaction('seguimiento', 'readwrite')
       tx.objectStore('seguimiento').delete('ultimo_id')
     }
-    // ===============================================================
     document.getElementById('info').innerHTML = '<h2 class="text-5xl font-black gradient-blue">¡Gracias por tu calificación!</h2><p class="text-2xl text-gray-400 mt-6">Esperamos verte pronto</p>'
   }
 
-  // FIX 2: SI NO CALIFICA → BORRA EL BOTÓN DESPUÉS DE 5 MINUTOS
+  // SI NO CALIFICA → BORRA DESPUÉS DE 5 MINUTOS
   setTimeout(() => {
     const openDB = indexedDB.open('TechUIT', 1)
     openDB.onsuccess = e => {
@@ -237,7 +235,7 @@ function mostrarGracias(cliente) {
       const tx = db.transaction('seguimiento', 'readwrite')
       tx.objectStore('seguimiento').delete('ultimo_id')
     }
-  }, 5 * 60 * 1000) // 5 minutos
+  }, 5 * 60 * 1000)
 }
 document.getElementById('btn-cafecito-cliente')?.addEventListener('click', () => {
   document.getElementById('kofi-container-cliente').classList.remove('hidden')
@@ -246,7 +244,7 @@ document.getElementById('btn-cafecito-cliente')?.addEventListener('click', () =>
 iniciarActualizacion()
 </script>
 
-<!-- GUARDA EL ID CON INDEXEDDB (reemplazamos localStorage) -->
+<!-- GUARDA EL ID CON INDEXEDDB (sin romper nada) -->
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const id = urlParams.get('id');
