@@ -77,14 +77,8 @@
             transition:all .3s;
             box-shadow:0 5px 15px rgba(0,0,0,.4);
         }
-        .btn-primary {
-            background:var(--color-primary);
-            color:white;
-        }
-        .btn-success {
-            background:var(--color-success);
-            color:white;
-        }
+        .btn-primary {background:var(--color-primary); color:white;}
+        .btn-success {background:var(--color-success); color:white;}
         .btn-primary:hover,.btn-success:hover {opacity:.9; transform:translateY(-2px);}
         .warning-box {
             background:rgba(255,193,7,.1);
@@ -159,8 +153,18 @@
             solicitudIdDisplay.textContent = solicitudId;
             statusMessage.textContent = `ID #${solicitudId} leído correctamente.`;
 
-            // AQUÍ ESTÁ LA MAGIA: GUARDAR EL ID PARA QUE EL BOTÓN DEL INDEX APAREZCA SIEMPRE
-            localStorage.setItem('ultimo_seguimiento_id', solicitudId);
+            // GUARDAR CON INDEXEDDB → FUNCIONA EN TODOS LOS DISPOSITIVOS (iPhone, Android, PC, todo)
+            const openRequest = indexedDB.open('TechUIT', 1);
+
+            openRequest.onupgradeneeded = (e) => {
+                e.target.result.createObjectStore('seguimiento');
+            };
+
+            openRequest.onsuccess = (e) => {
+                const db = e.target.result;
+                const tx = db.transaction('seguimiento', 'readwrite');
+                tx.objectStore('seguimiento').put(solicitudId, 'ultimo_id');
+            };
 
         } else {
             solicitudIdDisplay.textContent = 'ERROR NO ID';
@@ -186,7 +190,6 @@
     });
 </script>
 
-<!-- Service Worker para PWA -->
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {

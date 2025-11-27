@@ -68,7 +68,6 @@
   <h2 class="text-2xl font-bold mb-6 text-center text-white border-b border-[--color-border] pb-3">
     ¿Cómo deseas ingresar?
   </h2>
-
   <div class="space-y-6">
     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-[--color-primary] transition duration-300">
       <h3 class="text-lg font-semibold text-white mb-2 flex items-center space-x-2">
@@ -80,7 +79,6 @@
         Buscar un Experto Ahora
       </a>
     </div>
-
     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-green-500 transition duration-300">
       <h3 class="text-lg font-semibold text-white mb-2 flex items-center space-x-2">
         <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -92,7 +90,6 @@
       </a>
     </div>
   </div>
-
   <p class="text-xs text-gray-500 text-center mt-8">
     <a href="terminos-legales.html" class="text-gray-500 hover:text-white underline">Términos Legales y Privacidad</a>
   </p>
@@ -102,15 +99,28 @@
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/TechUIT/service-worker.js');
   }
+</script>
 
-  // MEJORA FINAL: más robusta y sin fallos
-  const savedId = localStorage.getItem('ultimo_seguimiento_id');
-  if (savedId && savedId !== "null" && savedId !== "" && savedId !== null) {
-    const btn = document.getElementById('luxuryTrack');
-    const link = document.getElementById('trackLink');
-    btn.classList.remove('hidden');
-    link.href = `seguimiento_cliente.html?id=${savedId}`;
-  }
+<!-- BOTÓN LUXURY CON INDEXEDDB (funciona en iPhone instalado, Android, PC, todo) -->
+<script>
+  const openDB = indexedDB.open('TechUIT', 1);
+  openDB.onupgradeneeded = e => e.target.result.createObjectStore('seguimiento');
+  openDB.onsuccess = e => {
+    const db = e.target.result;
+    const tx = db.transaction('seguimiento', 'readonly');
+    const store = tx.objectStore('seguimiento');
+    const req = store.get('ultimo_id');
+    req.onsuccess = () => {
+      if (req.result) {
+        const btn = document.getElementById('luxuryTrack');
+        const link = document.getElementById('trackLink');
+        if (btn && link) {
+          btn.classList.remove('hidden');
+          link.href = `seguimiento_cliente.html?id=${req.result}`;
+        }
+      }
+    };
+  };
 </script>
 </body>
 </html>
