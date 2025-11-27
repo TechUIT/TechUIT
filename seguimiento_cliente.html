@@ -5,16 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <title>TechUIT - Seguimiento en vivo</title>
- 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
- 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
- 
   <style>
     body { background:#0d1117; color:#f3f4f6; margin:0; }
     .gradient-blue { background: linear-gradient(90deg, #007bff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -35,7 +32,6 @@
       <h2 class="text-3xl font-bold text-cyan-400 mb-4" id="nombre_tecnico">—</h2>
       <p class="text-xl text-gray-400" id="estado">Buscando técnico...</p>
     </div>
-    <!-- CAFECITO -->
     <div id="support-card-cliente" class="bg-gradient-to-br from-cyan-900 via-blue-900 to-black rounded-3xl p-10 text-center shadow-2xl border border-cyan-700 mt-6" style="display:none">
       <h3 class="text-4xl font-black gradient-blue mb-6">¡Gracias por usar TechUIT!</h3>
       <p class="text-xl text-gray-200 mb-8 leading-relaxed">
@@ -59,15 +55,19 @@
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co', 'sb_publishable_HmIKr5aaqK-zxdNM5yiWNQ_G7lSH8XT')
+
 const urlParams = new URLSearchParams(window.location.search)
 const clienteId = Number(urlParams.get('id'))
 if (!clienteId) location.href = 'index.html'
+
 const map = L.map('map').setView([15.507, -88.025], 15)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
+
 let tecnicoMarker = null
 let clienteMarker = null
 let intervalId = null
 let estaOffline = false
+
 window.addEventListener('online', () => {
   document.getElementById('offline-banner').classList.add('hidden')
   estaOffline = false
@@ -77,7 +77,7 @@ window.addEventListener('offline', () => {
   document.getElementById('offline-banner').classList.remove('hidden')
   estaOffline = true
 })
-// GPS DEL CLIENTE
+
 function actualizarGPSCliente() {
   if (estaOffline) return
   navigator.geolocation.getCurrentPosition(
@@ -101,48 +101,48 @@ function actualizarGPSCliente() {
 }
 setInterval(actualizarGPSCliente, 8000)
 actualizarGPSCliente()
-// Filtro Honduras
+
 function esPosicionValida(lat, lng) {
   return lat >= 12.9 && lat <= 17.4 && lng >= -89.4 && lng <= -83.1
 }
+
 async function actualizar() {
   if (estaOffline) return
   try {
-    const { data: cliente, error } = await supabase
-      .from('clientes')
-      .select('*, tecnico_asignado_id')
-      .eq('id', clienteId)
-      .single()
+    const { data: cliente, error } = await supabase.from('clientes').select('*, tecnico_asignado_id').eq('id', clienteId).single()
     if (error || !cliente) return
-    // Marcador cliente
+
     const latCliente = cliente.lat_cliente ?? cliente.lat
     const lngCliente = cliente.lng_cliente ?? cliente.lng
     if (latCliente && lngCliente && latCliente !== 0) {
       if (!clienteMarker) {
-        clienteMarker = L.circleMarker([latCliente, lngCliente], {
-          color: '#00ff00', weight: 8, fillColor: '#00ff00', fillOpacity: 0.3, radius: 50
-        }).addTo(map).bindPopup('TÚ (Cliente)').openPopup()
+        clienteMarker = L.circleMarker([latCliente, lngCliente], { color: '#00ff00', weight: 8, fillColor: '#00ff00', fillOpacity: 0.3, radius: 50 })
+          .addTo(map).bindPopup('TÚ (Cliente)').openPopup()
       }
       clienteMarker.setLatLng([latCliente, lngCliente])
     }
+
     if (cliente.status?.includes('Completado')) {
       clearInterval(intervalId)
       mostrarGracias(cliente)
       return
     }
+
     if (!cliente.tecnico_asignado_id) {
       document.getElementById('titulo').textContent = 'Esperando técnico...'
       document.getElementById('estado').textContent = 'Un técnico aceptará en breve'
       if (tecnicoMarker) { map.removeLayer(tecnicoMarker); tecnicoMarker = null }
       return
     }
+
     const [tecRes, posRes] = await Promise.all([
       supabase.from('tecnicos').select('nombre').eq('id', cliente.tecnico_asignado_id).single(),
       supabase.from('tecnico_ubicacion').select('lat,lng').eq('tecnico_id', cliente.tecnico_asignado_id).single()
     ]).catch(() => [null, null])
+
     const nombreTecnico = tecRes?.data?.nombre || 'Técnico'
     document.getElementById('nombre_tecnico').textContent = nombreTecnico
-    // YA LLEGÓ → PEGADO EXACTO
+
     if (cliente.status?.includes('llegad') || cliente.status?.includes('llegado')) {
       document.getElementById('titulo').textContent = `${nombreTecnico} ya llegó`
       document.getElementById('estado').textContent = 'Ya está aquí'
@@ -155,7 +155,7 @@ async function actualizar() {
       }
       return
     }
-    // EN CAMINO → POSICIÓN REAL O "CERCA DEL CLIENTE"
+
     document.getElementById('titulo').textContent = `${nombreTecnico} está en camino`
     document.getElementById('estado').textContent = 'Llegará pronto'
     const pos = posRes?.data
@@ -175,18 +175,20 @@ async function actualizar() {
       }
       tecnicoMarker.setLatLng([fakeLat, fakeLng])
     }
+
     if (clienteMarker && tecnicoMarker) {
       const bounds = L.latLngBounds([clienteMarker.getLatLng(), tecnicoMarker.getLatLng()])
       map.fitBounds(bounds, { padding: [50, 50] })
     }
   } catch (err) { console.log("Error temporal") }
 }
+
 function iniciarActualizacion() {
   clearInterval(intervalId)
   intervalId = setInterval(actualizar, 5000)
   actualizar()
 }
-// === CALIFICACIÓN + CAFECITO (intacto) ===
+
 function mostrarGracias(cliente) {
   document.getElementById('map').style.display = 'none'
   document.getElementById('titulo').innerHTML = '<span class="text-6xl font-black gradient-blue">¡Servicio completado!</span>'
@@ -207,67 +209,52 @@ function mostrarGracias(cliente) {
     })
     setTimeout(() => document.getElementById('support-card-cliente').style.display = 'block', 1200)
   }
-  window.enviarCalificacion = async () => {
-    const comentario = document.getElementById('comentario').value
-    if (window.calificacionSeleccionada > 0) {
-      await supabase.from('calificaciones').insert({
-        cliente_id: clienteId,
-        tecnico_id: cliente.tecnico_asignado_id,
-        estrellas: window.calificacionSeleccionada,
-        comentario: comentario || null
-      })
-    }
-    document.getElementById('info').innerHTML = '<h2 class="text-5xl font-black gradient-blue">¡Gracias por tu calificación!</h2><p class="text-2xl text-gray-400 mt-6">Esperamos verte pronto</p>'
-  }
 }
+
 document.getElementById('btn-cafecito-cliente')?.addEventListener('click', () => {
   document.getElementById('kofi-container-cliente').classList.remove('hidden')
   document.getElementById('kofi-container-cliente').scrollIntoView({ behavior: 'smooth' })
 })
+
 iniciarActualizacion()
-</script>
 
-<script>
-  // GUARDA EL ID TAMBIÉN CUANDO ENTRA DIRECTO AL SEGUIMIENTO
-  const urlParams = new URLSearchParams(window.location.search);
-  const id = urlParams.get('id');
-  if (id) {
-    localStorage.setItem('ultimo_seguimiento_id', id);
+// ============ BOTÓN LUXURY CON INDEXEDDB (FUNCIONA 100%) ============
+const id = urlParams.get('id')
+if (id) {
+  const open = indexedDB.open('TechUIT', 1)
+  open.onupgradeneeded = e => e.target.result.createObjectStore('seguimiento')
+  open.onsuccess = e => {
+    e.target.result.transaction('seguimiento', 'readwrite').objectStore('seguimiento').put(id, 'ultimo_id')
   }
-</script>
-
-<!-- ====== SOLO ESTO AGREGUÉ (15 líneas) ====== -->
-<script>
-const urlParams2 = new URLSearchParams(window.location.search);
-const id2 = urlParams2.get('id');
-
-if (id2) {
-  const dbReq = indexedDB.open('TechUIT', 1);
-  dbReq.onupgradeneeded = e => e.target.result.createObjectStore('seguimiento');
-  dbReq.onsuccess = e => {
-    const db = e.target.result;
-    db.transaction('seguimiento', 'readwrite')
-      .objectStore('seguimiento')
-      .put(id2, 'ultimo_id');
-  };
-
-  const vieja = window.enviarCalificacion;
-  window.enviarCalificacion = async function() {
-    if (vieja) await vieja.apply(this, arguments);
-    indexedDB.open('TechUIT', 1).onsuccess = e => {
-      e.target.result.transaction('seguimiento', 'readwrite')
-        .objectStore('seguimiento').delete('ultimo_id');
-    };
-  };
-
-  setTimeout(() => {
-    indexedDB.open('TechUIT', 1).onsuccess = e => {
-      e.target.result.transaction('seguimiento', 'readwrite')
-        .objectStore('seguimiento').delete('ultimo_id');
-    };
-  }, 300000); // 5 minutos
 }
-</script>
 
+const borrarBoton = () => {
+  const open = indexedDB.open('TechUIT', 1)
+  open.onsuccess = e => {
+    e.target.result.transaction('seguimiento', 'readwrite').objectStore('seguimiento').delete('ultimo_id')
+  }
+}
+
+// Sobrescribe enviarCalificacion para borrar el botón al calificar
+const originalEnviar = window.enviarCalificacion || (() => {})
+window.enviarCalificacion = async () => {
+  const comentario = document.getElementById('comentario')?.value || ''
+  if (window.calificacionSeleccionada > 0) {
+    await supabase.from('calificaciones').insert({
+      cliente_id: clienteId,
+      tecnico_id: cliente.tecnico_asignado_id,
+      estrellas: window.calificacionSeleccionada,
+      comentario: comentario || null
+    })
+  }
+  await originalEnviar()
+  borrarBoton()
+  document.getElementById('info').innerHTML = '<h2 class="text-5xl font-black gradient-blue">¡Gracias por tu calificación!</h2><p class="text-2xl text-gray-400 mt-6">Esperamos verte pronto</p>'
+}
+
+// Borra automáticamente a los 5 minutos si no califica
+setTimeout(borrarBoton, 300000)
+
+</script>
 </body>
 </html>

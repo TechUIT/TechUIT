@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TechUIT | Plataforma de Expertos</title>
   <link rel="manifest" href="/TechUIT/manifest.json">
-  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
+  
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="TechUIT">
-  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co;">
+  
   <link rel="apple-touch-icon" sizes="192x192" href="Logo.png">
   <link rel="icon" type="image/png" sizes="192x192" href="Logo.png">
   <link rel="icon" type="image/png" sizes="512x512" href="Logo.png">
@@ -128,16 +128,6 @@
     };
   };
 </script>
-<script>
-  // Fuerza que siempre cargue desde /TechUIT/ (mata el 404 en iPhone instalado)
-  if (location.pathname === '/' || location.pathname === '') {
-    location.replace('/TechUIT/');
-  }
-</script>
-<script>
-  if (location.pathname === '/' || location.pathname === '') {
-    location.replace('/TechUIT/');
-  }
-</script>
+
 </body>
 </html>
