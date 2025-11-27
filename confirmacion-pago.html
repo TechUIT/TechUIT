@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>1. Código y Pago | TechUIT</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- ESQUEMA VISUAL UNIFICADO --- */
         :root {
             --color-primary: #007bff;
             --color-dark-bg: #0d1117;
@@ -17,7 +15,6 @@
             --color-accent: #ffc107;
             --color-success: #25D366;
         }
-        
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         
         body {
@@ -31,7 +28,6 @@
             justify-content: center;
             align-items: center;
         }
-        
         .main-card {
             max-width: 440px;
             width: 100%;
@@ -39,89 +35,75 @@
             border: 1px solid var(--color-border);
             padding: 2rem 1.5rem;
             border-radius: 1.5rem;
-            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
+            box-shadow: 0 10px 40px rgba(0,123,255,.15);
             position: relative;
             overflow: hidden;
         }
-
         .main-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0) 70%);
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(0,123,255,.1) 0%, rgba(0,123,255,0) 70%);
             z-index: 0;
         }
-
-        .content-wrapper {
-            position: relative;
-            z-index: 1;
-        }
-
+        .content-wrapper {position: relative; z-index: 1;}
         .code-display {
-            background-color: #0d1117;
-            border: 3px solid var(--color-accent);
-            padding: 18px;
-            border-radius: 10px;
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--color-accent);
-            text-align: center;
-            letter-spacing: 3px;
-            cursor: pointer;
-            user-select: all;
-            box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
-            transition: all 0.2s;
+            background:#0d1117;
+            border:3px solid var(--color-accent);
+            padding:18px;
+            border-radius:10px;
+            font-size:2rem;
+            font-weight:900;
+            color:var(--color-accent);
+            text-align:center;
+            letter-spacing:3px;
+            cursor:pointer;
+            user-select:all;
+            box-shadow:0 0 20px rgba(255,193,7,.5);
+            transition:all .2s;
         }
-
+        .code-display:hover {transform:scale(1.02);}
+        .btn-primary,.btn-success {
+            display:block;
+            width:100%;
+            padding:16px;
+            font-weight:900;
+            font-size:1.1rem;
+            text-align:center;
+            border-radius:50px;
+            text-decoration:none;
+            margin-top:1rem;
+            transition:all .3s;
+            box-shadow:0 5px 15px rgba(0,0,0,.4);
+        }
         .btn-primary {
-            background-color: var(--color-primary);
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
-            position: relative;
-            overflow: hidden;
+            background:var(--color-primary);
+            color:white;
         }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+        .btn-success {
+            background:var(--color-success);
+            color:white;
         }
-
-        .btn-primary:hover::before {
-            left: 100%;
-        }
-
-        #pay-button {
-            background-color: var(--color-success);
-            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
-        }
-
+        .btn-primary:hover,.btn-success:hover {opacity:.9; transform:translateY(-2px);}
         .warning-box {
-            background-color: rgba(255, 193, 7, 0.1);
-            border: 2px solid var(--color-accent);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            background:rgba(255,193,7,.1);
+            border:2px solid var(--color-accent);
+            padding:15px;
+            border-radius:10px;
+            margin-bottom:20px;
         }
-
         .step-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            background-color: var(--color-primary);
-            color: white;
-            border-radius: 50%;
-            font-weight: bold;
-            margin-right: 8px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            width:28px;
+            height:28px;
+            background:var(--color-primary);
+            color:white;
+            border-radius:50%;
+            font-weight:bold;
+            margin-right:8px;
         }
     </style>
 </head>
@@ -129,19 +111,12 @@
 <div class="main-card">
     <div class="content-wrapper">
         <header class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-white mb-2">
-                ✅ Solicitud Aprobada
-            </h1>
-            <p class="text-sm text-gray-400">
-                Paga para clasificar tu servicio como URGENTE
-            </p>
+            <h1 class="text-3xl font-extrabold text-white mb-2">Solicitud Aprobada</h1>
+            <p class="text-sm text-gray-400">Paga para clasificar tu servicio como URGENTE</p>
         </header>
 
-        <!-- MENSAJE ACTUALIZADO Y OBLIGATORIO -->
         <div class="warning-box">
-            <h3 class="text-lg font-bold text-yellow-400 mb-2">
-                ⚠️ ¡IMPORTANTE!
-            </h3>
+            <h3 class="text-lg font-bold text-yellow-400 mb-2">¡IMPORTANTE!</h3>
             <p class="text-white text-sm">
                 <strong>DEBES</strong> poner tu código ID en el campo de mensaje de Ko-fi para verificar tu pago. Sin el ID, el pago no se procesará.
             </p>
@@ -149,40 +124,22 @@
 
         <div class="bg-[#0d1117] p-6 rounded-xl border border-[#30363d] mb-6">
             <div class="mb-6">
-                <p class="text-lg font-bold text-white mb-3">
-                    <span class="step-number">1</span> Copia tu código:
-                </p>
-                
-                <div id="solicitud-id-display" class="code-display mb-2" title="Clic para Copiar">
-                    Cargando ID...
-                </div>
-                <p id="copy-message" class="text-sm font-bold text-green-400 text-center hidden">✅ ¡Código copiado!</p>
+                <p class="text-lg font-bold text-white mb-3"><span class="step-number">1</span> Copia tu código:</p>
+                <div id="solicitud-id-display" class="code-display" title="Clic para Copiar">Cargando ID...</div>
+                <p id="copy-message" class="text-sm font-bold text-green-400 text-center hidden">¡Código copiado!</p>
             </div>
-
             <div>
-                <p class="text-lg font-bold text-white mb-3">
-                    <span class="step-number">2</span> Paga en Ko-fi:
-                </p>
-                
-                <a id="pay-button" href="https://ko-fi.com/c/8d720c6c86" target="_blank"
-                    class="w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
-                >
+                <p class="text-lg font-bold text-white mb-3"><span class="step-number">2</span> Paga en Ko-fi:</p>
+                <a id="pay-button" href="https://ko-fi.com/c/8d720c6c86" target="_blank" class="btn-success">
                     PAGAR EN KOFI
                 </a>
             </div>
         </div>
 
         <div class="bg-[#161b22] p-4 rounded-lg border border-[#30363d] text-center">
-            <h2 class="text-xl font-bold text-white mb-2">
-                ¿Listo?
-            </h2>
-            <p class="text-gray-400 text-sm mb-3">
-                Después de pagar, presiona el botón para ver tu estado
-            </p>
-            
-            <button id="seguimiento-btn" 
-                class="btn-primary w-full text-white font-extrabold py-3 rounded-lg block text-center hover:opacity-90 transition duration-200"
-            >
+            <h2 class="text-xl font-bold text-white mb-2">¿Listo?</h2>
+            <p class="text-gray-400 text-sm mb-3">Después de pagar, presiona el botón para ver tu estado</p>
+            <button id="seguimiento-btn" class="btn-primary">
                 VER ESTADO DE MI SERVICIO
             </button>
         </div>
@@ -195,39 +152,47 @@
     document.addEventListener('DOMContentLoaded', () => {
         const solicitudIdDisplay = document.getElementById('solicitud-id-display');
         const statusMessage = document.getElementById('status-message');
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const solicitudId = urlParams.get('solicitud');
-
-        if (solicitudId && solicitudIdDisplay) {
-            solicitudIdDisplay.textContent = solicitudId;
-            if(statusMessage) statusMessage.textContent = `ID #${solicitudId} leído correctamente.`;
-        } else {
-            solicitudIdDisplay.textContent = 'ERROR NO ID';
-            if(statusMessage) statusMessage.textContent = `ERROR: No se encontró el ID.`;
-        }
-    });
-
-    document.getElementById('solicitud-id-display').addEventListener('click', function() {
-        const textToCopy = this.textContent;
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            document.getElementById('copy-message').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('copy-message').classList.add('hidden');
-            }, 3000);
-        });
-    });
-
-    document.getElementById('seguimiento-btn').addEventListener('click', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const solicitudId = urlParams.get('solicitud');
 
         if (solicitudId) {
-            window.location.href = `seguimiento_cliente.html?solicitud=${solicitudId}`;
+            solicitudIdDisplay.textContent = solicitudId;
+            statusMessage.textContent = `ID #${solicitudId} leído correctamente.`;
+
+            // AQUÍ ESTÁ LA MAGIA: GUARDAR EL ID PARA QUE EL BOTÓN DEL INDEX APAREZCA SIEMPRE
+            localStorage.setItem('ultimo_seguimiento_id', solicitudId);
+
         } else {
-            alert('Error: No se encontró el ID de la solicitud para continuar.');
+            solicitudIdDisplay.textContent = 'ERROR NO ID';
+            statusMessage.textContent = 'ERROR: No se encontró el ID.';
         }
     });
+
+    document.getElementById('solicitud-id-display').addEventListener('click', function() {
+        navigator.clipboard.writeText(this.textContent).then(() => {
+            const msg = document.getElementById('copy-message');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 3000);
+        });
+    });
+
+    document.getElementById('seguimiento-btn').addEventListener('click', () => {
+        const solicitudId = new URLSearchParams(window.location.search).get('solicitud');
+        if (solicitudId) {
+            window.location.href = `seguimiento_cliente.html?id=${solicitudId}`;
+        } else {
+            alert('Error: No se encontró el ID de la solicitud.');
+        }
+    });
+</script>
+
+<!-- Service Worker para PWA -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/TechUIT/service-worker.js').catch(() => {});
+        });
+    }
 </script>
 </body>
 </html>
