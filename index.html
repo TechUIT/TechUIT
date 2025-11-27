@@ -51,7 +51,6 @@
     <img src="Logo.png" alt="Logo de TechUIT" class="h-56 w-auto mx-auto mb-54 object-contain">
     <p class="text-md text-gray-300 font-light">Conecta con tu experto.</p>
   </div>
-
   <!-- BOTÓN LUXURY (solo si ya pagó) -->
   <div id="luxuryTrack" class="hidden mb-10 px-4">
     <a href="#" id="trackLink" class="block w-full text-center py-6 rounded-full font-extrabold text-xl text-white
@@ -64,7 +63,6 @@
       Ver mi técnico en vivo
     </a>
   </div>
-
   <h2 class="text-2xl font-bold mb-6 text-center text-white border-b border-[--color-border] pb-3">
     ¿Cómo deseas ingresar?
   </h2>
@@ -122,5 +120,13 @@
     };
   };
 </script>
+
+<!-- FIX PARA EL ERROR 404 CUANDO LA APP ESTÁ INSTALADA EN IPHONE -->
+<script>
+  if (location.protocol === 'file:' || location.pathname === '/' || location.pathname === '/TechUIT') {
+    location.replace('/TechUIT/index.html');
+  }
+</script>
+
 </body>
 </html>
