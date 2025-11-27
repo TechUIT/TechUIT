@@ -14,6 +14,14 @@
   <link rel="icon" type="image/png" sizes="512x512" href="Logo.png">
   <link rel="apple-touch-startup-image" href="Logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FIX DEFINITIVO 404 EN IPHONE INSTALADO -->
+  <script>
+    if (location.pathname === '/' || location.pathname === '') {
+      location.replace('/TechUIT/index.html');
+    }
+  </script>
+
   <style>
     :root {
       --color-primary: #007bff;
@@ -92,13 +100,11 @@
     <a href="terminos-legales.html" class="text-gray-500 hover:text-white underline">Términos Legales y Privacidad</a>
   </p>
 </div>
-
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/TechUIT/service-worker.js');
   }
 </script>
-
 <!-- BOTÓN LUXURY CON INDEXEDDB (funciona en iPhone instalado, Android, PC, todo) -->
 <script>
   const openDB = indexedDB.open('TechUIT', 1);
@@ -120,13 +126,5 @@
     };
   };
 </script>
-
-<!-- FIX PARA EL ERROR 404 CUANDO LA APP ESTÁ INSTALADA EN IPHONE -->
-<script>
-  if (location.protocol === 'file:' || location.pathname === '/' || location.pathname === '/TechUIT') {
-    location.replace('/TechUIT/index.html');
-  }
-</script>
-
 </body>
 </html>
