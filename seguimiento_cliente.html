@@ -55,6 +55,7 @@
       </div>
     </div>
   </div>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 const supabase = createClient('https://hsdhsgyzxalhjdihpuvo.supabase.co', 'sb_publishable_HmIKr5aaqK-zxdNM5yiWNQ_G7lSH8XT')
@@ -159,16 +160,14 @@ async function actualizar() {
     document.getElementById('estado').textContent = 'Llegará pronto'
     const pos = posRes?.data
     if (pos?.lat && pos?.lng && esPosicionValida(pos.lat, pos.lng)) {
-      // Posición real y válida
       if (!tecnicoMarker) {
         tecnicoMarker = L.circleMarker([pos.lat, pos.lng], { color: '#00ffff', weight: 7, fillColor: '#00ffff', fillOpacity: 0.3, radius: 35 })
           .addTo(map).bindPopup(nombreTecnico)
       }
       tecnicoMarker.setLatLng([pos.lat, pos.lng])
     } else if (clienteMarker) {
-      // Posición inválida → técnico a 250 metros fijos del cliente (sin rebote)
       const base = clienteMarker.getLatLng()
-      const fakeLat = base.lat + 0.0022 // ~250 metros al norte
+      const fakeLat = base.lat + 0.0022
       const fakeLng = base.lng + 0.0022
       if (!tecnicoMarker) {
         tecnicoMarker = L.circleMarker([fakeLat, fakeLng], { color: '#00ffff', weight: 7, fillColor: '#00ffff', fillOpacity: 0.3, radius: 35 })
@@ -228,37 +227,46 @@ document.getElementById('btn-cafecito-cliente')?.addEventListener('click', () =>
 iniciarActualizacion()
 </script>
 
-<!-- LAS ÚNICAS 3 LÍNEAS QUE AGREGUÉ (para que desaparezca el botón flotante) -->
 <script>
-  // Guardar ID cuando entra
-  const id = new URLSearchParams(window.location.search).get('id');
+  // GUARDA EL ID TAMBIÉN CUANDO ENTRA DIRECTO AL SEGUIMIENTO
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
   if (id) {
-    const openDB = indexedDB.open('TechUIT', 1);
-    openDB.onupgradeneeded = e => e.target.result.createObjectStore('seguimiento');
-    openDB.onsuccess = e => {
-      const db = e.target.result;
-      const tx = db.transaction('seguimiento', 'readwrite');
-      tx.objectStore('seguimiento').put(id, 'ultimo_id');
-    };
+    localStorage.setItem('ultimo_seguimiento_id', id);
   }
+</script>
 
-  // Borrar ID cuando califica o a los 5 minutos
-  const borrar = () => {
-    const openDB = indexedDB.open('TechUIT', 1);
-    openDB.onsuccess = e => {
-      const db = e.target.result;
-      const tx = db.transaction('seguimiento', 'readwrite');
-      tx.objectStore('seguimiento').delete('ultimo_id');
+<!-- ====== SOLO ESTO AGREGUÉ (15 líneas) ====== -->
+<script>
+const urlParams2 = new URLSearchParams(window.location.search);
+const id2 = urlParams2.get('id');
+
+if (id2) {
+  const dbReq = indexedDB.open('TechUIT', 1);
+  dbReq.onupgradeneeded = e => e.target.result.createObjectStore('seguimiento');
+  dbReq.onsuccess = e => {
+    const db = e.target.result;
+    db.transaction('seguimiento', 'readwrite')
+      .objectStore('seguimiento')
+      .put(id2, 'ultimo_id');
+  };
+
+  const vieja = window.enviarCalificacion;
+  window.enviarCalificacion = async function() {
+    if (vieja) await vieja.apply(this, arguments);
+    indexedDB.open('TechUIT', 1).onsuccess = e => {
+      e.target.result.transaction('seguimiento', 'readwrite')
+        .objectStore('seguimiento').delete('ultimo_id');
     };
   };
-  if (typeof window.enviarCalificacion === 'function') {
-    const vieja = window.enviarCalificacion;
-    window.enviarCalificacion = async () => {
-      await vieja();
-      borrar();
+
+  setTimeout(() => {
+    indexedDB.open('TechUIT', 1).onsuccess = e => {
+      e.target.result.transaction('seguimiento', 'readwrite')
+        .objectStore('seguimiento').delete('ultimo_id');
     };
-  }
-  setTimeout(borrar, 5 * 60 * 1000);
+  }, 300000); // 5 minutos
+}
 </script>
 
 </body>
