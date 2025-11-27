@@ -1,115 +1,112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<!-- Metadatos PWA y Solución Móvil -->
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="TechUIT App">
-<meta name="theme-color" content="#000000">
-    <!-- Metadatos y scripts -->
-  <!-- *** CORRECCIÓN CRÍTICA DE ICONO PARA APPLE (iOS) *** -->
-    <!-- Define el icono de 180x180 para dispositivos Apple -->
-    <link rel="apple-touch-icon" sizes="192x192" href="Logo-192.png">
-   
-    <!-- Define el icono de 192x192 (usado por otros navegadores) -->
-    <link rel="icon" type="image/png" sizes="192x192" href="Logo-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="Logo-512.png">
-    <!-- Define el 'splash screen' (pantalla de carga de iOS) -->
-    <link rel="apple-touch-startup-image" href="Logo-512.png">
-    <!-- **************************************************** -->
-    <link rel="manifest" href="manifest.json">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechUIT | Plataforma de Expertos</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* --- ESQUEMA VISUAL UNIFICADO --- */
-        :root {
-            --color-primary: #007bff; /* Azul de énfasis */
-            --color-dark-bg: #0d1117; /* Fondo oscuro principal (similar a tu fondo negro) */
-            --color-card-bg: #161b22; /* Fondo de contenedor (similar a tu gris oscuro) */
-            --color-text-light: #f3f4f6;
-            --color-border: #30363d; /* Borde sutil */
-        }
-       
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-       
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: var(--color-dark-bg);
-            color: var(--color-text-light);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .main-card {
-            max-width: 440px;
-            width: 100%;
-            background-color: var(--color-card-bg);
-            border: 1px solid var(--color-border);
-            padding: 3rem 1.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechUIT | Plataforma de Expertos</title>
+  <link rel="manifest" href="/TechUIT/manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="TechUIT">
+  <link rel="apple-touch-icon" sizes="192x192" href="Logo.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="Logo.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="Logo.png">
+  <link rel="apple-touch-startup-image" href="Logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-primary: #007bff;
+      --color-dark-bg: #0d1117;
+      --color-card-bg: #161b22;
+      --color-text-light: #f3f4f6;
+      --color-border: #30363d;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--color-dark-bg);
+      color: var(--color-text-light);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .main-card {
+      max-width: 440px;
+      width: 100%;
+      background-color: var(--color-card-bg);
+      border: 1px solid var(--color-border);
+      padding: 3rem 1.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 40px rgba(0, 123, 255, 0.15);
+    }
+  </style>
 </head>
 <body>
 <div class="main-card">
-    <div class="text-center mb-10">
-        <img src="Logo.png" alt="Logo de TechUIT" class="h-56 w-auto mx-auto mb-54 object-contain">
-        <p class="text-md text-gray-300 font-light">Conecta con tu experto.</p>
+  <div class="text-center mb-10">
+    <img src="Logo.png" alt="Logo de TechUIT" class="h-56 w-auto mx-auto mb-54 object-contain">
+    <p class="text-md text-gray-300 font-light">Conecta con tu experto.</p>
+  </div>
+
+  <!-- ==== BOTÓN LUXURY NUEVO (solo aparece si ya pagó) ==== -->
+  <div id="luxuryTrack" class="hidden mb-8">
+    <a href="#" id="trackLink" class="block w-full text-center py-5 rounded-full font-extrabold text-xl text-white
+         bg-gradient-to-r from-cyan-500 to-blue-600 
+         border-2 border-amber-500/40 shadow-2xl shadow-cyan-500/50 
+         hover:shadow-cyan-500/80 hover:scale-105 transition-all duration-300">
+      <svg class="inline w-8 h-8 mr-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+      </svg>
+      Ver mi técnico en vivo
+    </a>
+  </div>
+
+  <h2 class="text-2xl font-bold mb-6 text-center text-white border-b border-[--color-border] pb-3">¿Cómo deseas ingresar?</h2>
+
+  <div class="space-y-6">
+    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-[--color-primary] transition duration-300">
+      <h3 class="text-lg font-semibold text-white mb-2 flex items-center space-x-2">
+        <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        <span>Soy un Cliente</span>
+      </h3>
+      <p class="text-gray-400 text-sm mb-4">Necesito un servicio de reparación, diagnóstico</p>
+      <a href="terminos-clientes.html" class="w-full bg-[--color-primary] text-white font-extrabold py-3 rounded-full hover:bg-[#005bb5] transition shadow-lg block text-center">
+        Buscar un Experto Ahora
+      </a>
     </div>
-    <h2 class="text-2xl font-bold mb-6 text-center text-white border-b border-[--color-border] pb-3">¿Cómo deseas ingresar?</h2>
-   
-    <div class="space-y-6">
-        <!-- SECCIÓN CLIENTE -->
-        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-[--color-primary] transition duration-300">
-            <h3 class="text-lg font-semibold text-white mb-2 flex items-center space-x-2">
-                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                <span>Soy un Cliente</span>
-            </h3>
-            <p class="text-gray-400 text-sm mb-4">
-                Necesito un servicio de reparación, diagnóstico
-            </p>
-            <a href="terminos-clientes.html"
-                class="w-full bg-[--color-primary] text-white font-extrabold py-3 rounded-full hover:bg-[#005bb5] transition duration-200 ease-in-out transform hover:scale-[1.01] shadow-lg shadow-[--color-primary]/40 block text-center">
-                Buscar un Experto Ahora
-            </a>
-        </div>
-        <!-- SECCIÓN TÉCNICO -->
-        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-green-500 transition duration-300">
-            <h3 class="text-lg font-semibold text-white mb-2 flex items-center space-x-2">
-                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <span>Soy un Técnico</span>
-            </h3>
-            <p class="text-gray-400 text-sm mb-4">
-                Quiero unirme a la red de expertos y recibir solicitudes de servicio.
-            </p>
-            <a href="formulario-tecnicos.html"
-                class="w-full bg-green-600 text-white font-extrabold py-3 rounded-full hover:bg-green-700 transition duration-200 ease-in-out transform hover:scale-[1.01] shadow-lg shadow-green-600/40 block text-center">
-                Registrarme como Experto
-            </a>
-        </div>
+
+    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-green-500 transition duration-300">
+      <h3 class="text-lg font-semibold text-white mb-2 flex items-center space-x-2">
+        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span>Soy un Técnico</span>
+      </h3>
+      <p class="text-gray-400 text-sm mb-4">Quiero unirme a la red de expertos y recibir solicitudes de servicio.</p>
+  <a href="formulario-tecnicos.html" class="w-full bg-green-600 text-white font-extrabold py-3 rounded-full hover:bg-green-700 transition shadow-lg block text-center">
+        Registrarme como Experto
+      </a>
     </div>
-   
-    <p class="text-xs text-gray-500 text-center mt-8">
-        <a href="terminos-legales.html" class="text-gray-500 hover:text-white transition duration-200 underline">Términos Legales y Privacidad</a>
-    </p>
+  </div>
+
+  <p class="text-xs text-gray-500 text-center mt-8">
+    <a href="terminos-legales.html" class="text-gray-500 hover:text-white underline">Términos Legales y Privacidad</a>
+  </p>
 </div>
 
-<!-- REGISTRO DEL SERVICE WORKER CORREGIDO -->
 <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('Service worker registrado con éxito:', reg))
-          .catch(err => console.log('Fallo al registrar el service worker:', err));
-      });
-    }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/TechUIT/service-worker.js');
+  }
+
+  // ==== LÓGICA DEL BOTÓN LUXURY ====
+  const savedId = localStorage.getItem('ultimo_seguimiento_id');
+  if (savedId && savedId !== "null") {
+    document.getElementById('luxuryTrack').classList.remove('hidden');
+    document.getElementById('trackLink').href = `seguimiento_cliente.html?id=${savedId}`;
+  }
 </script>
 </body>
 </html>
