@@ -52,20 +52,22 @@
     <p class="text-md text-gray-300 font-light">Conecta con tu experto.</p>
   </div>
 
-  <!-- ==== BOTÓN LUXURY NUEVO (solo aparece si ya pagó) ==== -->
-  <div id="luxuryTrack" class="hidden mb-8">
-    <a href="#" id="trackLink" class="block w-full text-center py-5 rounded-full font-extrabold text-xl text-white
-         bg-gradient-to-r from-cyan-500 to-blue-600 
-         border-2 border-amber-500/40 shadow-2xl shadow-cyan-500/50 
-         hover:shadow-cyan-500/80 hover:scale-105 transition-all duration-300">
-      <svg class="inline w-8 h-8 mr-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+  <!-- BOTÓN LUXURY (solo si ya pagó) -->
+  <div id="luxuryTrack" class="hidden mb-10 px-4">
+    <a href="#" id="trackLink" class="block w-full text-center py-6 rounded-full font-extrabold text-xl text-white
+         bg-gradient-to-r from-cyan-500 to-blue-600
+         border-2 border-amber-500/50 shadow-2xl shadow-cyan-500/60
+         hover:shadow-cyan-500/90 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3">
+      <svg class="w-9 h-9 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
       </svg>
       Ver mi técnico en vivo
     </a>
   </div>
 
-  <h2 class="text-2xl font-bold mb-6 text-center text-white border-b border-[--color-border] pb-3">¿Cómo deseas ingresar?</h2>
+  <h2 class="text-2xl font-bold mb-6 text-center text-white border-b border-[--color-border] pb-3">
+    ¿Cómo deseas ingresar?
+  </h2>
 
   <div class="space-y-6">
     <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-[--color-primary] transition duration-300">
@@ -85,7 +87,7 @@
         <span>Soy un Técnico</span>
       </h3>
       <p class="text-gray-400 text-sm mb-4">Quiero unirme a la red de expertos y recibir solicitudes de servicio.</p>
-  <a href="formulario-tecnicos.html" class="w-full bg-green-600 text-white font-extrabold py-3 rounded-full hover:bg-green-700 transition shadow-lg block text-center">
+      <a href="formulario-tecnicos.html" class="w-full bg-green-600 text-white font-extrabold py-3 rounded-full hover:bg-green-700 transition shadow-lg block text-center">
         Registrarme como Experto
       </a>
     </div>
@@ -101,11 +103,13 @@
     navigator.serviceWorker.register('/TechUIT/service-worker.js');
   }
 
-  // ==== LÓGICA DEL BOTÓN LUXURY ====
+  // MEJORA FINAL: más robusta y sin fallos
   const savedId = localStorage.getItem('ultimo_seguimiento_id');
-  if (savedId && savedId !== "null") {
-    document.getElementById('luxuryTrack').classList.remove('hidden');
-    document.getElementById('trackLink').href = `seguimiento_cliente.html?id=${savedId}`;
+  if (savedId && savedId !== "null" && savedId !== "" && savedId !== null) {
+    const btn = document.getElementById('luxuryTrack');
+    const link = document.getElementById('trackLink');
+    btn.classList.remove('hidden');
+    link.href = `seguimiento_cliente.html?id=${savedId}`;
   }
 </script>
 </body>
