@@ -52,13 +52,12 @@
     <p class="text-md text-gray-300 font-light">Conecta con tu experto.</p>
   </div>
 
-  <!-- BANNER DE INSTALACIÓN (bonito y solo aparece cuando sirve) -->
-  <div id="installBanner" class="hidden bg-gradient-to-r from-cyan-900 to-blue-900 p-5 rounded-2xl mb-8 text-center text-white">
+  <!-- BANNER SOLO PARA NAVEGADOR (desaparece cuando es PWA instalada) -->
+  <div id="installBanner" class="bg-gradient-to-r from-cyan-900 to-blue-900 p-5 rounded-2xl mb-8 text-center text-white hidden">
     <p class="font-bold text-lg">¡Instala la app para una experiencia perfecta!</p>
-    <button id="installBtn" class="mt-4 bg-white text-cyan-600 font-black text-xl py-4 px-12 rounded-full shadow-2xl hidden">
+    <button id="installBtn" class="mt-4 bg-white text-cyan-600 font-black text-xl py-4 px-12 rounded-full shadow-2xl">
       Descargar App Gratis
     </button>
-    <p id="iosText" class="mt-4 text-sm hidden">iPhone: toca ⋮ → "Agregar a pantalla de inicio"</p>
   </div>
 
   <!-- BOTÓN FLOTANTE LUXURY -->
@@ -99,7 +98,6 @@
       </a>
     </div>
 
-    <!-- BOTÓN MANUAL DE RESPALDO -->
     <a href="seguimiento_manual.html" class="mt-8 text-center text-cyan-400 hover:text-cyan-300 text-lg underline block">
       ¿Ya pagaste y no ves el botón? → Ingresa tu código aquí
     </a>
@@ -115,30 +113,39 @@
     navigator.serviceWorker.register('/TechUIT/service-worker.js');
   }
 
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBanner').classList.remove('hidden');
-    document.getElementById('installBtn').classList.remove('hidden');
-  });
+  // === DETECCIÓN INTELIGENTE: solo muestra banner si NO es PWA instalada ===
+  const esPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-  document.getElementById('installBtn')?.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') document.getElementById('installBanner').classList.add('hidden');
-      deferredPrompt = null;
+  if (!esPWA) {
+    // Solo Android muestra el botón grande
+    if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBanner').classList.remove('hidden');
+      });
+      document.getElementById('installBtn')?.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') document.getElementById('installBanner').classList.add('hidden');
+          deferredPrompt = null;
+        }
+      });
     }
-  });
-
-  // Detecta iOS y muestra solo texto
-  if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream) {
-    document.getElementById('installBanner').classList.remove('hidden');
-    document.getElementById('iosText').classList.remove('hidden');
+    // iPhone: solo aparece el banner si entra por Safari (no cuando abre desde el ícono)
+    else {
+      document.getElementById('installBanner').classList.remove('hidden');
+      document.getElementById('installBtn').style.display = 'none'; // no mostramos botón en iOS
+      document.getElementById('installBanner').innerHTML = `
+        <p class="font-bold text-lg">Para mejor experiencia:</p>
+        <p class="text-sm mt-2">Toca ⋮ → "Agregar a pantalla de inicio"</p>
+      `;
+    }
   }
 
-  // LECTURA HÍBRIDA DEL BOTÓN FLOTANTE (ya funciona en todos los Android)
+  // BOTÓN FLOTANTE (funciona en todos)
   function leerUltimoId() {
     return new Promise(resolve => {
       const abrir = indexedDB.open('TechUIT', 1);
