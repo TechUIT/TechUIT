@@ -5,23 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TechUIT - Seguimiento Manual</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
-    body { background:#0d1117; color:#f3f4f6; margin:0; }
+    body { background:#0d1117; color:#f3f4f6; font-family: 'Inter', sans-serif; }
     .gradient-blue { background: linear-gradient(90deg, #007bff, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   </style>
 </head>
-<body class="min-h-screen">
-  <div class="max-w-lg mx-auto p-6">
+<body class="min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full mx-4">
     <h1 class="text-5xl font-black text-center mb-8 gradient-blue">Seguimiento Manual</h1>
-    <div class="bg-[#161b22] border border-[#30363d] rounded-3xl p-10 text-center shadow-2xl shadow-blue-500/30">
-      <p class="text-xl text-gray-300 mb-6">Ingresa tu código de cliente o número de teléfono para ver tu técnico en vivo</p>
-      <input id="codigo" type="text" placeholder="Código o teléfono" class="w-full bg-[#0d1117] border border-[#30363d] rounded-2xl p-4 text-lg text-white mb-6">
-      <button onclick="buscarSeguimiento()" class="w-full py-6 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-2xl rounded-2xl shadow-lg hover:from-cyan-400 hover:to-blue-500">Ver mi técnico</button>
+    <div class="bg-[#161b22] border border-[#30363d] rounded-3xl p-10 shadow-2xl">
+      <p class="text-xl text-gray-300 text-center mb-8">
+        Ingresa tu código de servicio o número de teléfono
+      </p>
+      <input id="codigo" type="text" placeholder="Ej: 138 o +504 9999-8888" 
+             class="w-full bg-[#0d1117] border border-[#30363d] rounded-2xl p-5 text-xl text-white mb-6 text-center">
+      <button onclick="irSeguimiento()" 
+              class="w-full py-6 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black text-2xl rounded-2xl shadow-lg hover:scale-105 transition">
+        Ver mi técnico en vivo
+      </button>
     </div>
   </div>
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+
+<script>
+function irSeguimiento() {
+  const input = document.getElementById('codigo').value.trim();
+  if (!input) return alert('Ingresa tu código o teléfono');
+
+  // Si es número puro (el ID del cliente)
+  if (/^\d+$/.test(input)) {
+    location.href = `seguimiento_cliente.html?id=${input}`;
+    return;
+  }
+
+  // Si es teléfono con +504, 504, etc.
+  const tel = input.replace(/[^\d]/g, '');
+  if (tel.length >= 8) {
+    // Busca en Supabase por teléfono
+    fetch(`https://hsdhsgyzxalhjdihpuvo.supabase.co/rest/v1/clientes?telefono=eq.${tel}&select=id`, {
+      headers: { 'apikey': 'sb_publishable_HmIKr5aaqK-zxdNM5yiWNQ_G7lSH8XT' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.length > 0) {
+        location.href = `seguimiento_cliente.html?id=${data[0].id}`;
+      } else {
+        alert('No se encontró servicio activo con ese teléfono');
+      }
+    });
+  } else {
+    alert('Código o teléfono inválido');
+  }
+}
+</script>
+</body>
+</html>
