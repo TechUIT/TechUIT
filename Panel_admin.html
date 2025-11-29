@@ -69,13 +69,13 @@
             </div>
         </div>
 
-        <!-- BOTÓN PARA ENCENDER BOT -->
+        <!-- BOTÓN BOT EN LA NUBE (ya no depende de tu PC) -->
         <div class="card text-center bg-green-900 border-l-8 border-green-500">
-            <h2 class="text-3xl font-bold mb-6 text-green-400">Control Bot Supremo</h2>
-            <button onclick="encenderBot()" class="btn-bot text-white font-black">
-                ENCENDER BOT 24/7
-            </button>
-            <p class="mt-4 text-gray-300">Si se fue la luz → da click y vuelve a la vida</p>
+            <h2 class="text-3xl font-bold mb-6 text-green-400">Bot 24/7 en la Nube</h2>
+            <p class="text-2xl mb-4">Estado: <span id="botStatus" class="text-green-400 font-bold">VERIFICANDO...</span></p>
+            <a href="https://techuit-bot.onrender.com" target="_blank" class="btn-bot text-white font-black">
+                VER BOT EN VIVO
+            </a>
         </div>
 
         <!-- ÓRDENES EN TIEMPO REAL -->
@@ -84,9 +84,9 @@
             <div id="ordenes" class="space-y-4"></div>
         </div>
 
-        <!-- MAPA -->
+        <!-- MAPA EN VIVO -->
         <div class="card">
-            <h2 class="text-3xl font-bold mb-4 text-cyan-400">Mapa en Vivo</h2>
+            <h2 class="text-3xl font-bold mb-4 text-cyan-400">Mapa en Vivo (Técnicos + Clientes)</h2>
             <div id="map"></div>
         </div>
 
@@ -97,67 +97,116 @@
         </div>
     </div>
 
-    <script>
-        const supabase = window.supabase.createClient(
-            'https://hsdhsgyzxalhjdihpuvo.supabase.co',
-            'sb_publishable_HmIKr5aaqK-zxdNM5yiWNQ_G7lSH8XT'
-        );
+<script>
+    const supabase = window.supabase.createClient(
+        'https://hsdhsgyzxalhjdihpuvo.supabase.co',
+        'sb_publishable_HmIKr5aaqK-zxdNM5yiWNQ_G7lSH8XT'
+    );
 
-        function encenderBot() {
-            fetch('http://localhost:3939/start', {method: 'GET'})
-                .then(() => alert('¡BOT ENCENDIDO! Ya te llegan todas las notificaciones'))
-                .catch(() => alert('El bot ya está corriendo o usá el .bat'));
-        }
+    // Estado del bot en la nube
+    fetch('https://techuit-bot.onrender.com').then(() => {
+        document.getElementById('botStatus').textContent = 'ENCENDIDO 24/7'
+        document.getElementById('botStatus').className = 'text-green-400 font-bold'
+    }).catch(() => {
+        document.getElementById('botStatus').textContent = 'OFFLINE (raro)'
+        document.getElementById('botStatus').className = 'text-red-400 font-bold'
+    });
 
-        let map = L.map('map').setView([14.0723, -87.1921], 8);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    // Mapa
+    const map = L.map('map').setView([15.507, -88.025], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // CARGAR PAGOS VIERNES
-        async function cargarPagosViernes() {
-            const hoy = new Date();
-            if (hoy.getDay() !== 5) {
-                document.getElementById('pagosViernes').innerHTML = "<p class='text-xl'>Los pagos aparecen solo los viernes</p>";
-                return;
+    const marcadoresTecnicos = {};
+    const marcadoresClientes = {};
+
+    // CARGAR TODO EN TIEMPO REAL
+    async function cargarTodo() {
+        // Estadísticas
+        const { data: todas } = await supabase.from('clientes').select('status, monto_total, created_at').gte('created_at', new Date().toISOString().split('T')[0]);
+        const total = todas.length;
+        document.getElementById('total').textContent = total.length;
+        document.getElementById('pendientes').textContent = total.filter(o => o.status.includes('pagado') && !o.tecnico_asignado_id).length;
+        document.getElementById('asignadas').textContent = total.filter(o => o.tecnico_asignado_id && !o.status.includes('Completado')).length;
+        document.getElementById('canceladas').textContent = total.filter(o => o.status.includes('Cancelado')).length;
+        document.getElementById('ganancia').textContent = 'L' + total.filter(o => o.status.includes('Completado')).reduce((a, b) => a + (b.monto_total * 0.6 || 0), 0).toFixed(0);
+
+        // Órdenes
+        const { data: ordenes } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }).limit(15);
+        const div = document.getElementById('ordenes');
+        div.innerHTML = ordenes.map(o => `
+            <div class="bg-[#1e293b] p-4 rounded-xl">
+                <strong>${o.nombre}</strong> | ${o.telefono} | ${o.status}
+            </div>`).join('');
+
+        // Mapa técnicos
+        const { data: tecnicos } = await supabase.from('tecnico_ubicacion').select('*');
+        tecnicos.forEach(t => {
+            if (!marcadoresTecnicos[t.tecnico_id]) {
+                marcadoresTecnicos[t.tecnico_id] = L.circleMarker([t.lat, t.lng], {color: '#00ffff', radius: 12}).addTo(map).bindPopup('Técnico en vivo');
+            } else {
+                marcadoresTecnicos[t.tecnico_id].setLatLng([t.lat, t.lng]);
             }
+        });
 
-            const lunes = new Date(hoy);
-            lunes.setDate(hoy.getDate() - hoy.getDay() - 6);
-            lunes.setHours(0,0,0,0);
-
-            const { data: ordenes } = await supabase.from('clientes')
-                .select('tecnico_asignado_id, monto_tecnico')
-                .eq('status', 'Completado')
-                .gte('created_at', lunes.toISOString());
-
-            const pagos = {};
-            ordenes.forEach(o => {
-                if (o.tecnico_asignado_id) {
-                    pagos[o.tecnico_asignado_id] = (pagos[o.tecnico_asignado_id] || 0) + (o.monto_tecnico || 0);
+        // Mapa clientes activos
+        const { data: clientes } = await supabase.from('clientes').select('id,nombre,lat,lng,status').not('status','ilike','%Completado%');
+        clientes.forEach(c => {
+            if (c.lat && c.lng) {
+                if (!marcadoresClientes[c.id]) {
+                    marcadoresClientes[c.id] = L.circleMarker([c.lat, c.lng], {color: '#00ff00', radius: 15}).addTo(map).bindPopup(c.nombre);
                 }
-            });
+            }
+        });
+    }
 
-            const { data: tecnicos } = await supabase.from('tecnicos').select('tecnico_id, nombre, paypal').in('tecnico_id', Object.keys(pagos));
-
-            let html = `<table><tr><th>Técnico</th><th>Ganancia</th><th>Comisión</th><th>Total a enviar</th><th>Pagar</th></tr>`;
-            tecnicos.forEach(t => {
-                const ganancia = pagos[t.tecnico_id] || 0;
-                if (ganancia === 0) return;
-                const comision = Math.ceil(ganancia * 0.045 + 7.5);
-                const total = ganancia + comision;
-                html += `<tr>
-                    <td><strong>${t.nombre}</strong></td>
-                    <td>L${ganancia}</td>
-                    <td>L${comision}</td>
-                    <td><strong>L${total}</strong></td>
-                    <td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${t.paypal}&amount=${total}&currency_code=HNL" target="_blank" class="btn-paypal">PAGAR YA</a></td>
-                </tr>`;
-            });
-            html += `</table>`;
-            document.getElementById('pagosViernes').innerHTML = html || "<p class='text-xl'>No hay pagos esta semana</p>";
+    // PAGOS VIERNES
+    async function cargarPagosViernes() {
+        const hoy = new Date();
+        if (hoy.getDay() !== 5) {
+            document.getElementById('pagosViernes').innerHTML = "<p class='text-xl'>Los pagos aparecen solo los viernes</p>";
+            return;
         }
 
-        setInterval(cargarPagosViernes, 10000);
-        cargarPagosViernes();
-    </script>
+        const lunes = new Date(hoy);
+        lunes.setDate(hoy.getDate() - hoy.getDay() + 1);
+        lunes.setHours(0,0,0,0);
+
+        const { data: ordenes } = await supabase.from('clientes')
+            .select('tecnico_asignado_id, monto_tecnico')
+            .eq('status', 'Completado')
+            .gte('created_at', lunes.toISOString());
+
+        const pagos = {};
+        ordenes.forEach(o => {
+            if (o.tecnico_asignado_id) {
+                pagos[o.tecnico_asignado_id] = (pagos[o.tecnico_asignado_id] || 0) + (o.monto_tecnico || 0);
+            }
+        });
+
+        const { data: tecnicos } = await supabase.from('tecnicos').select('tecnico_id, nombre, paypal').in('tecnico_id', Object.keys(pagos));
+
+        let html = `<table><tr><th>Técnico</th><th>Ganancia</th><th>Comisión</th><th>Total a enviar</th><th>Pagar</th></tr>`;
+        tecnicos.forEach(t => {
+            const ganancia = pagos[t.tecnico_id] || 0;
+            if (ganancia === 0) return;
+            const comision = Math.ceil(ganancia * 0.045 + 7.5);
+            const total = ganancia + comision;
+            html += `<tr>
+                <td><strong>${t.nombre}</strong></td>
+                <td>L${ganancia}</td>
+                <td>L${comision}</td>
+                <td><strong>L${total}</strong></td>
+                <td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${t.paypal}&amount=${total}&currency_code=HNL" target="_blank" class="btn-paypal">PAGAR YA</a></td>
+            </tr>`;
+        });
+        html += `</table>`;
+        document.getElementById('pagosViernes').innerHTML = html || "<p class='text-xl'>No hay pagos esta semana</p>";
+    }
+
+    setInterval(cargarTodo, 8000);
+    setInterval(cargarPagosViernes, 15000);
+    cargarTodo();
+    cargarPagosViernes();
+</script>
 </body>
 </html>
