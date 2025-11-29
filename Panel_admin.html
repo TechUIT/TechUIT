@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TechUIT - Panel Admin Supremo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root { --primary: #00d4ff; --dark: #0d1117; --card: #161b22; --border: #30363d; }
+        body { font-family: 'Inter', sans-serif; background: var(--dark); color: #f0f0f0; margin: 0; padding: 0; min-height: 100vh; }
+        .header { background: var(--card); padding: 1rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 2.5rem; font-weight: 900; color: var(--primary); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem; }
+        #map { height: 500px; border-radius: 1rem; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 14px; text-align: center; border-bottom: 1px solid #444; }
+        th { background: #1f2937; font-weight: bold; }
+        .btn-paypal { background: #0070ba; color: white; padding: 12px 24px; border-radius: 50px; font-weight: bold; text-decoration: none; }
+        .btn-paypal:hover { background: #003087; }
+        .btn-bot { background: linear-gradient(145deg, #16a34a, #15803d); padding: 20px 40px; font-size: 2rem; border-radius: 50px; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">TechUIT ADMIN Supremo</div>
+        <div class="text-2xl font-bold">Solo el rey entra aquí</div>
+    </div>
+    <div class="container">
+        <script>
+            const PASSWORD = "techuit2025hn";
+            if (prompt("Contraseña Panel Supremo") !== PASSWORD) {
+                alert("Acceso denegado");
+                location.href = "https://google.com";
+            }
+        </script>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-8">
+            <div class="card text-center"><div class="text-5xl font-black text-cyan-400" id="total">0</div><div>Total Órdenes</div></div>
+            <div class="card text-center"><div class="text-5xl font-black text-yellow-400" id="pendientes">0</div><div>Pendientes</div></div>
+            <div class="card text-center"><div class="text-5xl font-black text-green-400" id="asignadas">0</div><div>Asignadas</div></div>
+            <div class="card text-center"><div class="text-5xl font-black text-red-400" id="canceladas">0</div><div>Canceladas</div></div>
+            <div class="card text-center"><div class="text-5xl font-black text-purple-400" id="ganancia">L0</div><div>Ganancia Hoy</div></div>
+        </div>
+
+        <!-- REGLAS + COMISIONES -->
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <div class="card bg-red-900 border-l-8 border-red-500">
+                <h2 class="text-3xl font-bold mb-4">Regla Anti-Estafa 2025</h2>
+                <ul class="space-y-3 text-xl">
+                    <li>Cancelación ≤ 3 min → 100% reembolso cliente</li>
+                    <li>Cancelación > 3 min y técnico NO se movió → TechUIT se queda el 100%</li>
+                    <li>Cancelación + ≥8 km → Técnico recibe <strong>L50</strong> (combustible)</li>
+                    <li>Técnico OBLIGADO a tener PayPal</li>
+                    <li>Pagos a técnicos: <strong>todos los viernes 5 pm</strong></li>
+                </ul>
+            </div>
+            <div class="card bg-purple-900 border-l-8 border-purple-500">
+                <h2 class="text-3xl font-bold mb-4">Comisiones PayPal (TechUIT absorbe)</h2>
+                <ul class="space-y-3 text-xl">
+                    <li>Comisión Honduras: <strong>4.5% + $0.30 USD</strong></li>
+                    <li>Ej: Técnico gana L5,000 → vos enviás <strong>L5,255</strong></li>
+                    <li>El técnico recibe su dinero cabal</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- BOTÓN PARA ENCENDER BOT -->
+        <div class="card text-center bg-green-900 border-l-8 border-green-500">
+            <h2 class="text-3xl font-bold mb-6 text-green-400">Control Bot Supremo</h2>
+            <button onclick="encenderBot()" class="btn-bot text-white font-black">
+                ENCENDER BOT 24/7
+            </button>
+            <p class="mt-4 text-gray-300">Si se fue la luz → da click y vuelve a la vida</p>
+        </div>
+
+        <!-- ÓRDENES EN TIEMPO REAL -->
+        <div class="card">
+            <h2 class="text-3xl font-bold mb-4 text-cyan-400">Órdenes en Tiempo Real</h2>
+            <div id="ordenes" class="space-y-4"></div>
+        </div>
+
+        <!-- MAPA -->
+        <div class="card">
+            <h2 class="text-3xl font-bold mb-4 text-cyan-400">Mapa en Vivo</h2>
+            <div id="map"></div>
+        </div>
+
+        <!-- PAGOS VIERNES AUTOMÁTICOS -->
+        <div class="card">
+            <h2 class="text-3xl font-bold mb-6 text-yellow-400">PAGOS VIERNES - Listos para pagar</h2>
+            <div id="pagosViernes" class="text-center text-gray-400">Cargando pagos de esta semana...</div>
+        </div>
+    </div>
+
+    <script>
+        const supabase = window.supabase.createClient(
+            'https://hsdhsgyzxalhjdihpuvo.supabase.co',
+            'sb_publishable_HmIKr5aaqK-zxdNM5yiWNQ_G7lSH8XT'
+        );
+
+        function encenderBot() {
+            fetch('http://localhost:3939/start', {method: 'GET'})
+                .then(() => alert('¡BOT ENCENDIDO! Ya te llegan todas las notificaciones'))
+                .catch(() => alert('El bot ya está corriendo o usá el .bat'));
+        }
+
+        let map = L.map('map').setView([14.0723, -87.1921], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // CARGAR PAGOS VIERNES
+        async function cargarPagosViernes() {
+            const hoy = new Date();
+            if (hoy.getDay() !== 5) {
+                document.getElementById('pagosViernes').innerHTML = "<p class='text-xl'>Los pagos aparecen solo los viernes</p>";
+                return;
+            }
+
+            const lunes = new Date(hoy);
+            lunes.setDate(hoy.getDate() - hoy.getDay() - 6);
+            lunes.setHours(0,0,0,0);
+
+            const { data: ordenes } = await supabase.from('clientes')
+                .select('tecnico_asignado_id, monto_tecnico')
+                .eq('status', 'Completado')
+                .gte('created_at', lunes.toISOString());
+
+            const pagos = {};
+            ordenes.forEach(o => {
+                if (o.tecnico_asignado_id) {
+                    pagos[o.tecnico_asignado_id] = (pagos[o.tecnico_asignado_id] || 0) + (o.monto_tecnico || 0);
+                }
+            });
+
+            const { data: tecnicos } = await supabase.from('tecnicos').select('tecnico_id, nombre, paypal').in('tecnico_id', Object.keys(pagos));
+
+            let html = `<table><tr><th>Técnico</th><th>Ganancia</th><th>Comisión</th><th>Total a enviar</th><th>Pagar</th></tr>`;
+            tecnicos.forEach(t => {
+                const ganancia = pagos[t.tecnico_id] || 0;
+                if (ganancia === 0) return;
+                const comision = Math.ceil(ganancia * 0.045 + 7.5);
+                const total = ganancia + comision;
+                html += `<tr>
+                    <td><strong>${t.nombre}</strong></td>
+                    <td>L${ganancia}</td>
+                    <td>L${comision}</td>
+                    <td><strong>L${total}</strong></td>
+                    <td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${t.paypal}&amount=${total}&currency_code=HNL" target="_blank" class="btn-paypal">PAGAR YA</a></td>
+                </tr>`;
+            });
+            html += `</table>`;
+            document.getElementById('pagosViernes').innerHTML = html || "<p class='text-xl'>No hay pagos esta semana</p>";
+        }
+
+        setInterval(cargarPagosViernes, 10000);
+        cargarPagosViernes();
+    </script>
+</body>
+</html>
