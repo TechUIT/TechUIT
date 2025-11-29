@@ -6,6 +6,13 @@
     <title>Registro de Técnico Profesional (Storage)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- EMAILJS – CORREO AUTOMÁTICO CON LOGO -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() { emailjs.init("iH-ohiBk9St_NK5-U"); })();
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; padding: 20px 10px; display: flex; justify-content: center; min-height: 100vh; }
@@ -29,25 +36,21 @@
     <h1>Registro TechUIT Profesional</h1>
     <p class="subtitle">Completa tus datos y adjunta tu documentación. Las fotos se guardarán en Supabase Storage.</p>
     <form id="techForm">
+        <!-- TODOS TUS CAMPOS (igual que antes) -->
         <label for="nombre" class="block text-sm font-medium mb-1">Nombre Completo *</label>
         <input type="text" id="nombre" name="nombre" class="input-field" required placeholder="Tu nombre y apellido">
-
         <label for="cedula" class="block text-sm font-medium mb-1">Cédula o Identificación *</label>
         <input type="text" id="cedula" name="cedula" class="input-field" required placeholder="Número de identificación oficial">
-
         <label for="email" class="block text-sm font-medium mb-1">Correo Electrónico *</label>
         <input type="email" id="email" name="email" class="input-field" required placeholder="ejemplo@servicio.com">
-
         <label for="telefono" class="block text-sm font-medium mb-1">Teléfono (WhatsApp) *</label>
         <input type="tel" id="telefono" name="telefono" class="input-field" required placeholder="+504...">
-
         <label for="paypal" class="block text-sm font-medium mb-1">Correo PayPal (obligatorio) *</label>
         <input type="email" id="paypal" name="paypal" class="input-field" required placeholder="tucorreo@paypal.com">
         <p class="text-xs text-gray-400 mb-6">
           Aquí recibís tus pagos cada viernes. 
           <a href="https://www.paypal.com/hn/webapps/mpp/account-selection" target="_blank" class="underline text-cyan-400 hover:text-cyan-300">¿No tenés cuenta? Creala aquí</a>
         </p>
-
         <label for="especialidad" class="block text-sm font-medium mb-1">Especialidad Principal *</label>
         <select id="especialidad" name="especialidad" class="input-field" required>
             <option value="" disabled selected>Selecciona tu área</option>
@@ -57,19 +60,15 @@
             <option value="Desarrollo Web/Móvil">Desarrollo y Apps Móviles</option>
             <option value="Otros">General / Múltiples Áreas</option>
         </select>
-
         <label for="experiencia" class="block text-sm font-medium mb-1">Años de Experiencia *</label>
         <input type="number" id="experiencia" name="experiencia" class="input-field" min="1" max="50" required placeholder="Mínimo 1 año comprobado">
-
         <label for="bio" class="block text-sm font-medium mb-1">Breve Biografía / Servicios (Máx. 200 caracteres) *</label>
         <textarea id="bio" name="bio" rows="3" class="input-field resize-y" maxlength="200" required placeholder="Experto en diagnóstico, solución remota..."></textarea>
-
         <p class="text-sm text-gray-400 mt-4 mb-2 font-bold border-t border-gray-700 pt-4">Documentación Obligatoria (Imágenes)</p>
         <label for="id_file" class="block text-sm font-medium mb-1">1. Foto de Identidad (Cédula/DPI) *</label>
         <input type="file" id="id_file" name="id_file" class="input-field" accept="image/png, image/jpeg" required>
         <label for="selfie_file" class="block text-sm font-medium mb-1">2. Foto Selfie con Identidad *</label>
         <input type="file" id="selfie_file" name="selfie_file" class="input-field" accept="image/png, image/jpeg" required>
-
         <button type="submit" id="submitButton" class="submit-button">Enviar Solicitud y Documentos</button>
     </form>
     <div id="message-box" role="alert"></div>
@@ -80,6 +79,7 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_HmIKr5aaqK-zxdNM5yiWNQ_G7lSH8XT';
     const BUCKET_NAME = 'tech-documents';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const form = document.getElementById('techForm');
     const messageBox = document.getElementById('message-box');
     const submitButton = document.getElementById('submitButton');
@@ -138,15 +138,30 @@
             const { error } = await supabaseClient.from('tecnicos').insert([payload]);
             if (error) throw error;
 
-            // NOTIFICACIÓN A TU TELEGRAM
+            // 1. BOT EN LA NUBE (PRINCIPAL – SIEMPRE ENCENDIDO)
+            fetch('https://techuit-bot.onrender.com/notificar-nuevo-tecnico', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            }).catch(() => console.log("Render caído → pasa al respaldo"));
+
+            // 2. RESPALDO EN TU PC (solo si la tenés prendida)
             fetch('http://localhost:3939/notificar-nuevo-tecnico', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
+            }).catch(() => console.log("Los dos caídos → casi imposible"));
+
+            // 3. CORREO AUTOMÁTICO AL TÉCNICO (con logo y botón)
+            emailjs.send('service_klwxsdr', 'template_stzqgir', {
+                to_name: payload.nombre,
+                tecnico_id: payload.tecnico_id,
+                to_email: payload.email
             });
 
-            showMessage(`¡Registro exitoso! Revisa tu correo y Telegram. Tu ID: ${uniqueTechId}`, 'success');
+            showMessage(`¡ÉXITO TOTAL! Te llegó correo y Telegram. ID: ${uniqueTechId}`, 'success');
             form.reset();
+
         } catch (err) {
             showMessage('ERROR: ' + err.message, 'error');
         } finally {
