@@ -1,0 +1,40 @@
+# bot_techuit.py → VERSIÓN FINAL PARA RENDER 24/7
+import telebot
+import flask
+import os
+
+TOKEN = os.environ.get('TOKEN')
+TU_CHAT_ID = int(os.environ.get('TU_CHAT_ID'))
+
+bot = telebot.TeleBot(TOKEN)
+app = flask.Flask(__name__)
+
+print("TECHUIT BOT ENCENDIDO EN RENDER 24/7")
+
+def notificar_nuevo_tecnico(data):
+    msg = f"⚡ NUEVO TÉCNICO REGISTRADO ⚡\n\n" \
+          f"Nombre: {data['nombre']}\n" \
+          f"ID: {data['tecnico_id']}\n" \
+          f"Tel: {data['telefono']}\n" \
+          f"PayPal: {data['paypal']}\n" \
+          f"Especialidad: {data['especialidad']}\n\n" \
+          f"DPI: {data['foto_dpi_url']}\n" \
+          f"Selfie: {data['foto_selfie_url']}"
+    
+    bot.send_message(TU_CHAT_ID, msg)
+    bot.send_photo(TU_CHAT_ID, data['foto_dpi_url'], caption="DPI del técnico")
+    bot.send_photo(TU_CHAT_ID, data['foto_selfie_url'], caption="Selfie con identidad")
+
+@app.route('/notificar-nuevo-tecnico', methods=['POST'])
+def recibir():
+    data = flask.request.json
+    notificar_nuevo_tecnico(data)
+    return "OK", 200
+
+@app.route('/')
+def home():
+    return "TECHUIT BOT VIVIENDO EN LA NUBE"
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
